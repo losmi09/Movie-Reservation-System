@@ -1,0 +1,19 @@
+{
+  "name": "movie-reservation-system",
+  "version": "1.0.0",
+  "description": "A system that allows users to reserve movie tickets",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --watch --env-file=.env server.js"
+  },
+  "author": "Milos Radic",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.18.0",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "prisma": "^6.18.0"
+  }
+}
