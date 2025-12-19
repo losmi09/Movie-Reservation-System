@@ -9,5 +9,8 @@ export const getAllMovies = async query => {
   return { movies, metaData };
 };
 
+export const getMovie = async movieId =>
+  await movieRepository.getMovie(movieId);
+
 export const createMovie = async movieData =>
   await movieRepository.createMovie(movieData);
