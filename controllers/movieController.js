@@ -41,9 +41,14 @@ export const updateMovie = catchAsync(async (req, res, next) => {
 
   const { error } = movieSchema.validate(movieData, { abortEarly: false });
 
-  const errors = error.details.filter(err => !err.message.endsWith('required'));
+  if (error) {
+    const errors = error.details.filter(
+      err => !err.message.endsWith('required')
+    );
 
-  if (errors.length) return throwValidationError(errors, res, req.originalUrl);
+    if (errors.length)
+      return throwValidationError(errors, res, req.originalUrl);
+  }
 
   const updatedMovie = await movieService.updateMovie(movieId, movieData);
 
