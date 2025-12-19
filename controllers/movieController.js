@@ -4,6 +4,9 @@ import { throwValidationError } from './errorController.js';
 import AppError from '../utils/appError.js';
 import * as movieService from '../services/movieService.js';
 
+const sendResponse = (statusCode, data, res) =>
+  res.status(statusCode).json({ data });
+
 export const getAllMovies = catchAsync(async (req, res, next) => {
   const { movies, metaData } = await movieService.getAllMovies(req.query);
 
@@ -15,7 +18,7 @@ export const getMovie = catchAsync(async (req, res, next) => {
 
   if (!movie) return next(new AppError('No movie found with this ID', 404));
 
-  res.status(200).json({ data: movie });
+  sendResponse(200, movie, res);
 });
 
 export const createMovie = catchAsync(async (req, res, next) => {
@@ -27,7 +30,7 @@ export const createMovie = catchAsync(async (req, res, next) => {
 
   const movie = await movieService.createMovie(movieData);
 
-  res.status(201).json({ data: movie });
+  sendResponse(201, movie, res);
 });
 
 export const updateMovie = catchAsync(async (req, res, next) => {
@@ -52,7 +55,7 @@ export const updateMovie = catchAsync(async (req, res, next) => {
 
   const updatedMovie = await movieService.updateMovie(movieId, movieData);
 
-  res.status(200).json({ data: updatedMovie });
+  sendResponse(200, updatedMovie, res);
 });
 
 export const deleteMovie = catchAsync(async (req, res, next) => {
