@@ -7,3 +7,5 @@ router
   .route('/')
   .get(movieController.getAllMovies)
   .post(movieController.createMovie);
+
+router.route('/:id').get(movieController.getMovie);
