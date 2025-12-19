@@ -1,3 +1,5 @@
+import AppError from '../utils/appError.js';
+
 const handleUniqueField = (err, res, instance) => {
   const { modelName, target } = err.meta;
 
@@ -10,6 +12,8 @@ const handleUniqueField = (err, res, instance) => {
 
   return throwValidationError(error, res, instance);
 };
+
+const handleInvalidQueryParam = () => new AppError('Invalid query param', 400);
 
 export const throwValidationError = (error, res, instance) => {
   const errorObj = { errors: {} };
@@ -29,7 +33,16 @@ export const throwValidationError = (error, res, instance) => {
 };
 
 const sendError = (err, res, instance) => {
-  const { message, status, title, timestamp, stack } = err;
+  const { isOperational, message, status, title, timestamp, stack } = err;
+
+  if (!isOperational && process.env.NODE_ENV === 'production')
+    return res.status(500).json({
+      title: 'Internal Server Error',
+      status: 500,
+      detail: 'Something Went Wrong!',
+      instance,
+      timestamp: new Date(),
+    });
 
   res.status(status).json({
     title,
@@ -48,6 +61,8 @@ const globalErrorHandler = (err, req, res, next) => {
 
   if (error.code === 'P2002')
     return handleUniqueField(error, res, req.originalUrl);
+  if (err.message.includes('Unknown argument'))
+    error = handleInvalidQueryParam();
 
   sendError(error, res, req.originalUrl);
 };
