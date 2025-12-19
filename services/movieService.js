@@ -14,3 +14,6 @@ export const getMovie = async movieId =>
 
 export const createMovie = async movieData =>
   await movieRepository.createMovie(movieData);
+
+export const updateMovie = async (movieId, movieData) =>
+  await movieRepository.updateMovie(movieId, movieData);
