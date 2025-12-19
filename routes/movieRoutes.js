@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import validateUuid from '../middlewares/validateUuid.js';
 import * as movieController from '../controllers/movieController.js';
 
 export const router = Router();
@@ -10,6 +11,6 @@ router
 
 router
   .route('/:id')
-  .get(movieController.getMovie)
-  .patch(movieController.updateMovie)
-  .delete(movieController.deleteMovie);
+  .get(validateUuid, movieController.getMovie)
+  .patch(validateUuid, movieController.updateMovie)
+  .delete(validateUuid, movieController.deleteMovie);
