@@ -61,7 +61,11 @@ const globalErrorHandler = (err, req, res, next) => {
 
   if (error.code === 'P2002')
     return handleUniqueField(error, res, req.originalUrl);
-  if (err.message.includes('Unknown argument'))
+  if (
+    err.message.includes('Unknown argument') ||
+    err.message.includes('Error in query') ||
+    err.message === 'unexpected empty path'
+  )
     error = handleInvalidQueryParam();
 
   sendError(error, res, req.originalUrl);
