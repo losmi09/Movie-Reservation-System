@@ -15,7 +15,7 @@ export const getMovie = catchAsync(async (req, res, next) => {
 
   if (!movie) return next(new AppError('No movie found with this ID', 404));
 
-  res.status(200).json(movie);
+  res.status(200).json({ data: movie });
 });
 
 export const createMovie = catchAsync(async (req, res, next) => {
@@ -27,5 +27,25 @@ export const createMovie = catchAsync(async (req, res, next) => {
 
   const movie = await movieService.createMovie(movieData);
 
-  res.status(201).json(movie);
+  res.status(201).json({ data: movie });
+});
+
+export const updateMovie = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  const movie = await movieService.getMovie(id);
+
+  if (!movie) return next(new AppError('No movie found with this ID', 404));
+
+  const { body: movieData } = req;
+
+  const { error } = movieSchema.validate(movieData, { abortEarly: false });
+
+  const errors = error.details.filter(err => !err.message.endsWith('required'));
+
+  if (errors.length) return throwValidationError(errors, res, req.originalUrl);
+
+  const updatedMovie = await movieService.updateMovie(id, movieData);
+
+  res.status(200).json({ data: updatedMovie });
 });
