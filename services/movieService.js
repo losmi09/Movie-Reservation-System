@@ -17,3 +17,6 @@ export const createMovie = async movieData =>
 
 export const updateMovie = async (movieId, movieData) =>
   await movieRepository.updateMovie(movieId, movieData);
+
+export const deleteMovie = async movieId =>
+  await movieRepository.deleteMovie(movieId);
