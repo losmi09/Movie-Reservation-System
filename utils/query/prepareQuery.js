@@ -1,3 +1,5 @@
+import excludeFromQuery from './excludeFromQuery.js';
+
 const paginate = query => {
   const { page = 1, limit = 20 } = query;
 
@@ -31,9 +33,7 @@ const prepareQuery = query => {
 
   const orderBy = sort(queryClone);
 
-  const excludeFromQuery = ['page', 'limit', 'sort', 'fields'];
-
-  excludeFromQuery.forEach(param => delete queryClone[param]);
+  excludeFromQuery(queryClone, 'page', 'limit', 'sort', 'fields');
 
   return { queryClone, skip, limit, orderBy, selectFields };
 };

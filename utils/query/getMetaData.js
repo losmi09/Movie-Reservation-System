@@ -1,9 +1,14 @@
 import prisma from '../../server.js';
+import excludeFromQuery from './excludeFromQuery.js';
 
 const getMetaData = async (query, model) => {
-  const { page = 1, limit = 20 } = query;
+  const queryClone = structuredClone(query);
 
-  const totalCount = await prisma[model].count();
+  excludeFromQuery(queryClone, 'page', 'limit', 'sort', 'fields');
+
+  const totalCount = await prisma[model].count({ where: queryClone });
+
+  const { page = 1, limit = 20 } = query;
 
   const pageSize = Number(limit);
 
@@ -15,7 +20,7 @@ const getMetaData = async (query, model) => {
     pageSize,
     totalPages,
     hasNextPage: page < totalPages,
-    hasPrevPage: page > 1 && pageSize <= totalPages,
+    hasPrevPage: page > 1 && page <= totalPages,
   };
 };
 
