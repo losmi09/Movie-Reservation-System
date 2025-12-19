@@ -14,5 +14,8 @@ export const getAllMovies = async query => {
   });
 };
 
+export const getMovie = async movieId =>
+  await prisma.movie.findUnique({ where: { id: movieId } });
+
 export const createMovie = async movieData =>
   await prisma.movie.create({ data: movieData });
