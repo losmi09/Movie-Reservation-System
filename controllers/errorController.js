@@ -6,7 +6,7 @@ const handleUniqueField = (err, res, instance) => {
   const error = [
     {
       path: target[0],
-      message: `${modelName} with this name already exists`,
+      message: `${modelName} with this ${target} already exists`,
     },
   ];
 
@@ -62,7 +62,6 @@ const globalErrorHandler = (err, req, res, next) => {
   if (error.code === 'P2002')
     return handleUniqueField(error, res, req.originalUrl);
   if (
-    err.message.includes('Unknown argument') ||
     err.message.includes('Error in query') ||
     err.message === 'unexpected empty path'
   )
