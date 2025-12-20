@@ -8,6 +8,7 @@ const sanitizeOutput = user => {
     'emailVerificationTokenExpiry',
     'isVerified',
     'isActive',
+    'refreshToken',
   ];
 
   sensitiveFields.forEach(field => (user[field] = undefined));
