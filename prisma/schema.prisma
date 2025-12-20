@@ -17,3 +17,20 @@ model Movie {
 
   @@map("movies")
 }
+
+model User {
+  id                           String    @id @default(uuid())
+  firstName                    String    @map("first_name") @db.VarChar(255)
+  lastName                     String    @map("last_name") @db.VarChar(255)
+  email                        String    @unique @db.VarChar(255)
+  password                     String    @db.VarChar(255)
+  passwordChangedAt            DateTime? @map("password_changed_at")
+  passwordResetToken           String?   @unique @map("password_reset_token")
+  passwordResetTokenExpiry     DateTime? @map("password_reset_token_expiry")
+  emailVerificationToken       String?   @unique @map("email_verification_token")
+  emailVerificationTokenExpiry DateTime? @map("email_verification_token_expiry")
+  isVerified                   Boolean   @default(false) @map("is_verified")
+  isActive                     Boolean   @default(true) @map("is_active")
+
+  @@map("users")
+}
