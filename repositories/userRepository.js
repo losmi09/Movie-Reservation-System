@@ -3,6 +3,9 @@ import prisma from '../server.js';
 export const createUser = async userData =>
   await prisma.user.create({ data: userData });
 
+export const findUserById = async userId =>
+  await prisma.user.findUnique({ where: { id: userId } });
+
 export const findUserByEmail = async email =>
   await prisma.user.findUnique({ where: { email } });
 
