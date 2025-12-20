@@ -16,6 +16,23 @@ const generateRefreshToken = userId =>
     algorithm: 'HS256',
   });
 
+const verifyRefreshToken = async refreshToken => {
+  try {
+    const { id: userId } = await jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+      { algorithms: ['HS256'] }
+    );
+
+    return userId;
+  } catch (err) {
+    if (err.name === 'TokenExpiredError')
+      throw new AppError('Refresh token has expired', 400);
+
+    throw new AppError('Invalid refresh token', 400);
+  }
+};
+
 const hashPassword = async password => await bcrypt.hash(password, 12);
 
 const hashToken = token =>
@@ -48,4 +65,26 @@ export const register = async userData => {
   });
 
   return newUser;
+};
+
+export const refreshToken = async token => {
+  const userId = await verifyRefreshToken(token);
+
+  const hashedRefreshToken = hashToken(token);
+
+  const hackedUser = await userRepository.findUserByRefreshToken(
+    userId,
+    hashedRefreshToken
+  );
+
+  // Token reuse detected
+  if (!hackedUser) {
+    await userRepository.revokeRefreshToken(userId);
+    throw new AppError('You cannot use the same refresh token twice', 403);
+  }
+
+  const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+    await prepareAccessAndRefreshToken(userId);
+
+  return { newAccessToken, newRefreshToken };
 };

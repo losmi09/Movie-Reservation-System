@@ -6,16 +6,26 @@ import * as authService from '../services/authService.js';
 import * as userRepository from '../repositories/userRepository.js';
 import sanitizeOutput from '../utils/sanitizeOutput.js';
 
-const sendAuthResponse = async (user, statusCode, res) => {
-  const { accessToken, refreshToken } =
-    await authService.prepareAccessAndRefreshToken(user.id);
-
+const sendRefreshTokenCookie = (refreshToken, res) =>
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'Strict',
     expires: new Date(Date.now() + Number(process.env.COOKIE_EXPIRES_IN)),
   });
+
+const clearRefreshTokenCookie = res =>
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'Strict',
+  });
+
+const sendAuthResponse = async (user, statusCode, res) => {
+  const { accessToken, refreshToken } =
+    await authService.prepareAccessAndRefreshToken(user.id);
+
+  sendRefreshTokenCookie(refreshToken, res);
 
   sanitizeOutput(user);
 
@@ -46,4 +56,21 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect email or password', 401));
 
   sendAuthResponse(user, 200, res);
+});
+
+export const refreshToken = catchAsync(async (req, res, next) => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken)
+    return next(new AppError('Refresh token is required', 400));
+
+  clearRefreshTokenCookie(res);
+
+  const { newAccessToken, newRefreshToken } = await authService.refreshToken(
+    refreshToken
+  );
+
+  sendRefreshTokenCookie(newRefreshToken, res);
+
+  res.status(200).json({ accessToken: newAccessToken });
 });
