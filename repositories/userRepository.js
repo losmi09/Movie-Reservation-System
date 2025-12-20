@@ -8,3 +8,12 @@ export const findUserByEmail = async email =>
 
 export const setRefreshToken = async (userId, refreshToken) =>
   await prisma.user.update({ where: { id: userId }, data: { refreshToken } });
+
+export const findUserByRefreshToken = async (userId, refreshToken) =>
+  await prisma.user.findUnique({ where: { id: userId, refreshToken } });
+
+export const revokeRefreshToken = async userId =>
+  await prisma.user.update({
+    where: { id: userId },
+    data: { refreshToken: null },
+  });
