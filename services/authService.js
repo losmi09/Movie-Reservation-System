@@ -1,8 +1,9 @@
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import * as userRepository from '../repositories/userRepository.js';
 import AppError from '../utils/appError.js';
+import * as userRepository from '../repositories/userRepository.js';
+import * as emailService from '../services/emailService.js';
 
 const generateAccessToken = userId =>
   jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
@@ -38,7 +39,7 @@ const verifyToken = async (token, tokenType) => {
 
 const hashPassword = async password => await bcrypt.hash(password, 12);
 
-const hashToken = token =>
+export const hashToken = token =>
   crypto.createHash('sha256').update(token).digest('hex');
 
 export const comparePasswords = async (password, userPassword) =>
@@ -70,6 +71,8 @@ export const register = async userData => {
     email,
     password: hashedPassword,
   });
+
+  await emailService.sendEmailVerification(newUser);
 
   return newUser;
 };
@@ -106,6 +109,19 @@ export const protect = async accessToken => {
 
   if (checkForPasswordChange(issuedAt, user.passwordChangedAt))
     throw new AppError('Password was changed. Please log in again', 401);
+
+  return user;
+};
+
+export const verifyEmail = async token => {
+  const hashedToken = hashToken(token);
+
+  const user = await userRepository.findUserByVerificationToken(hashedToken);
+
+  if (!user)
+    throw new AppError('Verification token is invalid or has expired', 400);
+
+  await userRepository.setUserVerified(user.id);
 
   return user;
 };

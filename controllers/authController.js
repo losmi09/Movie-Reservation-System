@@ -74,3 +74,14 @@ export const refreshToken = catchAsync(async (req, res, next) => {
 
   res.status(200).json({ accessToken: newAccessToken });
 });
+
+export const verifyEmail = catchAsync(async (req, res, next) => {
+  const user = await authService.verifyEmail(req.params.token);
+
+  sanitizeOutput(user);
+
+  await res.status(200).json({
+    message: 'Email address has been successfully verified',
+    data: { ...user, verifiedAt: new Date() },
+  });
+});
