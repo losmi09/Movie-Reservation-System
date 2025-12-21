@@ -34,7 +34,12 @@ export const setEmailVerificationToken = async (userId, token) => {
 };
 
 export const findUserByVerificationToken = async token =>
-  await prisma.user.findUnique({ where: { emailVerificationToken: token } });
+  await prisma.user.findUnique({
+    where: {
+      emailVerificationToken: token,
+      emailVerificationTokenExpiry: { gte: new Date() },
+    },
+  });
 
 export const setUserVerified = async userId =>
   await prisma.user.update({
