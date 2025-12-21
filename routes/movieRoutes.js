@@ -8,10 +8,24 @@ export const router = Router();
 router
   .route('/')
   .get(movieController.getAllMovies)
-  .post(authMiddleware.protect, movieController.createMovie);
+  .post(
+    authMiddleware.protect,
+    authMiddleware.restrictTo('admin'),
+    movieController.createMovie
+  );
 
 router
   .route('/:id')
   .get(validateUuid, movieController.getMovie)
-  .patch(validateUuid, authMiddleware.protect, movieController.updateMovie)
-  .delete(validateUuid, authMiddleware.protect, movieController.deleteMovie);
+  .patch(
+    validateUuid,
+    authMiddleware.protect,
+    authMiddleware.restrictTo('admin'),
+    movieController.updateMovie
+  )
+  .delete(
+    validateUuid,
+    authMiddleware.protect,
+    authMiddleware.restrictTo('admin'),
+    movieController.deleteMovie
+  );
