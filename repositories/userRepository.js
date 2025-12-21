@@ -20,3 +20,28 @@ export const revokeRefreshToken = async userId =>
     where: { id: userId },
     data: { refreshToken: null },
   });
+
+export const setEmailVerificationToken = async (userId, token) => {
+  const TOKEN_EXPIRY = Date.now() + 60 * 60 * 1000; // 1 hour
+
+  return await prisma.user.update({
+    where: { id: userId },
+    data: {
+      emailVerificationToken: token,
+      emailVerificationTokenExpiry: new Date(TOKEN_EXPIRY),
+    },
+  });
+};
+
+export const findUserByVerificationToken = async token =>
+  await prisma.user.findUnique({ where: { emailVerificationToken: token } });
+
+export const setUserVerified = async userId =>
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      isVerified: true,
+      emailVerificationToken: null,
+      emailVerificationTokenExpiry: null,
+    },
+  });
