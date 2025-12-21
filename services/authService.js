@@ -30,9 +30,9 @@ const verifyToken = async (token, tokenType) => {
     return { userId, issuedAt };
   } catch (err) {
     if (err.name === 'TokenExpiredError')
-      throw new AppError(`${tokenType} token has expired`, 400);
+      throw new AppError(`${tokenType} token has expired`, 401);
 
-    throw new AppError(`Invalid ${tokenType} token`, 400);
+    throw new AppError(`Invalid ${tokenType} token`, 401);
   }
 };
 
