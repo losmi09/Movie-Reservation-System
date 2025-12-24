@@ -2,6 +2,7 @@ import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import userSchema from '../schemas/userSchema.js';
 import * as authService from '../services/authService.js';
+import * as userRepository from '../repositories/userRepository.js';
 import sanitizeOutput from '../utils/sanitizeOutput.js';
 import { loginSchema } from '../schemas/userSchema.js';
 import { passwordSchema, emailSchema } from '../schemas/userSchema.js';
@@ -57,6 +58,14 @@ export const login = catchAsync(async (req, res, next) => {
   const user = await authService.login(email, password);
 
   sendAuthResponse(res, user, 200);
+});
+
+export const logout = catchAsync(async (req, res, next) => {
+  clearRefreshTokenCookie(res);
+
+  await userRepository.revokeRefreshToken(req.user.id);
+
+  res.status(204).end();
 });
 
 export const refreshToken = catchAsync(async (req, res, next) => {
