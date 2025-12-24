@@ -26,7 +26,7 @@ export const createMovie = catchAsync(async (req, res, next) => {
 
   const { error } = movieSchema.validate(movieData, { abortEarly: false });
 
-  if (error) return throwValidationError(error.details, res, req.originalUrl);
+  if (error) return next(error);
 
   const movie = await movieService.createMovie(movieData);
 
@@ -45,12 +45,11 @@ export const updateMovie = catchAsync(async (req, res, next) => {
   const { error } = movieSchema.validate(movieData, { abortEarly: false });
 
   if (error) {
-    const errors = error.details.filter(
+    const details = error.details.filter(
       err => !err.message.endsWith('required')
     );
 
-    if (errors.length)
-      return throwValidationError(errors, res, req.originalUrl);
+    return next({ details, name: 'ValidationError' });
   }
 
   const updatedMovie = await movieService.updateMovie(movieId, movieData);
