@@ -1,4 +1,5 @@
 import express from 'express';
+import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
@@ -29,6 +30,8 @@ const authLimit = rateLimit({
 app.use(express.json({ limit: '10kb' }));
 
 app.use(cookieParser());
+
+if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 app.use('/api/v1/movies', limit, movieRouter);
 app.use('/api/v1/auth', authLimit, authRouter);
