@@ -10,12 +10,12 @@ const handleUniqueField = (err, res, instance) => {
     },
   ];
 
-  return throwValidationError(error, res, instance);
+  return throwValidationError(res, error, instance);
 };
 
 const handleInvalidQueryParam = () => new AppError('Invalid query param', 400);
 
-export const throwValidationError = (error, res, instance) => {
+export const throwValidationError = (res, error, instance) => {
   const errorObj = { errors: {} };
 
   error.forEach(
@@ -57,7 +57,11 @@ const sendError = (err, res, instance) => {
 
 const globalErrorHandler = (err, req, res, next) => {
   let error = Object.create(err);
+  error.title = error.title || 'Internal Server Error';
   error.status = error.status || 500;
+
+  if (err.name === 'ValidationError')
+    return throwValidationError(res, err.details, req.originalUrl);
 
   if (error.code === 'P2002')
     return handleUniqueField(error, res, req.originalUrl);
