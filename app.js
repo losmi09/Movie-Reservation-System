@@ -1,4 +1,5 @@
 import express from 'express';
+import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
@@ -6,6 +7,8 @@ import { router as movieRouter } from './routes/movieRoutes.js';
 import { router as authRouter } from './routes/authRoutes.js';
 
 const app = express();
+
+app.use(helmet());
 
 app.use(express.json({ limit: '10kb' }));
 
