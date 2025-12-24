@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit';
 import { xss } from 'express-xss-sanitizer';
 import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
 import { router as movieRouter } from './routes/movieRoutes.js';
@@ -36,6 +37,8 @@ app.use(cookieParser());
 app.use(xss());
 
 app.use(hpp());
+
+app.use(compression());
 
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
