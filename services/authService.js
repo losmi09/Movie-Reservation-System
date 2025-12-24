@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import AppError from '../utils/appError.js';
 import * as userRepository from '../repositories/userRepository.js';
 import * as emailService from '../services/emailService.js';
+import { passwordSchema } from '../schemas/userSchema.js';
 
 const generateAccessToken = userId =>
   jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
@@ -42,12 +43,23 @@ const hashPassword = async password => await bcrypt.hash(password, 12);
 export const hashToken = token =>
   crypto.createHash('sha256').update(token).digest('hex');
 
+export const createToken = () => {
+  const token = crypto.randomBytes(32).toString('hex');
+  const hashedToken = hashToken(token);
+  return { token, hashedToken };
+};
+
 export const comparePasswords = async (password, userPassword) =>
   await bcrypt.compare(password, userPassword);
 
 export const checkForPasswordChange = (JWTTimestamp, passwordChangeTimestamp) =>
-  JWTTimestamp * 1000 <
-  new Date(passwordChangeTimestamp - 2 * 60 * 60 * 1000).getTime();
+  new Date(JWTTimestamp * 1000) < new Date(passwordChangeTimestamp);
+
+const setPassword = async (userId, password) => {
+  const hashedPassword = await hashPassword(password);
+
+  await userRepository.updateUserPassword(userId, hashedPassword);
+};
 
 export const prepareAccessAndRefreshToken = async userId => {
   const accessToken = generateAccessToken(userId);
@@ -72,9 +84,22 @@ export const register = async userData => {
     password: hashedPassword,
   });
 
-  await emailService.sendEmailVerification(newUser);
+  const { token: verificationToken, hashedToken } = createToken();
+
+  await userRepository.setEmailVerificationToken(newUser.id, hashedToken);
+
+  await emailService.sendEmailVerification(newUser, verificationToken);
 
   return newUser;
+};
+
+export const login = async (email, password) => {
+  const user = await userRepository.findUserByEmail(email);
+
+  if (!user || !(await comparePasswords(password, user.password)))
+    throw new AppError('Incorrect email or password', 401);
+
+  return user;
 };
 
 export const refreshToken = async token => {
@@ -122,6 +147,60 @@ export const verifyEmail = async token => {
     throw new AppError('Verification token is invalid or has expired', 400);
 
   await userRepository.setUserVerified(user.id);
+
+  return user;
+};
+
+export const forgotPassword = async email => {
+  try {
+    const user = await userRepository.findUserByEmail(email);
+
+    if (user) {
+      const { token: resetToken, hashedToken } = createToken();
+
+      await userRepository.setPasswordResetToken(email, hashedToken);
+
+      await emailService.sendPasswordReset(email, resetToken);
+    }
+  } catch {
+    await userRepository.clearPasswordResetToken(email);
+
+    throw new AppError(
+      'Password reset email failed. Please try again later',
+      500
+    );
+  }
+};
+
+export const resetPassword = async (token, password, passwordConfirm) => {
+  const hashedToken = hashToken(token);
+
+  const user = await userRepository.findUserByPasswordResetToken(hashedToken);
+
+  if (!user)
+    throw new AppError('Password reset token is invalid or has expired', 400);
+
+  const { error } = passwordSchema.validate(
+    { passwordCurrent: user.password, password, passwordConfirm },
+    { abortEarly: false }
+  );
+
+  if (error) throw error;
+
+  setPassword(user.id, password);
+
+  return user;
+};
+
+export const updatePassword = async (userId, passwordCurrent, password) => {
+  const user = await userRepository.findUserById(userId);
+
+  if (!user) throw new AppError('User does no longer exist', 404);
+
+  if (!(await comparePasswords(passwordCurrent, user.password)))
+    throw new AppError('Your current password is incorrect', 401);
+
+  setPassword(user.id, password);
 
   return user;
 };

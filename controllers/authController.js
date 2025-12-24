@@ -1,12 +1,12 @@
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import userSchema from '../schemas/userSchema.js';
-import { throwValidationError } from './errorController.js';
 import * as authService from '../services/authService.js';
-import * as userRepository from '../repositories/userRepository.js';
 import sanitizeOutput from '../utils/sanitizeOutput.js';
+import { loginSchema } from '../schemas/userSchema.js';
+import { passwordSchema, emailSchema } from '../schemas/userSchema.js';
 
-const sendRefreshTokenCookie = (refreshToken, res) =>
+const sendRefreshTokenCookie = (res, refreshToken) =>
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -21,11 +21,11 @@ const clearRefreshTokenCookie = res =>
     sameSite: 'Strict',
   });
 
-const sendAuthResponse = async (user, statusCode, res) => {
+const sendAuthResponse = async (res, user, statusCode) => {
   const { accessToken, refreshToken } =
     await authService.prepareAccessAndRefreshToken(user.id);
 
-  sendRefreshTokenCookie(refreshToken, res);
+  sendRefreshTokenCookie(res, refreshToken);
 
   sanitizeOutput(user);
 
@@ -37,25 +37,26 @@ export const register = catchAsync(async (req, res, next) => {
 
   const { error } = userSchema.validate(userData, { abortEarly: false });
 
-  if (error) return throwValidationError(error.details, res, req.originalUrl);
+  if (error) return next(error);
 
   const newUser = await authService.register(userData);
 
-  sendAuthResponse(newUser, 201, res);
+  sendAuthResponse(res, newUser, 201);
 });
 
 export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password)
-    return next(new AppError('Email and password are required', 400));
+  const { error } = loginSchema.validate(
+    { email, password },
+    { abortEarly: false }
+  );
 
-  const user = await userRepository.findUserByEmail(email);
+  if (error) return next(error);
 
-  if (!user || !(await authService.comparePasswords(password, user.password)))
-    return next(new AppError('Incorrect email or password', 401));
+  const user = await authService.login(email, password);
 
-  sendAuthResponse(user, 200, res);
+  sendAuthResponse(res, user, 200);
 });
 
 export const refreshToken = catchAsync(async (req, res, next) => {
@@ -70,12 +71,12 @@ export const refreshToken = catchAsync(async (req, res, next) => {
     refreshToken
   );
 
-  sendRefreshTokenCookie(newRefreshToken, res);
+  sendRefreshTokenCookie(res, newRefreshToken);
 
   res.status(200).json({ accessToken: newAccessToken });
 });
 
-export const verifyEmail = catchAsync(async (req, res, next) => {
+export const verifyEmail = catchAsync(async (req, res) => {
   const user = await authService.verifyEmail(req.params.token);
 
   sanitizeOutput(user);
@@ -84,4 +85,57 @@ export const verifyEmail = catchAsync(async (req, res, next) => {
     message: 'Email address has been successfully verified',
     data: { ...user, verifiedAt: new Date() },
   });
+});
+
+export const forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+
+  const { error } = emailSchema.validate({ email });
+
+  if (error) return next(error);
+
+  await authService.forgotPassword(email);
+
+  res.status(200).json({
+    message:
+      'If a user with this email address exists, password reset email will be sent!',
+  });
+});
+
+const sendPasswordUpdate = (res, user) => {
+  sanitizeOutput(user);
+
+  res.status(200).json({
+    message: 'Your password has been successfully updated!',
+    data: { ...user, passwordChangedAt: new Date() },
+  });
+};
+
+export const resetPassword = catchAsync(async (req, res, next) => {
+  const user = await authService.resetPassword(
+    req.params.token,
+    req.body.password,
+    req.body.passwordConfirm
+  );
+
+  sendPasswordUpdate(res, user);
+});
+
+export const updateUserPassword = catchAsync(async (req, res, next) => {
+  const { passwordCurrent, password, passwordConfirm } = req.body;
+
+  const { error } = passwordSchema.validate(
+    { passwordCurrent, password, passwordConfirm },
+    { abortEarly: false }
+  );
+
+  if (error) return next(error);
+
+  const user = await authService.updatePassword(
+    req.user.id,
+    passwordCurrent,
+    password
+  );
+
+  sendPasswordUpdate(res, user);
 });
