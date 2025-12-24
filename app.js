@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { rateLimit } from 'express-rate-limit';
 import { xss } from 'express-xss-sanitizer';
+import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
@@ -31,6 +32,8 @@ const authLimit = rateLimit({
 app.use(express.json({ limit: '10kb' }));
 
 app.use(xss());
+
+app.use(hpp());
 
 app.use(cookieParser());
 
