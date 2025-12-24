@@ -3,6 +3,7 @@ const errorMessages = {
   401: 'Unauthorized',
   403: 'Forbidden',
   404: 'Resource Not Found',
+  413: 'Payload Too Large',
   422: 'Unprocessable Entity',
   500: 'Internal Server Error',
 };
