@@ -22,13 +22,13 @@ export const revokeRefreshToken = async userId =>
   });
 
 export const setEmailVerificationToken = async (userId, token) => {
-  const TOKEN_EXPIRY = Date.now() + 60 * 60 * 1000; // 1 hour
+  const VERIFICATION_TOKEN_EXPIRY = Date.now() + 86400000; // 24 hours
 
   return await prisma.user.update({
     where: { id: userId },
     data: {
       emailVerificationToken: token,
-      emailVerificationTokenExpiry: new Date(TOKEN_EXPIRY),
+      emailVerificationTokenExpiry: new Date(VERIFICATION_TOKEN_EXPIRY),
     },
   });
 };
@@ -48,5 +48,42 @@ export const setUserVerified = async userId =>
       isVerified: true,
       emailVerificationToken: null,
       emailVerificationTokenExpiry: null,
+    },
+  });
+
+export const setPasswordResetToken = async (email, passwordResetToken) => {
+  const RESET_TOKEN_EXPIRY = Date.now() + 60 * 60 * 1000; // 1 hour
+
+  await prisma.user.update({
+    where: { email },
+    data: {
+      passwordResetToken,
+      passwordResetTokenExpiry: new Date(RESET_TOKEN_EXPIRY),
+    },
+  });
+};
+
+export const findUserByPasswordResetToken = async passwordResetToken =>
+  await prisma.user.findUnique({
+    where: {
+      passwordResetToken,
+      passwordResetTokenExpiry: { gte: new Date() },
+    },
+  });
+
+export const clearPasswordResetToken = async email =>
+  await prisma.user.update({
+    where: { email },
+    data: { passwordResetToken: null },
+  });
+
+export const updateUserPassword = async (userId, newPassword) =>
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      password: newPassword,
+      passwordChangedAt: new Date(),
+      passwordResetToken: null,
+      passwordResetTokenExpiry: null,
     },
   });
