@@ -15,6 +15,9 @@ const handleUniqueField = (err, res, instance) => {
 
 const handleInvalidQueryParam = () => new AppError('Invalid query param', 400);
 
+const handleTooLargePayload = () =>
+  new AppError('Request payload is too large', 413);
+
 export const throwValidationError = (res, error, instance) => {
   const errorObj = { errors: {} };
 
@@ -65,6 +68,7 @@ const globalErrorHandler = (err, req, res, next) => {
 
   if (error.code === 'P2002')
     return handleUniqueField(error, res, req.originalUrl);
+  if (err.name === 'PayloadTooLargeError') error = handleTooLargePayload();
   if (
     err.message.includes('Error in query') ||
     err.message === 'unexpected empty path'
