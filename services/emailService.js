@@ -1,7 +1,4 @@
-import crypto from 'crypto';
 import nodemailer from 'nodemailer';
-import * as authService from './authService.js';
-import * as userRepository from '../repositories/userRepository.js';
 
 export const sendEmail = async options => {
   const { to, subject, text } = options;
@@ -25,18 +22,25 @@ export const sendEmail = async options => {
   await transporter.sendMail(mailOptions);
 };
 
-export const sendEmailVerification = async user => {
-  const verificationToken = crypto.randomBytes(32).toString('hex');
+const getEmailUrl = (path, token) =>
+  `${process.env.HOST}/api/v1/auth/${path}/${token}`;
 
-  const verificationUrl = `${process.env.HOST}/api/v1/auth/verify-email/${verificationToken}`;
-
-  const hashedToken = authService.hashToken(verificationToken);
-
-  await userRepository.setEmailVerificationToken(user.id, hashedToken);
+export const sendEmailVerification = async (user, verificationToken) => {
+  const verificationUrl = getEmailUrl('verify-email', verificationToken);
 
   await sendEmail({
     to: user.email,
-    subject: 'Email verification (valid for 1 hour)',
+    subject: 'Email verification (valid for 24 hours)',
     text: `Please verify your email by opening this link: ${verificationUrl}.`,
+  });
+};
+
+export const sendPasswordReset = async (email, resetToken) => {
+  const resetUrl = getEmailUrl('reset-password', resetToken);
+
+  await sendEmail({
+    to: email,
+    subject: 'Password reset (valid for 1 hour)',
+    text: `Reset your password: ${resetUrl}.`,
   });
 };
