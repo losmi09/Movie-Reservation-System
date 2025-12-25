@@ -90,3 +90,12 @@ export const updateUserPassword = async (userId, newPassword) =>
       passwordResetTokenExpiry: null,
     },
   });
+
+export const deactivateUser = async userId =>
+  await prisma.user.update({
+    where: { id: userId },
+    data: { isActive: false },
+  });
+
+export const activateUser = async userId =>
+  await prisma.user.update({ where: { id: userId }, data: { isActive: true } });
