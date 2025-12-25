@@ -100,6 +100,8 @@ export const login = async (email, password) => {
   if (!user || !(await comparePasswords(password, user.password)))
     throw new AppError('Incorrect email or password', 401);
 
+  if (!user.isActive) await userRepository.activateUser(user.id);
+
   return user;
 };
 
@@ -108,16 +110,18 @@ export const refreshToken = async token => {
 
   const hashedRefreshToken = hashToken(token);
 
-  const hackedUser = await userRepository.findUserByRefreshToken(
+  const user = await userRepository.findUserByRefreshToken(
     userId,
     hashedRefreshToken
   );
 
   // Token reuse detected
-  if (!hackedUser) {
+  if (!user) {
     await userRepository.revokeRefreshToken(userId);
     throw new AppError('You cannot use the same refresh token twice', 403);
   }
+
+  if (!user.isActive) throw new AppError('Your account is deactivated', 403);
 
   const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
     await prepareAccessAndRefreshToken(userId);
@@ -135,6 +139,8 @@ export const protect = async accessToken => {
 
   if (checkForPasswordChange(issuedAt, user.passwordChangedAt))
     throw new AppError('Password was changed. Please log in again', 401);
+
+  sanitizeOutput(user);
 
   return user;
 };
