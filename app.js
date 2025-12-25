@@ -11,6 +11,7 @@ import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
 import { router as movieRouter } from './routes/movieRoutes.js';
 import { router as authRouter } from './routes/authRoutes.js';
+import { router as userRouter } from './routes/userRoutes.js';
 
 const app = express();
 
@@ -44,6 +45,7 @@ if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 app.use('/api/v1/movies', limit, movieRouter);
 app.use('/api/v1/auth', authLimit, authRouter);
+app.use('/api/v1/users', limit, userRouter);
 
 app.use((req, res, next) =>
   next(new AppError('The requested resource was not found', 404))
