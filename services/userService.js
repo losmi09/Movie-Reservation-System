@@ -1,5 +1,6 @@
 import AppError from '../utils/appError.js';
 import { comparePasswords } from './authService.js';
+import sanitizeOutput from '../utils/sanitizeOutput.js';
 import * as userRepository from '../repositories/userRepository.js';
 
 const filterObj = (obj, ...allowedFields) => {
@@ -8,6 +9,14 @@ const filterObj = (obj, ...allowedFields) => {
     if (allowedFields.includes(field)) newObj[field] = obj[field];
   });
   return newObj;
+};
+
+export const getCurrentUser = async userId => {
+  const currentUser = await userRepository.findUserById(userId);
+
+  sanitizeOutput(currentUser);
+
+  return currentUser;
 };
 
 export const updateCurrentUser = async (userId, data) => {

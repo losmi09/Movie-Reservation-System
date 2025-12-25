@@ -4,6 +4,12 @@ import { updateUserSchema } from '../schemas/userSchema.js';
 import { deactivateUserSchema } from '../schemas/userSchema.js';
 import * as userService from '../services/userService.js';
 
+export const getCurrentUser = catchAsync(async (req, res, next) => {
+  const currentUser = await userService.getCurrentUser(req.user.id);
+
+  res.status(200).json({ data: currentUser });
+});
+
 export const updateCurrentUser = catchAsync(async (req, res, next) => {
   const { error } = updateUserSchema.validate(req.body, { abortEarly: false });
 
