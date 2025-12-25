@@ -3,6 +3,9 @@ import prisma from '../server.js';
 export const createUser = async userData =>
   await prisma.user.create({ data: userData });
 
+export const updateUser = async (userId, data) =>
+  await prisma.user.update({ where: { id: userId }, data });
+
 export const findUserById = async userId =>
   await prisma.user.findUnique({ where: { id: userId } });
 
