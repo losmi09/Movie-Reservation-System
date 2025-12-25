@@ -22,6 +22,12 @@ const clearRefreshTokenCookie = res =>
     sameSite: 'Strict',
   });
 
+const invalidateRefreshToken = async (res, userId) => {
+  clearRefreshTokenCookie(res);
+
+  await userRepository.revokeRefreshToken(userId);
+};
+
 const sendAuthResponse = async (res, user, statusCode) => {
   const { accessToken, refreshToken } =
     await authService.prepareAccessAndRefreshToken(user.id);
@@ -61,9 +67,7 @@ export const login = catchAsync(async (req, res, next) => {
 });
 
 export const logout = catchAsync(async (req, res, next) => {
-  clearRefreshTokenCookie(res);
-
-  await userRepository.revokeRefreshToken(req.user.id);
+  invalidateRefreshToken(res, req.user.id);
 
   res.status(204).end();
 });
@@ -88,8 +92,6 @@ export const refreshToken = catchAsync(async (req, res, next) => {
 export const verifyEmail = catchAsync(async (req, res) => {
   const user = await authService.verifyEmail(req.params.token);
 
-  sanitizeOutput(user);
-
   await res.status(200).json({
     message: 'Email address has been successfully verified',
     data: { ...user, verifiedAt: new Date() },
@@ -111,14 +113,11 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   });
 });
 
-const sendPasswordUpdate = (res, user) => {
-  sanitizeOutput(user);
-
+const sendPasswordUpdate = (res, user) =>
   res.status(200).json({
     message: 'Your password has been successfully updated!',
     data: { ...user, passwordChangedAt: new Date() },
   });
-};
 
 export const resetPassword = catchAsync(async (req, res, next) => {
   const user = await authService.resetPassword(
@@ -126,6 +125,8 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     req.body.password,
     req.body.passwordConfirm
   );
+
+  invalidateRefreshToken(res, req.user.id);
 
   sendPasswordUpdate(res, user);
 });
@@ -145,6 +146,8 @@ export const updateUserPassword = catchAsync(async (req, res, next) => {
     passwordCurrent,
     password
   );
+
+  invalidateRefreshToken(res, req.user.id);
 
   sendPasswordUpdate(res, user);
 });
