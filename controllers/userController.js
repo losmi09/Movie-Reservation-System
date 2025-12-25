@@ -4,12 +4,15 @@ import { updateUserSchema } from '../schemas/userSchema.js';
 import { deactivateUserSchema } from '../schemas/userSchema.js';
 import * as userService from '../services/userService.js';
 
-export const updateUser = catchAsync(async (req, res, next) => {
+export const updateCurrentUser = catchAsync(async (req, res, next) => {
   const { error } = updateUserSchema.validate(req.body, { abortEarly: false });
 
   if (error) return next(error);
 
-  const updatedUser = await userService.updateUser(req.user.id, req.body);
+  const updatedUser = await userService.updateCurrentUser(
+    req.user.id,
+    req.body
+  );
 
   sanitizeOutput(updatedUser);
 
@@ -18,7 +21,7 @@ export const updateUser = catchAsync(async (req, res, next) => {
   });
 });
 
-export const deactivateUser = catchAsync(async (req, res, next) => {
+export const deactivateCurrentUser = catchAsync(async (req, res, next) => {
   const { password } = req.body;
 
   const { error } = deactivateUserSchema.validate(
@@ -28,7 +31,7 @@ export const deactivateUser = catchAsync(async (req, res, next) => {
 
   if (error) return next(error);
 
-  await userService.deactivateUser(req.user.id, password);
+  await userService.deactivateCurrentUser(req.user.id, password);
 
   res.status(204).end();
 });

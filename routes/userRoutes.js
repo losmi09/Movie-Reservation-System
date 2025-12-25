@@ -8,5 +8,5 @@ router.use(authMiddleware.protect);
 
 router
   .route('/me')
-  .patch(userController.updateUser)
-  .delete(userController.deactivateUser);
+  .patch(userController.updateCurrentUser)
+  .delete(userController.deactivateCurrentUser);

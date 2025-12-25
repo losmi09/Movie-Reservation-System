@@ -10,7 +10,7 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-export const updateUser = async (userId, data) => {
+export const updateCurrentUser = async (userId, data) => {
   const filteredData = filterObj(data, 'firstName', 'lastName', 'email');
 
   const updatedUser = await userRepository.updateUser(userId, filteredData);
@@ -18,7 +18,7 @@ export const updateUser = async (userId, data) => {
   return updatedUser;
 };
 
-export const deactivateUser = async (userId, password) => {
+export const deactivateCurrentUser = async (userId, password) => {
   const user = await userRepository.findUserById(userId);
 
   if (!user) throw new AppError('User does no longer exist', 404);
