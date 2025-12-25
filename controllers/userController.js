@@ -1,5 +1,4 @@
 import catchAsync from '../utils/catchAsync.js';
-import sanitizeOutput from '../utils/sanitizeOutput.js';
 import { updateUserSchema } from '../schemas/userSchema.js';
 import { deactivateUserSchema } from '../schemas/userSchema.js';
 import * as userService from '../services/userService.js';
@@ -19,8 +18,6 @@ export const updateCurrentUser = catchAsync(async (req, res, next) => {
     req.user.id,
     req.body
   );
-
-  sanitizeOutput(updatedUser);
 
   res.status(200).json({
     data: { ...updatedUser, updatedAt: new Date() },

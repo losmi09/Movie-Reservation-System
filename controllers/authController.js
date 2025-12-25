@@ -3,7 +3,6 @@ import AppError from '../utils/appError.js';
 import userSchema from '../schemas/userSchema.js';
 import * as authService from '../services/authService.js';
 import * as userRepository from '../repositories/userRepository.js';
-import sanitizeOutput from '../utils/sanitizeOutput.js';
 import { loginSchema } from '../schemas/userSchema.js';
 import { passwordSchema, emailSchema } from '../schemas/userSchema.js';
 
@@ -33,8 +32,6 @@ const sendAuthResponse = async (res, user, statusCode) => {
     await authService.prepareAccessAndRefreshToken(user.id);
 
   sendRefreshTokenCookie(res, refreshToken);
-
-  sanitizeOutput(user);
 
   res.status(statusCode).json({ accessToken, data: user });
 };
