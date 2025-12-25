@@ -14,9 +14,9 @@ const filterObj = (obj, ...allowedFields) => {
 export const getCurrentUser = async userId => {
   const currentUser = await userRepository.findUserById(userId);
 
-  sanitizeOutput(currentUser);
+  const sanitizedUser = sanitizeOutput(currentUser);
 
-  return currentUser;
+  return sanitizedUser;
 };
 
 export const updateCurrentUser = async (userId, data) => {
@@ -24,7 +24,9 @@ export const updateCurrentUser = async (userId, data) => {
 
   const updatedUser = await userRepository.updateUser(userId, filteredData);
 
-  return updatedUser;
+  const sanitizedUser = sanitizeOutput(updatedUser);
+
+  return sanitizedUser;
 };
 
 export const deactivateCurrentUser = async (userId, password) => {

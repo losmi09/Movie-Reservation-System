@@ -91,7 +91,9 @@ export const register = async userData => {
 
   await emailService.sendEmailVerification(newUser, verificationToken);
 
-  return newUser;
+  const sanitizedUser = sanitizeOutput(newUser);
+
+  return sanitizedUser;
 };
 
 export const login = async (email, password) => {
@@ -102,7 +104,9 @@ export const login = async (email, password) => {
 
   if (!user.isActive) await userRepository.activateUser(user.id);
 
-  return user;
+  const sanitizedUser = sanitizeOutput(user);
+
+  return sanitizedUser;
 };
 
 export const refreshToken = async token => {
@@ -140,9 +144,9 @@ export const protect = async accessToken => {
   if (checkForPasswordChange(issuedAt, user.passwordChangedAt))
     throw new AppError('Password was changed. Please log in again', 401);
 
-  sanitizeOutput(user);
+  const sanitizedUser = sanitizeOutput(user);
 
-  return user;
+  return sanitizedUser;
 };
 
 export const verifyEmail = async token => {
@@ -155,9 +159,9 @@ export const verifyEmail = async token => {
 
   await userRepository.setUserVerified(user.id);
 
-  sanitizeOutput(user);
+  const sanitizedUser = sanitizeOutput(user);
 
-  return user;
+  return sanitizedUser;
 };
 
 export const forgotPassword = async email => {
@@ -198,9 +202,9 @@ export const resetPassword = async (token, password, passwordConfirm) => {
 
   setPassword(user.id, password);
 
-  sanitizeOutput(user);
+  const sanitizedUser = sanitizeOutput(user);
 
-  return user;
+  return sanitizedUser;
 };
 
 export const updatePassword = async (userId, passwordCurrent, password) => {
@@ -213,7 +217,7 @@ export const updatePassword = async (userId, passwordCurrent, password) => {
 
   setPassword(user.id, password);
 
-  sanitizeOutput(user);
+  const sanitizedUser = sanitizeOutput(user);
 
-  return user;
+  return sanitizedUser;
 };
