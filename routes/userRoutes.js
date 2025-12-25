@@ -8,5 +8,6 @@ router.use(authMiddleware.protect);
 
 router
   .route('/me')
+  .get(userController.getCurrentUser)
   .patch(userController.updateCurrentUser)
   .delete(userController.deactivateCurrentUser);
