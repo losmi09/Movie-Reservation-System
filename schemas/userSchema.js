@@ -39,6 +39,13 @@ export const passwordSchema = Joi.object({
   ...passwordConfirmField,
 });
 
+// Used for user update
+export const updateUserSchema = Joi.object({
+  firstName: Joi.string().trim(),
+  lastName: Joi.string().trim(),
+  email: Joi.string().email().trim(),
+});
+
 // Used for registration
 const userSchema = Joi.object({
   firstName: Joi.string().required().trim(),
