@@ -6,4 +6,7 @@ export const router = Router();
 
 router.use(authMiddleware.protect);
 
-router.patch('/me', userController.updateUser);
+router
+  .route('/me')
+  .patch(userController.updateUser)
+  .delete(userController.deactivateUser);
