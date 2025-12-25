@@ -5,6 +5,7 @@ import AppError from '../utils/appError.js';
 import * as userRepository from '../repositories/userRepository.js';
 import * as emailService from '../services/emailService.js';
 import { passwordSchema } from '../schemas/userSchema.js';
+import sanitizeOutput from '../utils/sanitizeOutput.js';
 
 const generateAccessToken = userId =>
   jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
@@ -148,6 +149,8 @@ export const verifyEmail = async token => {
 
   await userRepository.setUserVerified(user.id);
 
+  sanitizeOutput(user);
+
   return user;
 };
 
@@ -189,6 +192,8 @@ export const resetPassword = async (token, password, passwordConfirm) => {
 
   setPassword(user.id, password);
 
+  sanitizeOutput(user);
+
   return user;
 };
 
@@ -201,6 +206,8 @@ export const updatePassword = async (userId, passwordCurrent, password) => {
     throw new AppError('Your current password is incorrect', 401);
 
   setPassword(user.id, password);
+
+  sanitizeOutput(user);
 
   return user;
 };
