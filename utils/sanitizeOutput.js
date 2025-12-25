@@ -1,4 +1,6 @@
 const sanitizeOutput = user => {
+  const userClone = structuredClone(user);
+
   const sensitiveFields = [
     'password',
     'passwordChangedAt',
@@ -11,7 +13,9 @@ const sanitizeOutput = user => {
     'refreshToken',
   ];
 
-  sensitiveFields.forEach(field => (user[field] = undefined));
+  sensitiveFields.forEach(field => (userClone[field] = undefined));
+
+  return userClone;
 };
 
 export default sanitizeOutput;
