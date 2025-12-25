@@ -46,6 +46,10 @@ export const updateUserSchema = Joi.object({
   email: Joi.string().email().trim(),
 });
 
+export const deactivateUserSchema = Joi.object({
+  password: Joi.string().required().trim(),
+});
+
 // Used for registration
 const userSchema = Joi.object({
   firstName: Joi.string().required().trim(),
