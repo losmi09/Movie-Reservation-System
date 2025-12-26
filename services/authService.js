@@ -200,7 +200,7 @@ export const resetPassword = async (token, password, passwordConfirm) => {
 
   if (error) throw error;
 
-  setPassword(user.id, password);
+  await setPassword(user.id, password);
 
   const sanitizedUser = sanitizeOutput(user);
 
@@ -215,7 +215,7 @@ export const updatePassword = async (userId, passwordCurrent, password) => {
   if (!(await comparePasswords(passwordCurrent, user.password)))
     throw new AppError('Your current password is incorrect', 401);
 
-  setPassword(user.id, password);
+  await setPassword(user.id, password);
 
   const sanitizedUser = sanitizeOutput(user);
 
