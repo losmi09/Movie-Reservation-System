@@ -14,5 +14,8 @@ export const getAllCinemas = async query => {
   });
 };
 
+export const getCinema = async cinemaId =>
+  await prisma.cinema.findUnique({ where: { id: cinemaId } });
+
 export const createCinema = async cinemaData =>
   await prisma.cinema.create({ data: cinemaData });

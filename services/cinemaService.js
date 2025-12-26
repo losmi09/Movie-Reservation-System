@@ -9,5 +9,8 @@ export const getAllCinemas = async query => {
   return { cinemas, metaData };
 };
 
+export const getCinema = async cinemaId =>
+  await cinemaRepository.getCinema(cinemaId);
+
 export const createCinema = async cinemaData =>
   cinemaRepository.createCinema(cinemaData);

@@ -1,11 +1,20 @@
 import catchAsync from '../utils/catchAsync.js';
 import cinemaSchema from '../schemas/cinemaSchema.js';
 import * as cinemaService from '../services/cinemaService.js';
+import AppError from '../utils/appError.js';
 
 export const getAllCinemas = catchAsync(async (req, res, next) => {
   const { cinemas, metaData } = await cinemaService.getAllCinemas(req.query);
 
   res.status(200).json({ data: cinemas, metaData });
+});
+
+export const getCinema = catchAsync(async (req, res, next) => {
+  const cinema = await cinemaService.getCinema(req.params.id);
+
+  if (!cinema) return next(new AppError('No cinema found with this ID', 404));
+
+  res.status(200).json({ data: cinema });
 });
 
 export const createCinema = catchAsync(async (req, res, next) => {
