@@ -193,8 +193,13 @@ export const resetPassword = async (token, password, passwordConfirm) => {
   if (!user)
     throw new AppError('Password reset token is invalid or has expired', 400);
 
+  let passwordCurrent = 'somestring';
+
+  if (await comparePasswords(String(password), user.password))
+    passwordCurrent = password;
+
   const { error } = passwordSchema.validate(
-    { passwordCurrent: user.password, password, passwordConfirm },
+    { passwordCurrent, password, passwordConfirm },
     { abortEarly: false }
   );
 
