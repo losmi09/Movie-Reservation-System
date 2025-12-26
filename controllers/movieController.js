@@ -1,7 +1,7 @@
 import catchAsync from '../utils/catchAsync.js';
 import movieSchema from '../schemas/movieSchema.js';
-import { throwValidationError } from './errorController.js';
 import AppError from '../utils/appError.js';
+import excludeRequiredErrors from '../utils/excludeRequiredErrors.js';
 import * as movieService from '../services/movieService.js';
 
 const sendResponse = (statusCode, data, res) =>
@@ -45,11 +45,9 @@ export const updateMovie = catchAsync(async (req, res, next) => {
   const { error } = movieSchema.validate(movieData, { abortEarly: false });
 
   if (error) {
-    const details = error.details.filter(
-      err => !err.message.endsWith('required')
-    );
+    const details = excludeRequiredErrors(error);
 
-    return next({ details, name: 'ValidationError' });
+    if (details.length) return next({ details, name: 'ValidationError' });
   }
 
   const updatedMovie = await movieService.updateMovie(movieId, movieData);
