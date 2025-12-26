@@ -1,5 +1,11 @@
 import AppError from '../utils/appError.js';
 
+const handleNotFoundRecord = err => {
+  const { modelName } = err.meta;
+
+  return new AppError(`No ${modelName.toLowerCase()} found with this ID`, 404);
+};
+
 const handleUniqueField = (err, res, instance) => {
   const { modelName, target } = err.meta;
 
@@ -68,6 +74,7 @@ const globalErrorHandler = (err, req, res, next) => {
 
   if (error.code === 'P2002')
     return handleUniqueField(error, res, req.originalUrl);
+  if (error.code === 'P2025') error = handleNotFoundRecord(err);
   if (err.name === 'PayloadTooLargeError') error = handleTooLargePayload();
   if (
     err.message.includes('Error in query') ||
