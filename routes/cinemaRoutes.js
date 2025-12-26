@@ -14,4 +14,7 @@ router
     cinemaController.createCinema
   );
 
-router.route('/:id').get(validateUuid, cinemaController.getCinema);
+router
+  .route('/:id')
+  .get(validateUuid, cinemaController.getCinema)
+  .patch(validateUuid, cinemaController.updateCinema);
