@@ -17,3 +17,6 @@ export const createCinema = async cinemaData =>
 
 export const updateCinema = async (cinemaId, cinemaData) =>
   cinemaRepository.updateCinema(cinemaId, cinemaData);
+
+export const deleteCinema = async cinemaId =>
+  await cinemaRepository.deleteCinema(cinemaId);

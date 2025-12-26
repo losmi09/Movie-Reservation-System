@@ -48,3 +48,9 @@ export const updateCinema = catchAsync(async (req, res, next) => {
 
   res.status(200).json({ data: updatedCinema });
 });
+
+export const deleteCinema = catchAsync(async (req, res, next) => {
+  await cinemaService.deleteCinema(req.params.id);
+
+  res.status(204).end();
+});
