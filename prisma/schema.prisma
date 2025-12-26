@@ -13,7 +13,7 @@ model Movie {
   description String   @db.VarChar(255)
   posterImage String?  @map("poster_image") @db.Text
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("movies")
 }
@@ -35,4 +35,19 @@ model User {
   refreshToken                 String?   @map("refresh_token")
 
   @@map("users")
+}
+
+model Cinema {
+  id        String   @id @default(uuid())
+  name      String   @unique @db.VarChar(255)
+  city      String   @db.VarChar(255)
+  address   String   @db.VarChar(255)
+  phone     String   @unique @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, city])
+
+  @@map("cinemas")
 }
