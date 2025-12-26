@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import validateUuid from '../middlewares/validateUuid.js';
 import * as cinemaController from '../controllers/cinemaController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
@@ -12,3 +13,5 @@ router
     authMiddleware.restrictTo('admin'),
     cinemaController.createCinema
   );
+
+router.route('/:id').get(validateUuid, cinemaController.getCinema);
