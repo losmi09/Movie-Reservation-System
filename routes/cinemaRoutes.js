@@ -17,4 +17,5 @@ router
 router
   .route('/:id')
   .get(validateUuid, cinemaController.getCinema)
-  .patch(validateUuid, cinemaController.updateCinema);
+  .patch(validateUuid, cinemaController.updateCinema)
+  .delete(validateUuid, cinemaController.deleteCinema);
