@@ -123,7 +123,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     req.body.passwordConfirm
   );
 
-  invalidateRefreshToken(res, req.user.id);
+  invalidateRefreshToken(res, user.id);
 
   sendPasswordUpdate(res, user);
 });
