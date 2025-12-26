@@ -1,68 +1,11 @@
-import catchAsync from '../utils/catchAsync.js';
-import movieSchema from '../schemas/movieSchema.js';
-import AppError from '../utils/appError.js';
-import excludeRequiredErrors from '../utils/excludeRequiredErrors.js';
-import * as movieService from '../services/movieService.js';
+import * as crudController from './crudController.js';
 
-const sendResponse = (statusCode, data, res) =>
-  res.status(statusCode).json({ data });
+export const getAllMovies = crudController.getAll('movie');
 
-export const getAllMovies = catchAsync(async (req, res, next) => {
-  const { movies, metaData } = await movieService.getAllMovies(req.query);
+export const getMovie = crudController.getOne('movie');
 
-  res.status(200).json({ data: movies, meta: metaData });
-});
+export const createMovie = crudController.createOne('movie');
 
-export const getMovie = catchAsync(async (req, res, next) => {
-  const movie = await movieService.getMovie(req.params.id);
+export const updateMovie = crudController.updateOne('movie');
 
-  if (!movie) return next(new AppError('No movie found with this ID', 404));
-
-  sendResponse(200, movie, res);
-});
-
-export const createMovie = catchAsync(async (req, res, next) => {
-  const { body: movieData } = req;
-
-  const { error } = movieSchema.validate(movieData, { abortEarly: false });
-
-  if (error) return next(error);
-
-  const movie = await movieService.createMovie(movieData);
-
-  sendResponse(201, movie, res);
-});
-
-export const updateMovie = catchAsync(async (req, res, next) => {
-  const { id: movieId } = req.params;
-
-  const movie = await movieService.getMovie(movieId);
-
-  if (!movie) return next(new AppError('No movie found with this ID', 404));
-
-  const { body: movieData } = req;
-
-  const { error } = movieSchema.validate(movieData, { abortEarly: false });
-
-  if (error) {
-    const details = excludeRequiredErrors(error);
-
-    if (details.length) return next({ details, name: 'ValidationError' });
-  }
-
-  const updatedMovie = await movieService.updateMovie(movieId, movieData);
-
-  sendResponse(200, updatedMovie, res);
-});
-
-export const deleteMovie = catchAsync(async (req, res, next) => {
-  const { id: movieId } = req.params;
-
-  const movie = await movieService.getMovie(movieId);
-
-  if (!movie) return next(new AppError('No movie found with this ID', 404));
-
-  await movieService.deleteMovie(movieId);
-
-  res.status(204).end();
-});
+export const deleteMovie = crudController.deleteOne('movie');
