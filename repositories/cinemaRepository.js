@@ -19,3 +19,6 @@ export const getCinema = async cinemaId =>
 
 export const createCinema = async cinemaData =>
   await prisma.cinema.create({ data: cinemaData });
+
+export const updateCinema = async (cinemaId, cinemaData) =>
+  await prisma.cinema.update({ where: { id: cinemaId }, data: cinemaData });

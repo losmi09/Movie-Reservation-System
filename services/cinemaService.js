@@ -14,3 +14,6 @@ export const getCinema = async cinemaId =>
 
 export const createCinema = async cinemaData =>
   cinemaRepository.createCinema(cinemaData);
+
+export const updateCinema = async (cinemaId, cinemaData) =>
+  cinemaRepository.updateCinema(cinemaId, cinemaData);
