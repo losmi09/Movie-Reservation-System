@@ -24,6 +24,8 @@ const handleInvalidQueryParam = () => new AppError('Invalid query param', 400);
 const handleTooLargePayload = () =>
   new AppError('Request payload is too large', 413);
 
+const handleMulterError = err => new AppError(err.message, 422);
+
 export const throwValidationError = (res, error, instance) => {
   const errorObj = { errors: {} };
 
@@ -71,7 +73,7 @@ const globalErrorHandler = (err, req, res, next) => {
 
   if (err.name === 'ValidationError')
     return throwValidationError(res, err.details, req.originalUrl);
-
+  if (err.name === 'MulterError') error = handleMulterError(err);
   if (error.code === 'P2002')
     return handleUniqueField(error, res, req.originalUrl);
   if (error.code === 'P2025') error = handleNotFoundRecord(err);
