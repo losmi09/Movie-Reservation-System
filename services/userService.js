@@ -41,3 +41,11 @@ export const deactivateCurrentUser = async (userId, password) => {
 
   await userRepository.deactivateUser(userId);
 };
+
+export const saveUserPhoto = async (userId, fileName) => {
+  const user = await userRepository.saveUserPhoto(userId, fileName);
+
+  const sanitizedUser = sanitizeOutput(user);
+
+  return sanitizedUser;
+};

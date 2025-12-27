@@ -99,3 +99,9 @@ export const deactivateUser = async userId =>
 
 export const activateUser = async userId =>
   await prisma.user.update({ where: { id: userId }, data: { isActive: true } });
+
+export const saveUserPhoto = async (userId, fileName) =>
+  await prisma.user.update({
+    where: { id: userId },
+    data: { photo: fileName },
+  });
