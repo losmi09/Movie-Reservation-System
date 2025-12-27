@@ -23,6 +23,7 @@ model User {
   firstName                    String    @map("first_name") @db.VarChar(255)
   lastName                     String    @map("last_name") @db.VarChar(255)
   email                        String    @unique @db.VarChar(255)
+  photo                        String    @default("default.jpg") @db.Text
   role                         String    @default("user") @db.VarChar(255)
   password                     String    @db.VarChar(255)
   passwordChangedAt            DateTime? @map("password_changed_at")
@@ -48,6 +49,5 @@ model Cinema {
   updatedAt DateTime @updatedAt
 
   @@unique([name, city])
-
   @@map("cinemas")
 }
