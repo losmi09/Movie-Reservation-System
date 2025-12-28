@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Movie {
-  id          String   @id @default(uuid())
+  id          Int      @id @default(autoincrement())
   title       String   @unique @db.VarChar(255)
   description String   @db.VarChar(255)
   posterImage String?  @map("poster_image") @db.Text
@@ -19,7 +19,7 @@ model Movie {
 }
 
 model User {
-  id                           String    @id @default(uuid())
+  id                           Int       @id @default(autoincrement())
   firstName                    String    @map("first_name") @db.VarChar(255)
   lastName                     String    @map("last_name") @db.VarChar(255)
   email                        String    @unique @db.VarChar(255)
@@ -39,7 +39,7 @@ model User {
 }
 
 model Cinema {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   name      String   @unique @db.VarChar(255)
   city      String   @db.VarChar(255)
   address   String   @db.VarChar(255)
@@ -47,7 +47,19 @@ model Cinema {
   email     String   @unique @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  halls     Hall[]
 
   @@unique([name, city])
   @@map("cinemas")
+}
+
+model Hall {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  cinemaId  Int      @map("cinema_id")
+  cinema    Cinema   @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("halls")
 }
