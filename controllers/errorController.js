@@ -76,7 +76,8 @@ const globalErrorHandler = (err, req, res, next) => {
   if (err.name === 'MulterError') error = handleMulterError(err);
   if (error.code === 'P2002')
     return handleUniqueField(error, res, req.originalUrl);
-  if (error.code === 'P2025') error = handleNotFoundRecord(err);
+  if (error.code === 'P2025' || error.code === 'P2003')
+    error = handleNotFoundRecord(err);
   if (err.name === 'PayloadTooLargeError') error = handleTooLargePayload();
   if (
     err.message.includes('Error in query') ||
