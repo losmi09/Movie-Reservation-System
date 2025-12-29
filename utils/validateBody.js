@@ -1,5 +1,6 @@
 import movieSchema from '../schemas/movieSchema.js';
 import cinemaSchema from '../schemas/cinemaSchema.js';
+import hallSchema from '../schemas/hallSchema.js';
 
 const excludeRequiredErrors = error =>
   error.details.filter(err => !err.message.endsWith('required'));
@@ -11,6 +12,10 @@ const validation = {
   },
   cinema: body => {
     const { error } = cinemaSchema.validate(body, { abortEarly: false });
+    return error;
+  },
+  hall: body => {
+    const { error } = hallSchema.validate(body, { abortEarly: false });
     return error;
   },
 };
