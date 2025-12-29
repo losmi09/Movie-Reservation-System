@@ -1,9 +1,12 @@
 import { Router } from 'express';
-import validateUuid from '../middlewares/validateUuid.js';
+import validateId from '../middlewares/validateId.js';
 import * as cinemaController from '../controllers/cinemaController.js';
 import * as authMiddleware from '../middlewares/auth.js';
+import hallRouter from './hallRoutes.js';
 
 export const router = Router();
+
+router.use('/:cinemaId/halls', validateId, hallRouter);
 
 router
   .route('/')
@@ -16,6 +19,14 @@ router
 
 router
   .route('/:id')
-  .get(validateUuid, cinemaController.getCinema)
-  .patch(validateUuid, cinemaController.updateCinema)
-  .delete(validateUuid, cinemaController.deleteCinema);
+  .get(validateId, cinemaController.getCinema)
+  .patch(
+    validateId,
+    authMiddleware.restrictTo('admin'),
+    cinemaController.updateCinema
+  )
+  .delete(
+    validateId,
+    authMiddleware.restrictTo('admin'),
+    cinemaController.deleteCinema
+  );
