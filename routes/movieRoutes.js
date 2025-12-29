@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import validateUuid from '../middlewares/validateUuid.js';
+import validateId from '../middlewares/validateId.js';
 import * as movieController from '../controllers/movieController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
@@ -16,15 +16,15 @@ router
 
 router
   .route('/:id')
-  .get(validateUuid, movieController.getMovie)
+  .get(validateId, movieController.getMovie)
   .patch(
-    validateUuid,
+    validateId,
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
     movieController.updateMovie
   )
   .delete(
-    validateUuid,
+    validateId,
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
     movieController.deleteMovie
