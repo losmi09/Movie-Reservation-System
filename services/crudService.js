@@ -9,14 +9,14 @@ export const getAll = async (model, query) => {
   return { docs, metaData };
 };
 
-export const getOne = async (model, id) =>
-  await crudRepository.getOne(model, id);
+export const getOne = async (model, params) =>
+  await crudRepository.getOne(model, params);
 
 export const createOne = async (model, data) =>
   await crudRepository.createOne(model, data);
 
-export const updateOne = async (model, id, data) =>
-  await crudRepository.updateOne(model, id, data);
+export const updateOne = async (model, params, data) =>
+  await crudRepository.updateOne(model, params, data);
 
-export const deleteOne = async (model, id) =>
-  await crudRepository.deleteOne(model, id);
+export const deleteOne = async (model, params) =>
+  await crudRepository.deleteOne(model, params);
