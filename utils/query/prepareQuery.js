@@ -1,4 +1,5 @@
 import excludeFromQuery from './excludeFromQuery.js';
+import convertNumericStringsToNumbers from '../convertNumericStrings.js';
 
 const paginate = query => {
   const { page = 1, limit = 20 } = query;
@@ -25,7 +26,9 @@ const selectSpecificFields = query => {
 };
 
 const prepareQuery = query => {
-  const queryClone = structuredClone(query);
+  let queryClone = structuredClone(query);
+
+  queryClone = convertNumericStringsToNumbers(queryClone);
 
   const { skip, limit } = paginate(queryClone);
 

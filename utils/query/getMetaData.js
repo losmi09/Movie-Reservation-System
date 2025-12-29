@@ -1,8 +1,11 @@
 import prisma from '../../server.js';
+import convertNumericStringsToNumbers from '../convertNumericStrings.js';
 import excludeFromQuery from './excludeFromQuery.js';
 
 const getMetaData = async (query, model) => {
-  const queryClone = structuredClone(query);
+  let queryClone = structuredClone(query);
+
+  queryClone = convertNumericStringsToNumbers(queryClone);
 
   excludeFromQuery(queryClone, 'page', 'limit', 'sort', 'fields');
 
