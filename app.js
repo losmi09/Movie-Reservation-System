@@ -13,6 +13,8 @@ import { router as movieRouter } from './routes/movieRoutes.js';
 import { router as authRouter } from './routes/authRoutes.js';
 import { router as userRouter } from './routes/userRoutes.js';
 import { router as cinemaRouter } from './routes/cinemaRoutes.js';
+import { idRouter as hallRouter } from './routes/hallRoutes.js';
+import { idRouter as seatRouter } from './routes/seatRoutes.js';
 
 const app = express();
 
@@ -48,6 +50,8 @@ app.use('/api/v1/movies', limit, movieRouter);
 app.use('/api/v1/auth', authLimit, authRouter);
 app.use('/api/v1/users', limit, userRouter);
 app.use('/api/v1/cinemas', limit, cinemaRouter);
+app.use('/api/v1/halls', limit, hallRouter);
+app.use('/api/v1/seats', limit, seatRouter);
 
 app.use((req, res, next) =>
   next(new AppError('The requested resource was not found', 404))
