@@ -54,12 +54,39 @@ model Cinema {
 }
 
 model Hall {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(255)
-  cinemaId  Int      @map("cinema_id")
-  cinema    Cinema   @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  seatsPerRow Int      @map("seats_per_row")
+  cinemaId    Int      @map("cinema_id")
+  cinema      Cinema   @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Seat        Seat[]
 
+  @@unique([cinemaId, name])
   @@map("halls")
+}
+
+model Seat {
+  id     Int  @id @default(autoincrement())
+  hallId Int  @map("hall_id")
+  hall   Hall @relation(fields: [hallId], references: [id], onDelete: Cascade)
+  row    Row
+  number Int
+
+  @@unique([hallId, row, number])
+  @@map("seats")
+}
+
+enum Row {
+  A
+  B
+  C
+  D
+  E
+  F
+  G
+  H
+  I
+  J
 }
