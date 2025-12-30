@@ -14,16 +14,14 @@ export const getAll = async (model, query) => {
   });
 };
 
-export const getOne = async (model, params) =>
-  await prisma[model].findUnique({
-    where: params,
-  });
+export const getOne = async (model, id) =>
+  await prisma[model].findUnique({ where: { id } });
 
 export const createOne = async (model, data) =>
   await prisma[model].create({ data });
 
-export const updateOne = async (model, params, data) =>
-  await prisma[model].update({ where: params, data });
+export const updateOne = async (model, id, data) =>
+  await prisma[model].update({ where: { id }, data });
 
-export const deleteOne = async (model, params) =>
-  await prisma[model].delete({ where: params });
+export const deleteOne = async (model, id) =>
+  await prisma[model].delete({ where: { id } });
