@@ -1,7 +1,6 @@
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import validateBody from '../utils/validateBody.js';
-import convertNumericStringsToNumbers from '../utils/convertNumericStrings.js';
 import * as crudService from '../services/crudService.js';
 
 const sendResponse = (res, statusCode, data) =>
@@ -9,7 +8,9 @@ const sendResponse = (res, statusCode, data) =>
 
 export const getAll = model =>
   catchAsync(async (req, res) => {
-    if (model === 'hall') req.query.cinemaId = Number(req.params.cinemaId);
+    if (model === 'hall') req.query.cinemaId = Number(req.params.id);
+
+    if (model === 'seat') req.query.hallId = Number(req.params.id);
 
     const { docs, metaData } = await crudService.getAll(model, req.query);
 
@@ -18,9 +19,7 @@ export const getAll = model =>
 
 export const getOne = model =>
   catchAsync(async (req, res, next) => {
-    const paramsClone = convertNumericStringsToNumbers(req.params);
-
-    const doc = await crudService.getOne(model, paramsClone);
+    const doc = await crudService.getOne(model, Number(req.params.id));
 
     if (!doc) return next(new AppError(`No ${model} found with this ID`, 404));
 
@@ -31,9 +30,11 @@ export const createOne = model =>
   catchAsync(async (req, res, next) => {
     const { body: data } = req;
 
-    if (model === 'hall') data.cinemaId = +req.params.cinemaId;
+    if (model === 'hall') data.cinemaId = Number(req.params.id);
 
-    const error = validateBody(model, data);
+    if (model === 'seat') data.hallId = Number(req.params.id);
+
+    const error = await validateBody(model, data);
 
     if (error) return next(error);
 
@@ -46,22 +47,22 @@ export const updateOne = model =>
   catchAsync(async (req, res, next) => {
     const { body: data } = req;
 
-    const error = validateBody(model, data, true);
+    const error = await validateBody(model, data, true);
 
     if (error) return next(error);
 
-    const paramsClone = convertNumericStringsToNumbers(req.params);
-
-    const updatedDoc = await crudService.updateOne(model, paramsClone, data);
+    const updatedDoc = await crudService.updateOne(
+      model,
+      Number(req.params.id),
+      data
+    );
 
     sendResponse(res, 200, updatedDoc);
   });
 
 export const deleteOne = model =>
   catchAsync(async (req, res) => {
-    const paramsClone = convertNumericStringsToNumbers(req.params);
-
-    await crudService.deleteOne(model, paramsClone);
+    await crudService.deleteOne(model, Number(req.params.id));
 
     res.status(204).end();
   });
