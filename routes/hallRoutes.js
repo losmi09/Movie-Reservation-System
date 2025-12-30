@@ -2,8 +2,9 @@ import { Router } from 'express';
 import validateId from '../middlewares/validateId.js';
 import * as hallController from '../controllers/hallController.js';
 import * as authMiddleware from '../middlewares/auth.js';
+import { router as seatRouter } from './seatRoutes.js';
 
-const router = Router({ mergeParams: true });
+export const router = Router({ mergeParams: true });
 
 router
   .route('/')
@@ -14,9 +15,13 @@ router
     hallController.createHall
   );
 
-router.use(authMiddleware.protect);
+export const idRouter = Router();
 
-router
+idRouter.use(authMiddleware.protect);
+
+idRouter.use('/:id/seats', seatRouter);
+
+idRouter
   .route('/:id')
   .get(validateId, hallController.getHall)
   .patch(
@@ -29,5 +34,3 @@ router
     authMiddleware.restrictTo('admin'),
     hallController.deleteHall
   );
-
-export default router;
