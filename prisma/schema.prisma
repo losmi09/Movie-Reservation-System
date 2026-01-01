@@ -8,12 +8,13 @@ datasource db {
 }
 
 model Movie {
-  id          Int      @id @default(autoincrement())
-  title       String   @unique @db.VarChar(255)
-  description String   @db.VarChar(255)
-  posterImage String?  @map("poster_image") @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int        @id @default(autoincrement())
+  title       String     @unique @db.VarChar(255)
+  description String     @db.VarChar(255)
+  posterImage String?    @map("poster_image") @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  Showtime    Showtime[]
 
   @@map("movies")
 }
@@ -44,29 +45,31 @@ enum Role {
 }
 
 model Cinema {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique @db.VarChar(255)
-  city      String   @db.VarChar(255)
-  address   String   @db.VarChar(255)
-  phone     String   @unique @db.VarChar(255)
-  email     String   @unique @db.VarChar(255)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int        @id @default(autoincrement())
+  name      String     @unique @db.VarChar(255)
+  city      String     @db.VarChar(255)
+  address   String     @db.VarChar(255)
+  phone     String     @unique @db.VarChar(255)
+  email     String     @unique @db.VarChar(255)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   halls     Hall[]
+  Showtime  Showtime[]
 
   @@unique([name, city])
   @@map("cinemas")
 }
 
 model Hall {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(255)
-  seatsPerRow Int      @map("seats_per_row")
-  cinemaId    Int      @map("cinema_id")
-  cinema      Cinema   @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  seatsPerRow Int        @map("seats_per_row")
+  cinemaId    Int        @map("cinema_id")
+  cinema      Cinema     @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   Seat        Seat[]
+  Showtime    Showtime[]
 
   @@unique([cinemaId, name])
   @@map("halls")
@@ -94,4 +97,21 @@ enum Row {
   H
   I
   J
+}
+
+model Showtime {
+  id        Int      @id @default(autoincrement())
+  movieId   Int      @map("movie_id")
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  cinemaId  Int      @map("cinema_id")
+  cinema    Cinema   @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
+  hallId    Int      @map("hall_id")
+  hall      Hall     @relation(fields: [hallId], references: [id], onDelete: Cascade)
+  startTime DateTime @map("start_time")
+  endTime   DateTime @map("end_time")
+  language  String   @default("english") @db.VarChar(255)
+  price     Decimal
+
+  @@unique([movieId, cinemaId, hallId, startTime])
+  @@map("showtimes")
 }
