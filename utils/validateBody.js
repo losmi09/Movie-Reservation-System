@@ -75,44 +75,40 @@ const validation = {
 
     return errorObj.details.length ? errorObj : undefined;
   },
-  showtime: async body => {
+  showtime: async (body, updating) => {
     let errorObj = getValidationErrorObject();
 
     const { error } = showtimeSchema.validate(body, { abortEarly: false });
 
-    const {
-      movieId,
-      cinemaId = 0,
-      hallId = 0,
-      startTime = 0,
-      endTime = 0,
-    } = body;
-
-    const fields = await Promise.all([
-      crudRepository.getOne('movie', movieId),
-      crudRepository.getOne('cinema', cinemaId),
-      crudRepository.getOne('hall', hallId),
-    ]);
-
     if (error) errorObj = error;
 
-    fields.forEach((foundField, i) => {
-      const fields = { 0: 'movieId', 1: 'cinemaId', 2: 'hallId' };
+    const { movieId, cinemaId = 0, hallId = 0, startTime, endTime } = body;
 
-      const field = fields[i];
+    if (!updating) {
+      const fields = await Promise.all([
+        crudRepository.getOne('movie', movieId),
+        crudRepository.getOne('cinema', cinemaId),
+        crudRepository.getOne('hall', hallId),
+      ]);
 
-      if (body[field] && !foundField)
-        pushErrorObject(errorObj, field, `No ${field} found with this ID`);
-    });
+      fields.forEach((foundField, i) => {
+        const fields = { 0: 'movieId', 1: 'cinemaId', 2: 'hallId' };
 
-    const [, , hall] = fields;
+        const field = fields[i];
 
-    if (hall && hall.cinemaId !== cinemaId)
-      pushErrorObject(
-        errorObj,
-        'hallId',
-        'Hall with this ID in this cinema does not exist'
-      );
+        if (body[field] && !foundField)
+          pushErrorObject(errorObj, field, `No ${field} found with this ID`);
+      });
+
+      const [, , hall] = fields;
+
+      if (hall && hall.cinemaId !== cinemaId)
+        pushErrorObject(
+          errorObj,
+          'hallId',
+          'Hall with this ID in this cinema does not exist'
+        );
+    }
 
     const invalidTime = error?.details.some(
       err => err.path.includes('startTime') || err.path.includes('endTime')
