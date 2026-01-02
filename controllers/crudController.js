@@ -12,6 +12,8 @@ export const getAll = model =>
 
     if (model === 'seat') req.query.hallId = Number(req.params.id);
 
+    if (model === 'showtime') req.query.movieId = Number(req.params.id);
+
     const { docs, metaData } = await crudService.getAll(model, req.query);
 
     res.status(200).json({ data: docs, metaData });
@@ -34,6 +36,8 @@ export const createOne = model =>
 
     if (model === 'seat') data.hallId = Number(req.params.id);
 
+    if (model === 'showtime') data.movieId = Number(req.params.id);
+
     const error = await validateBody(model, data);
 
     if (error) return next(error);
@@ -47,7 +51,7 @@ export const updateOne = model =>
   catchAsync(async (req, res, next) => {
     const { body: data } = req;
 
-    const error = await validateBody(model, data, true);
+    const error = await validateBody(model, data, true, Number(req.params.id));
 
     if (error) return next(error);
 
