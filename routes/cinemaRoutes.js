@@ -7,7 +7,7 @@ import { router as hallRouter } from './hallRoutes.js';
 
 export const router = Router();
 
-router.use('/:id/halls', validateId, checkIfExists('cinema'), hallRouter);
+router.use('/:id/halls', validateId, hallRouter);
 
 router
   .route('/')

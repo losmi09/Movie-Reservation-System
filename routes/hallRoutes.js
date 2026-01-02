@@ -9,7 +9,7 @@ export const router = Router({ mergeParams: true });
 
 router
   .route('/')
-  .get(hallController.getAllHalls)
+  .get(checkIfExists('cinema'), hallController.getAllHalls)
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
@@ -20,7 +20,7 @@ export const idRouter = Router();
 
 idRouter.use(authMiddleware.protect);
 
-idRouter.use('/:id/seats', validateId, checkIfExists('hall'), seatRouter);
+idRouter.use('/:id/seats', validateId, seatRouter);
 
 idRouter
   .route('/:id')

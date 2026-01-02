@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import validateId from '../middlewares/validateId.js';
+import checkIfExists from '../middlewares/checkIfExists.js';
 import * as seatController from '../controllers/seatController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
@@ -9,7 +10,7 @@ router.use(authMiddleware.protect);
 
 router
   .route('/')
-  .get(seatController.getAllSeats)
+  .get(checkIfExists('hall'), seatController.getAllSeats)
   .post(authMiddleware.restrictTo('admin'), seatController.createSeat);
 
 export const idRouter = Router();

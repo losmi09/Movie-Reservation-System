@@ -7,12 +7,7 @@ import { router as showtimeRouter } from './showtimeRoutes.js';
 
 export const router = Router();
 
-router.use(
-  '/:id/showtimes',
-  validateId,
-  checkIfExists('movie'),
-  showtimeRouter
-);
+router.use('/:id/showtimes', validateId, showtimeRouter);
 
 router
   .route('/')
