@@ -28,7 +28,7 @@ idRouter
   .patch(
     validateId,
     authMiddleware.restrictTo('admin'),
-    hallController.updatehall
+    hallController.updateHall
   )
   .delete(
     validateId,

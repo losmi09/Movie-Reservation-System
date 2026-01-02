@@ -6,6 +6,6 @@ export const getHall = crudController.getOne('hall');
 
 export const createHall = crudController.createOne('hall');
 
-export const updatehall = crudController.updateOne('hall');
+export const updateHall = crudController.updateOne('hall');
 
 export const deleteHall = crudController.deleteOne('hall');
