@@ -12,8 +12,17 @@ export const getAll = async (model, query) => {
 export const getOne = async (model, id) =>
   await crudRepository.getOne(model, id);
 
-export const createOne = async (model, data) =>
-  await crudRepository.createOne(model, data);
+export const createOne = async (model, data) => {
+  const newObj = {};
+
+  Object.entries(data).forEach(entry => {
+    const [key, value] = entry;
+    if (key === 'startTime' || key === 'endTime') newObj[key] = new Date(value);
+    else newObj[key] = value;
+  });
+
+  return await crudRepository.createOne(model, newObj);
+};
 
 export const updateOne = async (model, id, data) =>
   await crudRepository.updateOne(model, id, data);
