@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import validateId from '../middlewares/validateId.js';
+import checkIfExists from '../middlewares/checkIfExists.js';
 import * as cinemaController from '../controllers/cinemaController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import { router as hallRouter } from './hallRoutes.js';
 
 export const router = Router();
 
-router.use('/:id/halls', validateId, hallRouter);
+router.use('/:id/halls', validateId, checkIfExists('cinema'), hallRouter);
 
 router
   .route('/')

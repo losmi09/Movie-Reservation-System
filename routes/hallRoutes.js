@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import validateId from '../middlewares/validateId.js';
+import checkIfExists from '../middlewares/checkIfExists.js';
 import * as hallController from '../controllers/hallController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import { router as seatRouter } from './seatRoutes.js';
@@ -19,7 +20,7 @@ export const idRouter = Router();
 
 idRouter.use(authMiddleware.protect);
 
-idRouter.use('/:id/seats', seatRouter);
+idRouter.use('/:id/seats', validateId, checkIfExists('hall'), seatRouter);
 
 idRouter
   .route('/:id')

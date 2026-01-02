@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import validateId from '../middlewares/validateId.js';
 import * as seatController from '../controllers/seatController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
@@ -17,6 +18,14 @@ idRouter.use(authMiddleware.protect);
 
 idRouter
   .route('/:id')
-  .get(authMiddleware.restrictTo('admin'), seatController.getSeat)
-  .patch(authMiddleware.restrictTo('admin'), seatController.updateSeat)
-  .delete(authMiddleware.restrictTo('admin'), seatController.deleteSeat);
+  .get(validateId, seatController.getSeat)
+  .patch(
+    authMiddleware.restrictTo('admin'),
+    validateId,
+    seatController.updateSeat
+  )
+  .delete(
+    authMiddleware.restrictTo('admin'),
+    validateId,
+    seatController.deleteSeat
+  );
