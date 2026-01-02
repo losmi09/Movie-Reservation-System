@@ -1,9 +1,9 @@
 import * as showtimeRepository from '../repositories/showtimeRepository.js';
 
-export const isShowtimeOngoing = async (cinemaId, hallId, starttime, endTime) =>
+export const isShowtimeOngoing = async (cinemaId, hallId, startTime, endTime) =>
   await showtimeRepository.isShowtimeOngoing(
     cinemaId,
     hallId,
-    starttime,
+    startTime,
     endTime
   );
