@@ -5,7 +5,14 @@ export const isShowtimeOngoing = async (cinemaId, hallId, startTime, endTime) =>
     where: {
       cinemaId,
       hallId,
-      startTime: { gte: startTime },
-      endTime: { lte: endTime },
+      OR: [
+        {
+          startTime: { gte: startTime },
+          endTime: { lte: endTime },
+        },
+        {
+          endTime: { lte: endTime, gte: startTime },
+        },
+      ],
     },
   });
