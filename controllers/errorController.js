@@ -1,18 +1,28 @@
 import AppError from '../utils/appError.js';
 
 const handleNotFoundRecord = err => {
-  const { modelName } = err.meta;
+  const { modelName, constraint } = err.meta;
 
-  return new AppError(`No ${modelName.toLowerCase()} found with this ID`, 404);
+  const field = err.message.includes('Foreign key')
+    ? constraint.split('_')[1]
+    : modelName.toLowerCase();
+
+  return new AppError(`No ${field} found with this ID`, 404);
 };
 
 const handleUniqueField = (err, res, instance) => {
   const { modelName, target } = err.meta;
 
+  let field = target;
+
+  if (modelName === 'Hall') field = ['name'];
+
+  if (modelName === 'Seat') field = ['number'];
+
   const error = [
     {
-      path: target[0],
-      message: `${modelName} with this ${target} already exists`,
+      path: field[0],
+      message: `${modelName} with this ${field} already exists`,
     },
   ];
 
