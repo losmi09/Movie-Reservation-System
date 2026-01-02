@@ -38,10 +38,12 @@ const validation = {
       return errorObj;
     }
 
-    const cinema = await crudRepository.getOne('cinema', body.cinemaId);
+    if (!updating) {
+      const cinema = await crudRepository.getOne('cinema', body.cinemaId);
 
-    if (!cinema)
-      pushErrorObject(errorObj, 'cinemaId', 'No cinema found with this ID');
+      if (!cinema)
+        pushErrorObject(errorObj, 'cinemaId', 'No cinema found with this ID');
+    }
 
     return errorObj.details.length ? errorObj : undefined;
   },
