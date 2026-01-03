@@ -20,21 +20,22 @@ model Movie {
 }
 
 model User {
-  id                           Int       @id @default(autoincrement())
-  firstName                    String    @map("first_name") @db.VarChar(255)
-  lastName                     String    @map("last_name") @db.VarChar(255)
-  email                        String    @unique @db.VarChar(255)
-  photo                        String    @default("default.jpg") @db.Text
-  role                         Role      @default(user)
-  password                     String    @db.VarChar(255)
-  passwordChangedAt            DateTime? @map("password_changed_at")
-  passwordResetToken           String?   @unique @map("password_reset_token")
-  passwordResetTokenExpiry     DateTime? @map("password_reset_token_expiry")
-  emailVerificationToken       String?   @unique @map("email_verification_token")
-  emailVerificationTokenExpiry DateTime? @map("email_verification_token_expiry")
-  isVerified                   Boolean   @default(false) @map("is_verified")
-  isActive                     Boolean   @default(true) @map("is_active")
-  refreshToken                 String?   @map("refresh_token")
+  id                           Int           @id @default(autoincrement())
+  firstName                    String        @map("first_name") @db.VarChar(255)
+  lastName                     String        @map("last_name") @db.VarChar(255)
+  email                        String        @unique @db.VarChar(255)
+  photo                        String        @default("default.jpg") @db.Text
+  role                         Role          @default(user)
+  password                     String        @db.VarChar(255)
+  passwordChangedAt            DateTime?     @map("password_changed_at")
+  passwordResetToken           String?       @unique @map("password_reset_token")
+  passwordResetTokenExpiry     DateTime?     @map("password_reset_token_expiry")
+  emailVerificationToken       String?       @unique @map("email_verification_token")
+  emailVerificationTokenExpiry DateTime?     @map("email_verification_token_expiry")
+  isVerified                   Boolean       @default(false) @map("is_verified")
+  isActive                     Boolean       @default(true) @map("is_active")
+  refreshToken                 String?       @map("refresh_token")
+  Reservation                  Reservation[]
 
   @@map("users")
 }
@@ -76,11 +77,12 @@ model Hall {
 }
 
 model Seat {
-  id     Int  @id @default(autoincrement())
-  hallId Int  @map("hall_id")
-  hall   Hall @relation(fields: [hallId], references: [id], onDelete: Cascade)
-  row    Row
-  number Int
+  id          Int           @id @default(autoincrement())
+  hallId      Int           @map("hall_id")
+  hall        Hall          @relation(fields: [hallId], references: [id], onDelete: Cascade)
+  row         Row
+  number      Int
+  Reservation Reservation[]
 
   @@unique([hallId, row, number])
   @@map("seats")
@@ -100,18 +102,39 @@ enum Row {
 }
 
 model Showtime {
-  id        Int      @id @default(autoincrement())
-  movieId   Int      @map("movie_id")
-  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  cinemaId  Int      @map("cinema_id")
-  cinema    Cinema   @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
-  hallId    Int      @map("hall_id")
-  hall      Hall     @relation(fields: [hallId], references: [id], onDelete: Cascade)
-  startTime DateTime @map("start_time")
-  endTime   DateTime @map("end_time")
-  language  String   @default("english") @db.VarChar(255)
-  price     Decimal
+  id          Int           @id @default(autoincrement())
+  movieId     Int           @map("movie_id")
+  movie       Movie         @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  cinemaId    Int           @map("cinema_id")
+  cinema      Cinema        @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
+  hallId      Int           @map("hall_id")
+  hall        Hall          @relation(fields: [hallId], references: [id], onDelete: Cascade)
+  startTime   DateTime      @map("start_time")
+  endTime     DateTime      @map("end_time")
+  language    String        @default("english") @db.VarChar(255)
+  price       Decimal
+  Reservation Reservation[]
 
   @@unique([movieId, cinemaId, hallId, startTime])
   @@map("showtimes")
+}
+
+model Reservation {
+  showtimeId Int      @map("showtime_id")
+  showtime   Showtime @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  seatId     Int      @map("seat_id")
+  seat       Seat     @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  userId     Int      @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status     Status   @default(reserved)
+
+  @@unique([status, seatId, showtimeId])
+  @@map("reservations")
+}
+
+enum Status {
+  available
+  reserved
+  cancelled
+  waitlist
 }
