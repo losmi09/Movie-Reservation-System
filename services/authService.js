@@ -39,7 +39,10 @@ const verifyToken = async (token, tokenType) => {
   }
 };
 
-const hashPassword = async password => await bcrypt.hash(password, 12);
+const hashPassword = async password => {
+  const SALT_ROUNDS = 12;
+  return await bcrypt.hash(password, SALT_ROUNDS);
+};
 
 export const hashToken = token =>
   crypto.createHash('sha256').update(token).digest('hex');
