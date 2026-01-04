@@ -3,7 +3,7 @@ import app from './app.js';
 
 const prisma = new PrismaClient();
 
-const port = process.env.PORT || 8000;
+const port = process.env.PORT ?? 8000;
 
 app.listen(port, () => `Server running on port ${port}...`);
 
