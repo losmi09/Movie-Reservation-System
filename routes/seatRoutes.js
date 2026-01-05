@@ -4,6 +4,7 @@ import checkIfExists from '../middlewares/checkIfExists.js';
 import * as seatController from '../controllers/seatController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
+// Used for nested /halls/:id/seats route
 export const router = Router({ mergeParams: true });
 
 router.use(authMiddleware.protect);
@@ -13,6 +14,7 @@ router
   .get(checkIfExists('hall'), seatController.getAllSeats)
   .post(authMiddleware.restrictTo('admin'), seatController.createSeat);
 
+// Separate router for non-nested route
 export const idRouter = Router();
 
 idRouter.use(authMiddleware.protect);

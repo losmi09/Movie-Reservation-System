@@ -8,6 +8,7 @@ import * as hallService from '../services/hallService.js';
 import * as showtimeService from '../services/showtimeService.js';
 import * as crudRepository from '../repositories/crudRepository.js';
 
+// When updating, required-field validation errors are ignored
 const excludeRequiredErrors = error =>
   error.details.filter(err => !err.message.endsWith('required'));
 
@@ -34,11 +35,13 @@ const validation = {
 
     if (error) errorObj = error;
 
+    // Prevent changing cinemaId to
     if (updating && body.cinemaId) {
       pushErrorObject(errorObj, 'cinemaId', 'cinemaId cannot be changed');
       return errorObj;
     }
 
+    // Verify that cinema exists
     if (!updating) {
       const cinema = await crudRepository.getOne('cinema', body.cinemaId);
 
@@ -55,6 +58,7 @@ const validation = {
 
     if (error) errorObj = error;
 
+    // Prevent changing hallId
     if (updating && body.hallId) {
       body.hallId = undefined;
       pushErrorObject(errorObj, 'hallId', 'hallId cannot be changed');
@@ -62,8 +66,10 @@ const validation = {
 
     let { hallId, row } = body;
 
+    // When updating, we get hallId by destructuring it from current seat
     if (updating) ({ hallId } = await crudRepository.getOne('seat', seatId));
 
+    // Verify that hall exists
     const hall = await crudRepository.getOne('hall', hallId);
 
     if (!hall)
@@ -71,6 +77,7 @@ const validation = {
 
     const invalidRow = errorObj.details.some(err => err.path[0] === 'row');
 
+    // Verify that seat row is not full
     if (hall && !invalidRow && (await hallService.isSeatRowFull(hall.id, row)))
       pushErrorObject(errorObj, 'row', 'This row is full of seats');
 
@@ -83,8 +90,7 @@ const validation = {
 
     if (error) errorObj = error;
 
-    const { movieId, cinemaId = 0, hallId = 0, startTime, endTime } = body;
-
+    // Prevent changing reference IDs
     if (updating) {
       Object.keys(body).forEach(field => {
         if (field.endsWith('Id'))
@@ -92,7 +98,11 @@ const validation = {
       });
     }
 
+    // Default to 0 to avoid undefined
+    const { movieId, cinemaId = 0, hallId = 0, startTime, endTime } = body;
+
     if (!updating) {
+      // Verify that every showtime reference exists
       const fields = await Promise.all([
         crudRepository.getOne('movie', movieId),
         crudRepository.getOne('cinema', cinemaId),
@@ -104,13 +114,15 @@ const validation = {
 
         const field = fields[i];
 
+        // If reference id is provided in body but it is not found in DB add error to errorObj
         if (body[field] && !foundField)
           pushErrorObject(errorObj, field, `No ${field} found with this ID`);
       });
 
       const [, , hall] = fields;
 
-      if (hall && hall.cinemaId !== cinemaId)
+      // Verify that hall with provided ID exists in cinema with provided ID
+      if (hall?.cinemaId !== cinemaId)
         pushErrorObject(
           errorObj,
           'hallId',
@@ -122,6 +134,7 @@ const validation = {
       err => err.path.includes('startTime') || err.path.includes('endTime')
     );
 
+    // Verify that hall does not have an active showtime in the given time range
     if (!invalidTime) {
       const isShowtimeOngoing = await showtimeService.isShowtimeOngoing(
         cinemaId,
@@ -150,24 +163,29 @@ const validation = {
     let { showtimeId, seatId } = body;
 
     if (updating) {
+      // User can only cancel its reservation
       body.status = 'cancelled';
 
+      // Prevent changing reference IDs
       Object.keys(body).forEach(field => {
         if (field !== 'status')
           pushErrorObject(errorObj, field, `${field} cannot be changed`);
       });
 
+      // When updating, we get showtimeId by destructuring it from current reservation
       ({ showtimeId } = await crudRepository.getOne(
         'reservation',
         reservationId
       ));
     }
 
+    // Verify that showtime exists
     const showtime = await crudRepository.getOne('showtime', showtimeId);
 
     if (!showtime)
       pushErrorObject(errorObj, 'showtimeId', 'No showtime found with this ID');
 
+    // Verify that showtime has not started/finished
     if (new Date(showtime?.startTime) < new Date()) {
       const field = updating ? 'status' : 'showtimeId';
 
@@ -179,12 +197,14 @@ const validation = {
     }
 
     if (seatId) {
+      // Verify that seat exists
       const seat = await crudRepository.getOne('seat', seatId);
 
       let hall;
 
       if (seat) hall = await crudRepository.getOne('hall', seat.hallId);
 
+      // Verify that seat in hall with provided ID exists
       if (!seat || hall?.cinemaId !== showtime?.cinemaId)
         pushErrorObject(errorObj, 'seatId', 'No seat found with this ID');
     }

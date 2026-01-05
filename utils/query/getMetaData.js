@@ -7,6 +7,7 @@ const getMetaData = async (query, model) => {
 
   queryClone = convertNumericStringsToNumbers(queryClone);
 
+  // Prevent overwriting for special query params
   excludeFromQuery(queryClone, 'page', 'limit', 'sort', 'fields');
 
   const totalCount = await prisma[model].count({ where: queryClone });

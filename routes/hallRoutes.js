@@ -5,6 +5,7 @@ import * as hallController from '../controllers/hallController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import { router as seatRouter } from './seatRoutes.js';
 
+// Router for nested /cinemas/:id/halls route
 export const router = Router({ mergeParams: true });
 
 router
@@ -16,6 +17,7 @@ router
     hallController.createHall
   );
 
+// Separate router for non-nested route
 export const idRouter = Router();
 
 idRouter.use(authMiddleware.protect);

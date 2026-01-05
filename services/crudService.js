@@ -15,6 +15,7 @@ export const getOne = async (model, id) =>
 export const createOne = async (model, data) => {
   const newObj = {};
 
+  // Convert showtime startTime and endTime from ISO 8601 format to date
   Object.entries(data).forEach(entry => {
     const [key, value] = entry;
     if (key === 'startTime' || key === 'endTime') newObj[key] = new Date(value);

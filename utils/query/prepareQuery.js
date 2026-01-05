@@ -36,6 +36,7 @@ const prepareQuery = query => {
 
   const orderBy = sort(queryClone);
 
+  // Prevent overwriting for special query params
   excludeFromQuery(queryClone, 'page', 'limit', 'sort', 'fields');
 
   return { queryClone, skip, limit, orderBy, selectFields };
