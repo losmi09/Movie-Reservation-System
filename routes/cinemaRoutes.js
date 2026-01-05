@@ -1,11 +1,19 @@
 import { Router } from 'express';
 import validateId from '../middlewares/validateId.js';
-import checkIfExists from '../middlewares/checkIfExists.js';
+import setParentFilter from '../middlewares/setParentFilter.js';
 import * as cinemaController from '../controllers/cinemaController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import { router as hallRouter } from './hallRoutes.js';
+import { secondRouter as showtimeRouter } from './showtimeRoutes.js';
 
 export const router = Router();
+
+router.use(
+  '/:id/showtimes',
+  validateId,
+  setParentFilter('cinema'),
+  showtimeRouter
+);
 
 router.use('/:id/halls', validateId, hallRouter);
 
