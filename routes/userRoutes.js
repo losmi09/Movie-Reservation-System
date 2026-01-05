@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as authMiddleware from '../middlewares/auth.js';
 import * as userController from '../controllers/userController.js';
-import * as photoMiddleware from '../middlewares/photo.js';
+import * as imageMiddleware from '../middlewares/image.js';
 import { secondRouter as reservationRouter } from './reservationRoutes.js';
 
 export const router = Router();
@@ -18,8 +18,8 @@ router.use(authMiddleware.protect);
 
 router.patch(
   '/me/photo',
-  photoMiddleware.uploadUserPhoto,
-  photoMiddleware.resizeUserPhoto,
+  imageMiddleware.uploadUserPhoto,
+  imageMiddleware.resizeImage('photo'),
   userController.saveUserPhoto
 );
 
