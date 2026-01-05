@@ -11,7 +11,7 @@ model Movie {
   id          Int        @id @default(autoincrement())
   title       String     @unique @db.VarChar(255)
   description String     @db.VarChar(255)
-  posterImage String?    @map("poster_image") @db.Text
+  posterImage String     @default("default.jpg") @map("poster_image") @db.Text
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   Showtime    Showtime[]
@@ -53,7 +53,7 @@ model Cinema {
   phone     String     @unique @db.VarChar(255)
   email     String     @unique @db.VarChar(255)
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  updatedAt DateTime   @updatedAt 
   halls     Hall[]
   Showtime  Showtime[]
 
@@ -68,7 +68,7 @@ model Hall {
   cinemaId    Int        @map("cinema_id")
   cinema      Cinema     @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  updatedAt   DateTime   @updatedAt 
   Seat        Seat[]
   Showtime    Showtime[]
 
