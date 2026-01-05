@@ -12,7 +12,7 @@ export const saveUserPhoto = catchAsync(async (req, res, next) => {
   res.status(200).json({ data: user });
 });
 
-export const getCurrentUser = catchAsync(async (req, res, next) => {
+export const getCurrentUser = catchAsync(async (req, res) => {
   const currentUser = await userService.getCurrentUser(req.user.id);
 
   res.status(200).json({ data: currentUser });

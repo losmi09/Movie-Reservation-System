@@ -63,7 +63,7 @@ export const login = catchAsync(async (req, res, next) => {
   sendAuthResponse(res, user, 200);
 });
 
-export const logout = catchAsync(async (req, res, next) => {
+export const logout = catchAsync(async (req, res) => {
   invalidateRefreshToken(res, req.user.id);
 
   res.status(204).end();
@@ -116,7 +116,7 @@ const sendPasswordUpdate = (res, user) =>
     data: { ...user, passwordChangedAt: new Date() },
   });
 
-export const resetPassword = catchAsync(async (req, res, next) => {
+export const resetPassword = catchAsync(async (req, res) => {
   const user = await authService.resetPassword(
     req.params.token,
     req.body.password,
