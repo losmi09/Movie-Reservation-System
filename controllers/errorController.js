@@ -13,23 +13,26 @@ const handleNotFoundRecord = err => {
 const handleUniqueField = (err, res, instance) => {
   const { modelName, target } = err.meta;
 
-  let field = target;
+  const fields = { Hall: ['name'], Seat: ['number'], Reservation: ['seatId'] };
 
-  if (modelName === 'Hall') field = ['name'];
+  const field = fields[modelName] ?? target;
 
-  if (modelName === 'Seat') field = ['number'];
+  const message =
+    modelName === 'Reservation'
+      ? 'This seat is reserved'
+      : `${modelName} with this ${field} already exists`;
 
   const error = [
     {
       path: field[0],
-      message: `${modelName} with this ${field} already exists`,
+      message,
     },
   ];
 
   return throwValidationError(res, error, instance);
 };
 
-const handleInvalidQueryParam = () => new AppError('Invalid query param', 400);
+const handleInvalidQuery = () => new AppError('Invalid query', 400);
 
 const handleTooLargePayload = () =>
   new AppError('Request payload is too large', 413);
@@ -83,17 +86,22 @@ const globalErrorHandler = (err, req, res, next) => {
 
   if (err.name === 'ValidationError')
     return throwValidationError(res, err.details, req.originalUrl);
-  if (err.name === 'MulterError') error = handleMulterError(err);
+
   if (error.code === 'P2002')
     return handleUniqueField(error, res, req.originalUrl);
+
+  if (err.name === 'MulterError') error = handleMulterError(err);
+
   if (error.code === 'P2025' || error.code === 'P2003')
     error = handleNotFoundRecord(err);
+
   if (err.name === 'PayloadTooLargeError') error = handleTooLargePayload();
+
   if (
     err.message.includes('Error in query') ||
     err.message === 'unexpected empty path'
   )
-    error = handleInvalidQueryParam();
+    error = handleInvalidQuery();
 
   sendError(error, res, req.originalUrl);
 };
