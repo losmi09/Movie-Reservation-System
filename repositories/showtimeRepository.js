@@ -11,7 +11,14 @@ export const isShowtimeOngoing = async (cinemaId, hallId, startTime, endTime) =>
           endTime: { lte: endTime },
         },
         {
+          startTime: { gte: startTime, lte: endTime },
+          endTime: { gte: endTime, gte: startTime },
+        },
+        {
           endTime: { lte: endTime, gte: startTime },
+        },
+        {
+          endTime: { gte: endTime, lte: startTime },
         },
       ],
     },
