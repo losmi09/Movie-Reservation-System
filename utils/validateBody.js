@@ -3,6 +3,7 @@ import cinemaSchema from '../schemas/cinemaSchema.js';
 import hallSchema from '../schemas/hallSchema.js';
 import seatSchema from '../schemas/seatSchema.js';
 import showtimeSchema from '../schemas/showtimeSchema.js';
+import reservationSchema from '../schemas/reservationSchema.js';
 import * as hallService from '../services/hallService.js';
 import * as showtimeService from '../services/showtimeService.js';
 import * as crudRepository from '../repositories/crudRepository.js';
@@ -59,7 +60,7 @@ const validation = {
       pushErrorObject(errorObj, 'hallId', 'hallId cannot be changed');
     }
 
-    let { hallId } = body;
+    let { hallId, row } = body;
 
     if (updating) ({ hallId } = await crudRepository.getOne('seat', seatId));
 
@@ -68,9 +69,9 @@ const validation = {
     if (!hall)
       pushErrorObject(errorObj, 'hallId', 'No hall found with this ID');
 
-    const { row } = body;
+    const invalidRow = errorObj.details.some(err => err.path[0] === 'row');
 
-    if (hall && row && (await hallService.isSeatRowFull(hall.id, row)))
+    if (hall && !invalidRow && (await hallService.isSeatRowFull(hall.id, row)))
       pushErrorObject(errorObj, 'row', 'This row is full of seats');
 
     return errorObj.details.length ? errorObj : undefined;
@@ -83,6 +84,13 @@ const validation = {
     if (error) errorObj = error;
 
     const { movieId, cinemaId = 0, hallId = 0, startTime, endTime } = body;
+
+    if (updating) {
+      Object.keys(body).forEach(field => {
+        if (field.endsWith('Id'))
+          pushErrorObject(errorObj, field, `${field} cannot be changed`);
+      });
+    }
 
     if (!updating) {
       const fields = await Promise.all([
@@ -128,6 +136,57 @@ const validation = {
           'startTime',
           'Hall already has an active showtime in the given time range'
         );
+    }
+
+    return errorObj.details.length ? errorObj : undefined;
+  },
+  reservation: async (body, updating, reservationId) => {
+    let errorObj = getValidationErrorObject();
+
+    const { error } = reservationSchema.validate(body);
+
+    if (error) errorObj = error;
+
+    let { showtimeId, seatId } = body;
+
+    if (updating) {
+      body.status = 'cancelled';
+
+      Object.keys(body).forEach(field => {
+        if (field !== 'status')
+          pushErrorObject(errorObj, field, `${field} cannot be changed`);
+      });
+
+      ({ showtimeId } = await crudRepository.getOne(
+        'reservation',
+        reservationId
+      ));
+    }
+
+    const showtime = await crudRepository.getOne('showtime', showtimeId);
+
+    if (!showtime)
+      pushErrorObject(errorObj, 'showtimeId', 'No showtime found with this ID');
+
+    if (new Date(showtime?.startTime) < new Date()) {
+      const field = updating ? 'status' : 'showtimeId';
+
+      const errorMessage = updating
+        ? 'You cannot cancel a reservation for a showtime that is ongoing or has ended'
+        : 'Reservations are closed for this showtime';
+
+      pushErrorObject(errorObj, field, errorMessage);
+    }
+
+    if (seatId) {
+      const seat = await crudRepository.getOne('seat', seatId);
+
+      let hall;
+
+      if (seat) hall = await crudRepository.getOne('hall', seat.hallId);
+
+      if (!seat || hall?.cinemaId !== showtime?.cinemaId)
+        pushErrorObject(errorObj, 'seatId', 'No seat found with this ID');
     }
 
     return errorObj.details.length ? errorObj : undefined;
