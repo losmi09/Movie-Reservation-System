@@ -1,10 +1,8 @@
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import validateBody from '../utils/validateBody.js';
+import sendResponse from '../utils/sendResponse.js';
 import * as crudService from '../services/crudService.js';
-
-const sendResponse = (res, statusCode, data) =>
-  res.status(statusCode).json({ data });
 
 // Parent field comes from nested route e.g. /cinemas/:id/halls where is cinema parent to hall
 const parentFields = {
@@ -31,7 +29,7 @@ export const getOne = model =>
 
     if (!doc) return next(new AppError(`No ${model} found with this ID`, 404));
 
-    sendResponse(res, 200, doc);
+    sendResponse(res, doc);
   });
 
 export const createOne = model =>
@@ -48,7 +46,7 @@ export const createOne = model =>
 
     const newDoc = await crudService.createOne(model, data);
 
-    sendResponse(res, 201, newDoc);
+    sendResponse(res, newDoc, 201);
   });
 
 export const updateOne = model =>
@@ -65,7 +63,7 @@ export const updateOne = model =>
       data
     );
 
-    sendResponse(res, 200, updatedDoc);
+    sendResponse(res, updatedDoc);
   });
 
 export const deleteOne = model =>
