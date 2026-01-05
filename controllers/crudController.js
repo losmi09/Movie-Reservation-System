@@ -6,17 +6,23 @@ import * as crudService from '../services/crudService.js';
 const sendResponse = (res, statusCode, data) =>
   res.status(statusCode).json({ data });
 
+// Parent field comes from nested route e.g. /cinemas/:id/halls where is cinema parent to hall
+const parentFields = {
+  hall: 'cinemaId',
+  seat: 'hallId',
+  showtime: 'movieId',
+  reservation: 'showtimeId',
+};
+
 export const getAll = model =>
   catchAsync(async (req, res) => {
-    if (model === 'hall') req.query.cinemaId = Number(req.params.id);
-
-    if (model === 'seat') req.query.hallId = Number(req.params.id);
-
-    if (model === 'showtime') req.query.movieId = Number(req.params.id);
+    // Parent id for showtime and reservation is only used to set in req.body when creating
+    if (model !== 'showtime' && model !== 'reservation' && parentFields[model])
+      req.query[parentFields[model]] = Number(req.params.id);
 
     const { docs, metaData } = await crudService.getAll(model, req.query);
 
-    res.status(200).json({ data: docs, metaData });
+    res.status(200).json({ data: docs, meta: metaData });
   });
 
 export const getOne = model =>
@@ -32,11 +38,9 @@ export const createOne = model =>
   catchAsync(async (req, res, next) => {
     const { body: data } = req;
 
-    if (model === 'hall') data.cinemaId = Number(req.params.id);
+    if (parentFields[model]) data[parentFields[model]] = Number(req.params.id);
 
-    if (model === 'seat') data.hallId = Number(req.params.id);
-
-    if (model === 'showtime') data.movieId = Number(req.params.id);
+    if (model === 'reservation') data.userId = req.user.id;
 
     const error = await validateBody(model, data);
 
