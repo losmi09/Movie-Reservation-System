@@ -1,24 +1,33 @@
 import { Router } from 'express';
-import checkIfExists from '../middlewares/checkIfExists.js';
 import * as showtimeController from '../controllers/showtimeController.js';
 import * as authMiddleware from '../middlewares/auth.js';
+import { router as reservationRouter } from './reservationRoutes.js';
+import validateId from '../middlewares/validateId.js';
 
+// Used for nested /movies/:id/showtimes and /cinemas/:id/showtimes routes
 export const router = Router({ mergeParams: true });
 
 router
   .route('/')
-  .get(checkIfExists('movie'), showtimeController.getAllShowtimes)
+  .get(showtimeController.getAllShowtimes)
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
     showtimeController.createShowtime
   );
 
-export const idRouter = Router();
+// Separate showtime router
+export const secondRouter = Router();
 
-idRouter
+secondRouter.use(authMiddleware.protect);
+
+secondRouter.use('/:id/reservations', reservationRouter);
+
+secondRouter.get('/', showtimeController.getAllShowtimes);
+
+secondRouter
   .route('/:id')
-  .get(showtimeController.getShowtime)
+  .get(validateId, showtimeController.getShowtime)
   .patch(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
