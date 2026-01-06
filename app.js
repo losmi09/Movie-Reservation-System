@@ -59,15 +59,17 @@ app.use(compression());
 // Log requests in development
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
+const API_PREFIX = '/api/v1/';
+
 // Routes
-app.use('/api/v1/movies', limit, movieRouter);
-app.use('/api/v1/auth', authLimit, authRouter);
-app.use('/api/v1/users', limit, userRouter);
-app.use('/api/v1/cinemas', limit, cinemaRouter);
-app.use('/api/v1/halls', limit, hallRouter);
-app.use('/api/v1/seats', limit, seatRouter);
-app.use('/api/v1/showtimes', limit, showtimeRouter);
-app.use('/api/v1/reservations', limit, reservationRouter);
+app.use(`${API_PREFIX}movies`, limit, movieRouter);
+app.use(`${API_PREFIX}auth`, authLimit, authRouter);
+app.use(`${API_PREFIX}users`, limit, userRouter);
+app.use(`${API_PREFIX}cinemas`, limit, cinemaRouter);
+app.use(`${API_PREFIX}halls`, limit, hallRouter);
+app.use(`${API_PREFIX}seats`, limit, seatRouter);
+app.use(`${API_PREFIX}showtimes`, limit, showtimeRouter);
+app.use(`${API_PREFIX}reservations`, limit, reservationRouter);
 
 // Handle unhandled routes
 app.use((req, res, next) =>
