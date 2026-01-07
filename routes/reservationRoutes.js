@@ -5,27 +5,27 @@ import { checkIfReservationBelongsToUser } from '../middlewares/reservations.js'
 import * as reservationController from '../controllers/reservationController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
-export const router = Router({ mergeParams: true }); // Used to create a reservation
+// Used to create a reservation
+export const reservationRouter = Router({ mergeParams: true }); // Used to create a reservation
 
-router.use(authMiddleware.protect);
-
-router.post(
+reservationRouter.post(
   '/',
+  authMiddleware.protect,
   authMiddleware.restrictTo('user'),
   reservationController.createReservation
 );
 
-export const secondRouter = Router(); // Used for /users/me/reservations route
+export const userReservationRouter = Router(); // Used for /users/me/reservations route
 
-secondRouter.use(authMiddleware.protect);
+userReservationRouter.use(authMiddleware.protect);
 
-secondRouter.get(
+userReservationRouter.get(
   '/',
   getUserReservations,
   reservationController.getAllReservations
 );
 
-secondRouter
+userReservationRouter
   .route('/:id')
   .get(
     validateId,
@@ -38,12 +38,12 @@ secondRouter
     reservationController.cancelReservation
   );
 
-export const thirdRouter = Router(); // Used for admin to see all reservations
+export const allReservationRouter = Router(); // Used for admin to see all reservations
 
-thirdRouter.use(authMiddleware.protect);
+allReservationRouter.use(authMiddleware.protect);
 
-thirdRouter.use(authMiddleware.restrictTo('admin'));
+allReservationRouter.use(authMiddleware.restrictTo('admin'));
 
-thirdRouter.get('/', reservationController.getAllReservations);
+allReservationRouter.get('/', reservationController.getAllReservations);
 
-thirdRouter.get('/:id', reservationController.getReservation);
+allReservationRouter.get('/:id', reservationController.getReservation);
