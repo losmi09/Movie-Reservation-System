@@ -122,7 +122,7 @@ const validation = {
       const [, , hall] = fields;
 
       // Verify that hall with provided ID exists in cinema with provided ID
-      if (hall?.cinemaId !== cinemaId)
+      if (hall && hall.cinemaId !== cinemaId)
         pushErrorObject(
           errorObj,
           'hallId',
