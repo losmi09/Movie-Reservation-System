@@ -9,14 +9,14 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
-import { router as movieRouter } from './routes/movieRoutes.js';
-import { router as authRouter } from './routes/authRoutes.js';
-import { router as userRouter } from './routes/userRoutes.js';
-import { router as cinemaRouter } from './routes/cinemaRoutes.js';
-import { idRouter as hallRouter } from './routes/hallRoutes.js';
-import { idRouter as seatRouter } from './routes/seatRoutes.js';
-import { secondRouter as showtimeRouter } from './routes/showtimeRoutes.js';
-import { thirdRouter as reservationRouter } from './routes/reservationRoutes.js';
+import { movieRouter } from './routes/movieRoutes.js';
+import { authRouter } from './routes/authRoutes.js';
+import { userRouter } from './routes/userRoutes.js';
+import { cinemaRouter } from './routes/cinemaRoutes.js';
+import { hallRouter } from './routes/hallRoutes.js';
+import { seatRouter } from './routes/seatRoutes.js';
+import { showtimeRouter } from './routes/showtimeRoutes.js';
+import { allReservationRouter as reservationRouter } from './routes/reservationRoutes.js';
 
 // Initialize express app
 const app = express();
