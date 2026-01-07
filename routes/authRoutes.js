@@ -2,22 +2,22 @@ import { Router } from 'express';
 import * as authController from '../controllers/authController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
-export const router = Router();
+export const authRouter = Router();
 
-router.post('/register', authController.register);
+authRouter.post('/register', authController.register);
 
-router.post('/login', authController.login);
+authRouter.post('/login', authController.login);
 
-router.patch('/verify-email/:token', authController.verifyEmail);
+authRouter.patch('/verify-email/:token', authController.verifyEmail);
 
-router.post('/refresh-token', authController.refreshToken);
+authRouter.post('/refresh-token', authController.refreshToken);
 
-router.post('/forgot-password', authController.forgotPassword);
+authRouter.post('/forgot-password', authController.forgotPassword);
 
-router.patch('/reset-password/:token', authController.resetPassword);
+authRouter.patch('/reset-password/:token', authController.resetPassword);
 
-router.use(authMiddleware.protect);
+authRouter.use(authMiddleware.protect);
 
-router.post('/logout', authController.logout);
+authRouter.post('/logout', authController.logout);
 
-router.patch('/me/password', authController.updateUserPassword);
+authRouter.patch('/me/password', authController.updateUserPassword);
