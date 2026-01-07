@@ -3,31 +3,32 @@ import validateId from '../middlewares/validateId.js';
 import checkIfExists from '../middlewares/checkIfExists.js';
 import setParentFilter from '../middlewares/setParentFilter.js';
 import * as movieController from '../controllers/movieController.js';
+import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import * as imageMiddleware from '../middlewares/image.js';
-import { router as showtimeRouter } from './showtimeRoutes.js';
+import { movieShowtimeRouter as showtimeRouter } from './showtimeRoutes.js';
 
-export const router = Router();
+export const movieRouter = Router();
 
-router.use(
+movieRouter.use(
   '/:id/showtimes',
   validateId,
   setParentFilter('movie'),
   showtimeRouter
 );
 
-router
+movieRouter
   .route('/')
-  .get(movieController.getAllMovies)
+  .get(cacheAll('movie'), movieController.getAllMovies)
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
     movieController.createMovie
   );
 
-router
+movieRouter
   .route('/:id')
-  .get(validateId, movieController.getMovie)
+  .get(validateId, cacheOne('movie'), movieController.getMovie)
   .patch(
     validateId,
     authMiddleware.protect,
@@ -41,7 +42,7 @@ router
     movieController.deleteMovie
   );
 
-router.patch(
+movieRouter.patch(
   '/:id/poster',
   authMiddleware.protect,
   authMiddleware.restrictTo('admin'),

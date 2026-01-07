@@ -1,16 +1,18 @@
 import { Router } from 'express';
 import validateId from '../middlewares/validateId.js';
 import checkIfExists from '../middlewares/checkIfExists.js';
+import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import * as hallController from '../controllers/hallController.js';
 import * as authMiddleware from '../middlewares/auth.js';
-import { router as seatRouter } from './seatRoutes.js';
+import { hallSeatRouter as seatRouter } from './seatRoutes.js';
+import setParentFilter from '../middlewares/setParentFilter.js';
 
 // Router for nested /cinemas/:id/halls route
-export const router = Router({ mergeParams: true });
+export const cinemaHallRouter = Router({ mergeParams: true });
 
-router
+cinemaHallRouter
   .route('/')
-  .get(checkIfExists('cinema'), hallController.getAllHalls)
+  .get(checkIfExists('cinema'), cacheAll('hall'), hallController.getAllHalls)
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
@@ -18,15 +20,15 @@ router
   );
 
 // Separate router for non-nested route
-export const idRouter = Router();
+export const hallRouter = Router();
 
-idRouter.use(authMiddleware.protect);
+hallRouter.use(authMiddleware.protect);
 
-idRouter.use('/:id/seats', validateId, seatRouter);
+hallRouter.use('/:id/seats', validateId, setParentFilter('hall'), seatRouter);
 
-idRouter
+hallRouter
   .route('/:id')
-  .get(validateId, hallController.getHall)
+  .get(validateId, cacheOne('hall'), hallController.getHall)
   .patch(
     validateId,
     authMiddleware.restrictTo('admin'),

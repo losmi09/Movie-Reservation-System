@@ -1,43 +1,49 @@
 import { Router } from 'express';
 import validateId from '../middlewares/validateId.js';
-import setParentFilter from '../middlewares/setParentFilter.js';
+import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import * as cinemaController from '../controllers/cinemaController.js';
 import * as authMiddleware from '../middlewares/auth.js';
-import { router as hallRouter } from './hallRoutes.js';
-import { secondRouter as showtimeRouter } from './showtimeRoutes.js';
+import { cinemaHallRouter as hallRouter } from './hallRoutes.js';
+import { cinemaShowtimeRouter as showtimeRouter } from './showtimeRoutes.js';
+import setParentFilter from '../middlewares/setParentFilter.js';
 
-export const router = Router();
+export const cinemaRouter = Router();
 
-router.use(
+cinemaRouter.use(
   '/:id/showtimes',
   validateId,
   setParentFilter('cinema'),
   showtimeRouter
 );
 
-router.use('/:id/halls', validateId, hallRouter);
+cinemaRouter.use(
+  '/:id/halls',
+  validateId,
+  setParentFilter('cinema'),
+  hallRouter
+);
 
-router
+cinemaRouter
   .route('/')
-  .get(cinemaController.getAllCinemas)
+  .get(cacheAll('cinema'), cinemaController.getAllCinemas)
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
     cinemaController.createCinema
   );
 
-router.use(authMiddleware.protect);
-
-router
+cinemaRouter
   .route('/:id')
-  .get(validateId, cinemaController.getCinema)
+  .get(validateId, cacheOne('cinema'), cinemaController.getCinema)
   .patch(
     validateId,
+    authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
     cinemaController.updateCinema
   )
   .delete(
     validateId,
+    authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
     cinemaController.deleteCinema
   );
