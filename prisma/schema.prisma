@@ -53,7 +53,7 @@ model Cinema {
   phone     String     @unique @db.VarChar(255)
   email     String     @unique @db.VarChar(255)
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt 
+  updatedAt DateTime   @updatedAt
   halls     Hall[]
   Showtime  Showtime[]
 
@@ -68,7 +68,7 @@ model Hall {
   cinemaId    Int        @map("cinema_id")
   cinema      Cinema     @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt 
+  updatedAt   DateTime   @updatedAt
   Seat        Seat[]
   Showtime    Showtime[]
 
@@ -111,7 +111,7 @@ model Showtime {
   hall        Hall          @relation(fields: [hallId], references: [id], onDelete: Cascade)
   startTime   DateTime      @map("start_time")
   endTime     DateTime      @map("end_time")
-  language    String        @default("english") @db.VarChar(255)
+  language    String        @default("English") @db.VarChar(255)
   price       Decimal
   Reservation Reservation[]
 
