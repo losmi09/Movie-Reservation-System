@@ -71,34 +71,32 @@ model Hall {
   updatedAt   DateTime   @updatedAt
   Seat        Seat[]
   Showtime    Showtime[]
+  Row         Row[]
 
   @@unique([cinemaId, name])
   @@map("halls")
+}
+
+model Row {
+  id           Int    @id @default(autoincrement())
+  label        String @db.VarChar(255)
+  seatCapacity Int    @map("seat_capacity")
+  hallId       Int    @map("hall_id")
+  hall         Hall   @relation(fields: [hallId], references: [id], onDelete: Cascade)
+  Seat         Seat[]
 }
 
 model Seat {
   id          Int           @id @default(autoincrement())
   hallId      Int           @map("hall_id")
   hall        Hall          @relation(fields: [hallId], references: [id], onDelete: Cascade)
-  row         Row
+  rowId       Int           @map("row_id")
+  row         Row           @relation(fields: [rowId], references: [id], onDelete: Cascade)
   number      Int
   Reservation Reservation[]
 
-  @@unique([hallId, row, number])
+  @@unique([hallId, rowId, number])
   @@map("seats")
-}
-
-enum Row {
-  A
-  B
-  C
-  D
-  E
-  F
-  G
-  H
-  I
-  J
 }
 
 model Showtime {
