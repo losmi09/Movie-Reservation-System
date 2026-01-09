@@ -64,7 +64,6 @@ model Cinema {
 model Hall {
   id          Int        @id @default(autoincrement())
   name        String     @db.VarChar(255)
-  seatsPerRow Int        @map("seats_per_row")
   cinemaId    Int        @map("cinema_id")
   cinema      Cinema     @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now()) @map("created_at")
