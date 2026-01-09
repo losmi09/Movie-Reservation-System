@@ -12,8 +12,8 @@ model Movie {
   title       String     @unique @db.VarChar(255)
   description String     @db.VarChar(255)
   posterImage String     @default("default.jpg") @map("poster_image") @db.Text
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
   Showtime    Showtime[]
 
   @@map("movies")
@@ -52,8 +52,8 @@ model Cinema {
   address   String     @db.VarChar(255)
   phone     String     @unique @db.VarChar(255)
   email     String     @unique @db.VarChar(255)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
   halls     Hall[]
   Showtime  Showtime[]
 
@@ -67,8 +67,8 @@ model Hall {
   seatsPerRow Int        @map("seats_per_row")
   cinemaId    Int        @map("cinema_id")
   cinema      Cinema     @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
   Seat        Seat[]
   Showtime    Showtime[]
   Row         Row[]
@@ -84,6 +84,9 @@ model Row {
   hallId       Int    @map("hall_id")
   hall         Hall   @relation(fields: [hallId], references: [id], onDelete: Cascade)
   Seat         Seat[]
+
+  @@unique([label, hallId])
+  @@map("rows")
 }
 
 model Seat {
