@@ -64,6 +64,7 @@ model Cinema {
 model Hall {
   id        Int        @id @default(autoincrement())
   name      String     @db.VarChar(255)
+  maxRows   Int        @map("max_rows")
   cinemaId  Int        @map("cinema_id")
   cinema    Cinema     @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
   createdAt DateTime   @default(now()) @map("created_at")
