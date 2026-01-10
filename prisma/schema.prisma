@@ -127,7 +127,6 @@ model Reservation {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   status     Status   @default(reserved)
 
-  @@unique([status, seatId, showtimeId])
   @@map("reservations")
 }
 
