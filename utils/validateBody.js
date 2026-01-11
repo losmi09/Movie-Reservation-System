@@ -1,12 +1,16 @@
 import movieSchema from '../schemas/movieSchema.js';
 import cinemaSchema from '../schemas/cinemaSchema.js';
 import hallSchema from '../schemas/hallSchema.js';
+import rowSchema from '../schemas/rowSchema.js';
 import seatSchema from '../schemas/seatSchema.js';
 import showtimeSchema from '../schemas/showtimeSchema.js';
 import reservationSchema from '../schemas/reservationSchema.js';
 import * as hallService from '../services/hallService.js';
+import * as rowService from '../services/rowService.js';
 import * as showtimeService from '../services/showtimeService.js';
+import * as reservationService from '../services/reservationService.js';
 import * as crudRepository from '../repositories/crudRepository.js';
+import prisma from '../server.js';
 
 // When updating, required-field validation errors are ignored
 const excludeRequiredErrors = error =>
@@ -51,6 +55,27 @@ const validation = {
 
     return errorObj.details.length ? errorObj : undefined;
   },
+  row: async (body, updating) => {
+    let errorObj = getValidationErrorObject();
+
+    const { error } = rowSchema.validate(body, { abortEarly: false });
+
+    if (error) errorObj = error;
+
+    if (!updating) {
+      // Verify that hall exists
+      const hall = await crudRepository.getOne('hall', body.hallId);
+
+      if (!hall)
+        pushErrorObject(errorObj, 'hallId', 'No hall found with this ID');
+
+      // Verify that hall is not full of rows
+      if (hall && (await hallService.isHallFullOfRows(hall.id)))
+        pushErrorObject(errorObj, 'hallId', 'This hall is full of rows');
+    }
+
+    return errorObj.details.length ? errorObj : undefined;
+  },
   seat: async (body, updating, seatId) => {
     let errorObj = getValidationErrorObject();
 
@@ -60,26 +85,23 @@ const validation = {
 
     // Prevent changing hallId
     if (updating && body.hallId) {
-      body.hallId = undefined;
-      pushErrorObject(errorObj, 'hallId', 'hallId cannot be changed');
+      body.rowId = undefined;
+      pushErrorObject(errorObj, 'rowId', 'rowId cannot be changed');
     }
 
-    let { hallId, row } = body;
+    let { rowId } = body;
 
-    // When updating, we get hallId by destructuring it from current seat
-    if (updating) ({ hallId } = await crudRepository.getOne('seat', seatId));
+    // When updating, we get rowId by destructuring it from the current seat
+    if (updating) ({ rowId } = await crudRepository.getOne('seat', seatId));
 
     // Verify that hall exists
-    const hall = await crudRepository.getOne('hall', hallId);
+    const row = await crudRepository.getOne('row', rowId);
 
-    if (!hall)
-      pushErrorObject(errorObj, 'hallId', 'No hall found with this ID');
-
-    const invalidRow = errorObj.details.some(err => err.path[0] === 'row');
+    if (!row) pushErrorObject(errorObj, 'rowId', 'No row found with this ID');
 
     // Verify that seat row is not full
-    if (hall && !invalidRow && (await hallService.isSeatRowFull(hall.id, row)))
-      pushErrorObject(errorObj, 'row', 'This row is full of seats');
+    if (row && (await rowService.isRowFullOfSeats(rowId)))
+      pushErrorObject(errorObj, 'rowId', 'This row is full of seats');
 
     return errorObj.details.length ? errorObj : undefined;
   },
@@ -162,21 +184,39 @@ const validation = {
 
     let { showtimeId, seatId } = body;
 
+    // Updating = reservation cancellation
     if (updating) {
-      // User can only cancel its reservation
-      body.status = 'cancelled';
+      // When updating, we get showtimeId by destructuring it from current reservation
+      ({ showtimeId, seatId } = await crudRepository.getOne(
+        'reservation',
+        reservationId
+      ));
+
+      // When updating, we get reservation by its ID
+      const reservation = await reservationService.getReservationById(
+        reservationId
+      );
+
+      if (reservation) {
+        // Check if there are reservations with status of waitlist
+        const firstInWaitlist = await reservationService.getFirstInWaitlist();
+
+        if (firstInWaitlist)
+          await prisma.$transaction([
+            reservationService.cancelReservation(reservation.id),
+            reservationService.reserveSeatForFirstInWaitlist(
+              firstInWaitlist.id,
+              seatId
+            ),
+          ]);
+        else await reservationService.cancelReservation(reservation.id);
+      }
 
       // Prevent changing reference IDs
       Object.keys(body).forEach(field => {
         if (field !== 'status')
           pushErrorObject(errorObj, field, `${field} cannot be changed`);
       });
-
-      // When updating, we get showtimeId by destructuring it from current reservation
-      ({ showtimeId } = await crudRepository.getOne(
-        'reservation',
-        reservationId
-      ));
     }
 
     // Verify that showtime exists
@@ -186,7 +226,9 @@ const validation = {
       pushErrorObject(errorObj, 'showtimeId', 'No showtime found with this ID');
 
     // Verify that showtime has not started/finished
-    if (new Date(showtime?.startTime) < new Date()) {
+    const closedReservations = new Date(showtime?.startTime) < new Date();
+
+    if (closedReservations) {
       const field = updating ? 'status' : 'showtimeId';
 
       const errorMessage = updating
@@ -200,13 +242,40 @@ const validation = {
       // Verify that seat exists
       const seat = await crudRepository.getOne('seat', seatId);
 
-      let hall;
-
-      if (seat) hall = await crudRepository.getOne('hall', seat.hallId);
-
-      // Verify that seat in hall with provided ID exists
-      if (!seat || hall?.cinemaId !== showtime?.cinemaId)
+      if (!seat)
         pushErrorObject(errorObj, 'seatId', 'No seat found with this ID');
+
+      if (seat) {
+        const row = await crudRepository.getOne('row', seat.rowId);
+
+        // Verify that seat is not reserved
+        const reservedSeat = await reservationService.getReservation(
+          showtimeId,
+          seatId
+        );
+
+        // Verify that seat in hall with provided ID exists
+        if (row?.hallId !== showtime?.hallId)
+          pushErrorObject(
+            errorObj,
+            'seatId',
+            'No seat found with this ID in this hall'
+          );
+
+        if (!updating && reservedSeat) {
+          // Check if all seats are reserved
+          const allSeatsReserved = await showtimeService.areAllSeatsReserved(
+            showtime.id,
+            showtime.hallId
+          );
+
+          // If all seats are reserved, make a reservation with status of waitlist
+          if (allSeatsReserved) {
+            body.seatId = undefined;
+            body.status = 'waitlist';
+          } else pushErrorObject(errorObj, 'seatId', 'This seat is reserved');
+        }
+      }
     }
 
     return errorObj.details.length ? errorObj : undefined;
