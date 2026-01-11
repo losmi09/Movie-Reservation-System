@@ -5,3 +5,9 @@ export const getSeatsPerRow = async hallId =>
     where: { id: hallId },
     select: { seatsPerRow: true },
   });
+
+export const getMaxRows = async hallId =>
+  await prisma.hall.findUnique({
+    where: { id: hallId },
+    select: { maxRows: true },
+  });
