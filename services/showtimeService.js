@@ -1,4 +1,7 @@
 import * as showtimeRepository from '../repositories/showtimeRepository.js';
+import * as rowService from '../services/rowService.js';
+import * as seatService from '../services/seatService.js';
+import * as reservationService from '../services/reservationService.js';
 
 export const isShowtimeOngoing = async (cinemaId, hallId, startTime, endTime) =>
   await showtimeRepository.isShowtimeOngoing(
@@ -7,3 +10,14 @@ export const isShowtimeOngoing = async (cinemaId, hallId, startTime, endTime) =>
     startTime,
     endTime
   );
+
+export const areAllSeatsReserved = async (showtimeId, hallId) => {
+  const rowIds = (await rowService.getRowsInHall(hallId)).map(row => row.id);
+
+  const [totalHallSeats, reservedSeats] = await Promise.all([
+    seatService.countSeatsInHall(rowIds),
+    reservationService.countShowtimeReservations(showtimeId),
+  ]);
+
+  return totalHallSeats <= reservedSeats;
+};
