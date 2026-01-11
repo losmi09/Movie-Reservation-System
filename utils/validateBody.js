@@ -20,6 +20,12 @@ const getValidationErrorObject = () => {
   return { details: [], name: 'ValidationError' };
 };
 
+const preventChangingReferenceIds = (body, errorObj) =>
+  Object.keys(body).forEach(field => {
+    if (field.endsWith('Id'))
+      pushErrorObject(errorObj, field, `${field} cannot be changed`);
+  });
+
 const pushErrorObject = (errorObj, path, message) =>
   errorObj.details.push({ path, message });
 
@@ -39,11 +45,8 @@ const validation = {
 
     if (error) errorObj = error;
 
-    // Prevent changing cinemaId to
-    if (updating && body.cinemaId) {
-      pushErrorObject(errorObj, 'cinemaId', 'cinemaId cannot be changed');
-      return errorObj;
-    }
+    // Prevent changing cinemaId
+    if (updating && body.cinemaId) preventChangingReferenceIds(body, errorObj);
 
     // Verify that cinema exists
     if (!updating) {
@@ -61,6 +64,8 @@ const validation = {
     const { error } = rowSchema.validate(body, { abortEarly: false });
 
     if (error) errorObj = error;
+
+    if (updating) preventChangingReferenceIds(body, errorObj);
 
     if (!updating) {
       // Verify that hall exists
@@ -84,10 +89,7 @@ const validation = {
     if (error) errorObj = error;
 
     // Prevent changing hallId
-    if (updating && body.hallId) {
-      body.rowId = undefined;
-      pushErrorObject(errorObj, 'rowId', 'rowId cannot be changed');
-    }
+    if (updating && body.hallId) preventChangingReferenceIds(body, errorObj);
 
     let { rowId } = body;
 
@@ -113,12 +115,7 @@ const validation = {
     if (error) errorObj = error;
 
     // Prevent changing reference IDs
-    if (updating) {
-      Object.keys(body).forEach(field => {
-        if (field.endsWith('Id'))
-          pushErrorObject(errorObj, field, `${field} cannot be changed`);
-      });
-    }
+    if (updating) preventChangingReferenceIds(body, errorObj);
 
     // Default to 0 to avoid undefined
     const { movieId, cinemaId = 0, hallId = 0, startTime, endTime } = body;
@@ -213,10 +210,7 @@ const validation = {
       }
 
       // Prevent changing reference IDs
-      Object.keys(body).forEach(field => {
-        if (field !== 'status')
-          pushErrorObject(errorObj, field, `${field} cannot be changed`);
-      });
+      preventChangingReferenceIds(body, errorObj);
     }
 
     // Verify that showtime exists
