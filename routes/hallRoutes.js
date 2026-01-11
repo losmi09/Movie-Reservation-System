@@ -4,7 +4,7 @@ import checkIfExists from '../middlewares/checkIfExists.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import * as hallController from '../controllers/hallController.js';
 import * as authMiddleware from '../middlewares/auth.js';
-import { hallSeatRouter as seatRouter } from './seatRoutes.js';
+import { hallRowRouter } from './rowRoutes.js';
 import setParentFilter from '../middlewares/setParentFilter.js';
 
 // Router for nested /cinemas/:id/halls route
@@ -19,12 +19,12 @@ cinemaHallRouter
     hallController.createHall
   );
 
-// Separate router for non-nested route
+// Separate hall router
 export const hallRouter = Router();
 
 hallRouter.use(authMiddleware.protect);
 
-hallRouter.use('/:id/seats', validateId, setParentFilter('hall'), seatRouter);
+hallRouter.use('/:id/rows', validateId, setParentFilter('hall'), hallRowRouter);
 
 hallRouter
   .route('/:id')
