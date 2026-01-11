@@ -15,19 +15,17 @@ const handleUniqueField = (err, res, instance) => {
 
   const fields = { Hall: ['name'], Seat: ['number'], Reservation: ['seatId'] };
 
+  const messages = {
+    Hall: 'Hall with this name in this cinema already exists',
+    Row: 'Row with this label in this hall already exists',
+    Seat: 'Seat with this number in this row already exists',
+  };
+
   const field = fields[modelName] ?? target;
 
-  const message =
-    modelName === 'Reservation'
-      ? 'This seat is reserved'
-      : `${modelName} with this ${field} already exists`;
+  const message = `${modelName} with this ${field} already exists`;
 
-  const error = [
-    {
-      path: field[0],
-      message,
-    },
-  ];
+  const error = [{ path: field[0], message: messages[modelName] ?? message }];
 
   return throwValidationError(res, error, instance);
 };
