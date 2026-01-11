@@ -8,7 +8,8 @@ import * as crudService from '../services/crudService.js';
 // Parent field comes from nested route e.g. /cinemas/:id/halls where is cinema parent to hall
 const parentFields = {
   hall: 'cinemaId',
-  seat: 'hallId',
+  row: 'hallId',
+  seat: 'rowId',
   showtime: 'movieId',
   reservation: 'showtimeId',
 };
