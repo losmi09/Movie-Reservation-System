@@ -1,11 +1,11 @@
 import * as hallRepository from '../repositories/hallRepository.js';
-import * as seatService from './seatService.js';
+import * as rowService from './rowService.js';
 
-export const isSeatRowFull = async (hallId, row) => {
-  const [{ seatsPerRow }, seatsInRow] = await Promise.all([
-    hallRepository.getSeatsPerRow(hallId),
-    seatService.countSeatsInRow(hallId, row),
+export const isHallFullOfRows = async hallId => {
+  const [{ maxRows }, rowsInHall] = await Promise.all([
+    await hallRepository.getMaxRows(hallId),
+    await rowService.getRowsInHall(hallId),
   ]);
 
-  return seatsPerRow <= seatsInRow;
+  return maxRows <= rowsInHall.length;
 };
