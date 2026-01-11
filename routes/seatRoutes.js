@@ -1,21 +1,27 @@
 import { Router } from 'express';
 import validateId from '../middlewares/validateId.js';
+import setParentFilter from '../middlewares/setParentFilter.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import checkIfExists from '../middlewares/checkIfExists.js';
 import * as seatController from '../controllers/seatController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
 // Used for nested /halls/:id/seats route
-export const hallSeatRouter = Router({ mergeParams: true });
+export const rowSeatRouter = Router({ mergeParams: true });
 
-hallSeatRouter.use(authMiddleware.protect);
+rowSeatRouter.use(authMiddleware.protect);
 
-hallSeatRouter
+rowSeatRouter
   .route('/')
-  .get(checkIfExists('hall'), cacheAll('seat'), seatController.getAllSeats)
+  .get(
+    checkIfExists('row'),
+    setParentFilter('row'),
+    cacheAll('seat'),
+    seatController.getAllSeats
+  )
   .post(authMiddleware.restrictTo('admin'), seatController.createSeat);
 
-// Separate router for non-nested routes and /halls/:id/seats route
+// Separate router for non-nested routes
 export const seatRouter = Router();
 
 seatRouter.use(authMiddleware.protect);
