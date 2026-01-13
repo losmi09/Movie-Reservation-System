@@ -1,6 +1,7 @@
 import getMetaData from '../utils/query/getMetaData.js';
 import { invalidateCache } from '../middlewares/caching.js';
 import * as crudRepository from '../repositories/crudRepository.js';
+import * as showtimeService from '../services/showtimeService.js';
 
 export const getAll = async (model, query) => {
   const data = await crudRepository.getAll(model, query);
@@ -14,16 +15,10 @@ export const getOne = async (model, id) =>
   await crudRepository.getOne(model, id);
 
 export const createOne = async (model, data) => {
-  const newObj = {};
+  if (model === 'showtime')
+    showtimeService.convertShowtimeDatesToISOFormat(data);
 
-  // Convert showtime startTime and endTime from ISO 8601 format to date
-  Object.entries(data).forEach(entry => {
-    const [key, value] = entry;
-    if (key === 'startTime' || key === 'endTime') newObj[key] = new Date(value);
-    else newObj[key] = value;
-  });
-
-  const createdDoc = await crudRepository.createOne(model, newObj);
+  const createdDoc = await crudRepository.createOne(model, data);
 
   await invalidateCache(model);
 

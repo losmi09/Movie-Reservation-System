@@ -21,3 +21,8 @@ export const areAllSeatsReserved = async (showtimeId, hallId) => {
 
   return totalHallSeats <= reservedSeats;
 };
+
+export const convertShowtimeDatesToISOFormat = showtimeData => {
+  showtimeData.startTime = new Date(showtimeData.startTime);
+  showtimeData.endTime = new Date(showtimeData.endTime);
+};
