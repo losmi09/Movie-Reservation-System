@@ -4,15 +4,15 @@ import app from './app.js';
 
 const prisma = new PrismaClient();
 
-const cachingClient = async () => {
-  try {
-    return await createClient().connect();
-  } catch (err) {
-    console.error('Redis Client Error: ', err.message);
-  }
+const createRedisClient = async () => {
+  const redisClient = createClient();
+
+  redisClient.on('error', err => console.error('Redis Client Error:', err));
+
+  return await redisClient.connect();
 };
 
-export const redisClient = await cachingClient();
+export const redisClient = await createRedisClient();
 
 const port = process.env.PORT ?? 8000;
 
