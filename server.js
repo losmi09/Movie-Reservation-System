@@ -2,10 +2,20 @@ import { PrismaClient } from '@prisma/client';
 import { createClient } from 'redis';
 import app from './app.js';
 
-process.on('uncaughtException', err => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+const logError = (err, type) => {
+  const error =
+    type === 'exception' ? 'UNCAUGHT EXCEPTION' : 'UNHANDLED REJECTION';
+  console.error(`${error}! 💥 Shutting down...`);
   console.error(`${err.name}: ${err.message}`);
-  process.exit(1);
+};
+
+const port = process.env.PORT ?? 8000;
+
+const server = app.listen(port, () => `Server running on port ${port}...`);
+
+process.on('uncaughtException', err => {
+  logError(err, 'exception');
+  server.close(() => process.exit(1));
 });
 
 const prisma = new PrismaClient();
@@ -15,13 +25,16 @@ const createRedisClient = async () => {
 
   redisClient.on('error', err => console.error('Redis Client Error:', err));
 
-  return await redisClient.connect();
+  await redisClient.connect();
+
+  return redisClient;
 };
 
 export const redisClient = await createRedisClient();
 
-const port = process.env.PORT ?? 8000;
-
-app.listen(port, () => `Server running on port ${port}...`);
+process.on('unhandledRejection', err => {
+  logError(err, 'rejection');
+  server.close(() => process.exit(1));
+});
 
 export default prisma;
