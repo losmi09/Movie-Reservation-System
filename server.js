@@ -2,6 +2,12 @@ import { PrismaClient } from '@prisma/client';
 import { createClient } from 'redis';
 import app from './app.js';
 
+process.on('uncaughtException', err => {
+  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+  console.error(`${err.name}: ${err.message}`);
+  process.exit(1);
+});
+
 const prisma = new PrismaClient();
 
 const createRedisClient = async () => {
