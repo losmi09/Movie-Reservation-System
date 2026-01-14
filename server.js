@@ -11,7 +11,9 @@ const logError = (err, type) => {
 
 const port = process.env.PORT ?? 8000;
 
-const server = app.listen(port, () => `Server running on port ${port}...`);
+const server = app.listen(port, () =>
+  console.log(`Server running on port ${port}...`)
+);
 
 process.on('uncaughtException', err => {
   logError(err, 'exception');
