@@ -1,4 +1,5 @@
 import * as reservationRepository from '../repositories/reservationRepository.js';
+import * as showtimeService from './showtimeService.js';
 
 export const getReservationById = async reservationId =>
   await reservationRepository.getReservationById(reservationId);
@@ -17,3 +18,16 @@ export const cancelReservation = reservationId =>
 
 export const reserveSeatForFirstInWaitlist = (waitlistId, seatId) =>
   reservationRepository.reserveSeatForFirstInWaitlist(waitlistId, seatId);
+
+export const addToWaitlist = async (showtimeId, hallId, data) => {
+  // Check if all seats are reserved
+  const allSeatsReserved = await showtimeService.areAllSeatsReserved(
+    showtimeId,
+    hallId,
+  );
+
+  if (allSeatsReserved) {
+    data.seatId = undefined;
+    data.status = 'waitlist';
+  }
+};
