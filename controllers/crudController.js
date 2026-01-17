@@ -50,8 +50,6 @@ export const createOne = model =>
 
     if (parentId) data[parentId] = Number(req.params.id);
 
-    if (model === 'reservation') data.userId = req.user.id;
-
     const error = await validateBody(model, data);
 
     if (error) return next(error);
@@ -72,7 +70,7 @@ export const updateOne = model =>
     const updatedDoc = await crudService.updateOne(
       model,
       Number(req.params.id),
-      data
+      data,
     );
 
     sendResponse(res, updatedDoc);

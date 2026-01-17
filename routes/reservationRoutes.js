@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import validateId from '../middlewares/validateId.js';
+import setUserId from '../middlewares/setUserId.js';
 import { getUserReservations } from '../middlewares/reservations.js';
 import { checkIfReservationBelongsToUser } from '../middlewares/reservations.js';
 import * as reservationController from '../controllers/reservationController.js';
@@ -12,7 +13,8 @@ reservationRouter.post(
   '/',
   authMiddleware.protect,
   authMiddleware.restrictTo('user'),
-  reservationController.createReservation
+  setUserId,
+  reservationController.createReservation,
 );
 
 export const userReservationRouter = Router(); // Used for /users/me/reservations route
@@ -22,7 +24,7 @@ userReservationRouter.use(authMiddleware.protect);
 userReservationRouter.get(
   '/',
   getUserReservations,
-  reservationController.getAllReservations
+  reservationController.getAllReservations,
 );
 
 userReservationRouter
@@ -30,12 +32,12 @@ userReservationRouter
   .get(
     validateId,
     checkIfReservationBelongsToUser,
-    reservationController.getReservation
+    reservationController.getReservation,
   )
   .patch(
     validateId,
     checkIfReservationBelongsToUser,
-    reservationController.cancelReservation
+    reservationController.cancelReservation,
   );
 
 export const allReservationRouter = Router(); // Used for admin to see all reservations
