@@ -30,3 +30,9 @@ export const reserveSeatForFirstInWaitlist = (waitlistId, seatId) =>
     where: { id: waitlistId },
     data: { seatId, status: 'reserved' },
   });
+
+export const waitlistTransaction = async (reservationId, waitlistId, seatId) =>
+  await prisma.$transaction([
+    cancelReservation(reservationId),
+    reserveSeatForFirstInWaitlist(waitlistId, seatId),
+  ]);
