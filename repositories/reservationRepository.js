@@ -13,9 +13,9 @@ export const getReservation = async (showtimeId, seatId) =>
 export const countShowtimeReservations = async showtimeId =>
   await prisma.reservation.count({ where: { showtimeId, status: 'reserved' } });
 
-export const getFirstInWaitlist = async () =>
+export const getFirstInWaitlist = async showtimeId =>
   await prisma.reservation.findFirst({
-    where: { status: 'waitlist' },
+    where: { showtimeId, status: 'waitlist' },
     orderBy: { id: 'asc' },
   });
 

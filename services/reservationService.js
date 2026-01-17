@@ -9,8 +9,8 @@ export const getReservation = async (showtimeId, seatId) =>
 export const countShowtimeReservations = async showtimeId =>
   await reservationRepository.countShowtimeReservations(showtimeId);
 
-export const getFirstInWaitlist = async () =>
-  await reservationRepository.getFirstInWaitlist();
+export const getFirstInWaitlist = async showtimeId =>
+  await reservationRepository.getFirstInWaitlist(showtimeId);
 
 export const cancelReservation = reservationId =>
   reservationRepository.cancelReservation(reservationId);
