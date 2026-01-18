@@ -1,9 +1,9 @@
-import reservationSchema from '../schemas/reservationSchema.js';
-import validateSchema from '../utils/validation/validateSchema.js';
-import pushValidationError from '../utils/validation/pushValidationError.js';
-import * as crudRepository from '../repositories/crudRepository.js';
-import * as showtimeService from '../services/showtimeService.js';
-import * as reservationService from '../services/reservationService.js';
+import reservationSchema from '../../schemas/reservationSchema.js';
+import validateSchema from '../../utils/validation/validateSchema.js';
+import pushValidationError from '../../utils/validation/pushValidationError.js';
+import * as crudRepository from '../../repositories/crudRepository.js';
+import * as showtimeService from '../../services/showtimeService.js';
+import * as reservationService from '../../services/reservationService.js';
 
 const validateReservation = async (body, isUpdating, reservationId) => {
   const errorObj = validateSchema(reservationSchema, body, isUpdating);

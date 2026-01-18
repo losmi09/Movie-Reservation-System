@@ -1,8 +1,8 @@
-import showtimeSchema from '../schemas/showtimeSchema.js';
-import validateSchema from '../utils/validation/validateSchema.js';
-import pushValidationError from '../utils/validation/pushValidationError.js';
-import * as crudRepository from '../repositories/crudRepository.js';
-import * as showtimeService from '../services/showtimeService.js';
+import showtimeSchema from '../../schemas/showtimeSchema.js';
+import validateSchema from '../../utils/validation/validateSchema.js';
+import pushValidationError from '../../utils/validation/pushValidationError.js';
+import * as crudRepository from '../../repositories/crudRepository.js';
+import * as showtimeService from '../../services/showtimeService.js';
 
 const getReferences = async (movieId, cinemaId, hallId) =>
   await Promise.all([
@@ -22,7 +22,7 @@ const checkIfEveryReferenceExists = (foundReferences, body, errorObj) => {
       pushValidationError(
         errorObj,
         reference,
-        `No ${reference.slice(0, -2)} found with this ID`
+        `No ${reference.slice(0, -2)} found with this ID`,
       );
   });
 };
@@ -34,6 +34,7 @@ const checkIfInvalidTimeProvided = errorsArray =>
   });
 
 const validateShowtime = async (data, isUpdating) => {
+  console.log({ data });
   const errorObj = validateSchema(showtimeSchema, data, isUpdating);
 
   // Default to 0 to avoid undefined
@@ -52,7 +53,7 @@ const validateShowtime = async (data, isUpdating) => {
       pushValidationError(
         errorObj,
         'hallId',
-        'Hall with this ID does not belong to this cinema'
+        'Hall with this ID does not belong to this cinema',
       );
   }
 
@@ -64,14 +65,14 @@ const validateShowtime = async (data, isUpdating) => {
       cinemaId,
       hallId,
       new Date(startTime),
-      new Date(endTime)
+      new Date(endTime),
     );
 
     if (isShowtimeOngoing)
       pushValidationError(
         errorObj,
         'startTime',
-        'Hall already has an active showtime in the given time range'
+        'Hall already has an active showtime in the given time range',
       );
   }
 

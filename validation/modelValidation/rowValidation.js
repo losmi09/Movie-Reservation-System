@@ -1,8 +1,8 @@
-import rowSchema from '../schemas/rowSchema.js';
-import pushValidationError from '../utils/validation/pushValidationError.js';
-import validateSchema from '../utils/validation/validateSchema.js';
-import checkIfParentExists from '../utils/validation/checkIfParentExists.js';
-import * as hallService from '../services/hallService.js';
+import rowSchema from '../../schemas/rowSchema.js';
+import pushValidationError from '../../utils/validation/pushValidationError.js';
+import validateSchema from '../../utils/validation/validateSchema.js';
+import checkIfParentExists from '../../utils/validation/checkIfParentExists.js';
+import * as hallService from '../../services/hallService.js';
 
 const validateRow = async (data, isUpdating) => {
   const errorObj = validateSchema(rowSchema, data, isUpdating);
