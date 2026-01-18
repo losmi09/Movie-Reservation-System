@@ -1,6 +1,6 @@
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
-import validateBody from '../utils/validateBody.js';
+import validateBody from '../validation/validateBody.js';
 import sendResponse from '../utils/sendResponse.js';
 import { redisClient } from '../server.js';
 import * as crudService from '../services/crudService.js';
