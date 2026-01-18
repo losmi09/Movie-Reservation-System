@@ -34,7 +34,6 @@ const checkIfInvalidTimeProvided = errorsArray =>
   });
 
 const validateShowtime = async (data, isUpdating) => {
-  console.log({ data });
   const errorObj = validateSchema(showtimeSchema, data, isUpdating);
 
   // Default to 0 to avoid undefined

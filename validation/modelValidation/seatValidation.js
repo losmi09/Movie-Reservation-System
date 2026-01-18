@@ -10,8 +10,6 @@ const validateSeat = async (data, isUpdating) => {
   if (!isUpdating) {
     const { rowId } = data;
 
-    console.log({ rowId });
-
     // Verify that parent hall exists
     const row = await checkIfParentExists('row', rowId, errorObj);
 

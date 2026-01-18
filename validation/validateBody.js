@@ -28,7 +28,6 @@ const validation = {
 };
 
 const validateBody = async (model, body, isUpdating = false, id) => {
-  console.log({ model });
   const error = await validation[model](body, isUpdating, id);
 
   if (!error) return;
