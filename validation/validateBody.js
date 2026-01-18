@@ -1,10 +1,10 @@
 import movieSchema from '../schemas/movieSchema.js';
 import cinemaSchema from '../schemas/cinemaSchema.js';
-import validateHall from '../validation/hallValidation.js';
-import validateRow from '../validation/rowValidation.js';
-import validateSeat from '../validation/seatValidation.js';
-import validateShowtime from '../validation/showtimeValidation.js';
-import validateReservation from '../validation/reservationValidation.js';
+import validateHall from './modelValidation/hallValidation.js';
+import validateRow from './modelValidation/rowValidation.js';
+import validateSeat from './modelValidation/seatValidation.js';
+import validateShowtime from './modelValidation/showtimeValidation.js';
+import validateReservation from './modelValidation/reservationValidation.js';
 
 // When updating, required-field validation errors are ignored
 const excludeRequiredErrors = error =>
@@ -28,6 +28,7 @@ const validation = {
 };
 
 const validateBody = async (model, body, isUpdating = false, id) => {
+  console.log({ model });
   const error = await validation[model](body, isUpdating, id);
 
   if (!error) return;
