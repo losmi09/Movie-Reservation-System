@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import bcrypt from 'bcrypt';
+import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import AppError from '../utils/appError.js';
 import * as userRepository from '../repositories/userRepository.js';
@@ -39,10 +39,7 @@ const verifyToken = async (token, tokenType) => {
   }
 };
 
-const hashPassword = async password => {
-  const SALT_ROUNDS = 12;
-  return await bcrypt.hash(password, SALT_ROUNDS);
-};
+const hashPassword = async password => await argon2.hash(password);
 
 export const hashToken = token =>
   crypto.createHash('sha256').update(token).digest('hex');
@@ -54,7 +51,7 @@ export const createToken = () => {
 };
 
 export const comparePasswords = async (password, userPassword) =>
-  await bcrypt.compare(password, userPassword);
+  await argon2.verify(password, userPassword);
 
 export const checkForPasswordChange = (JWTTimestamp, passwordChangeTimestamp) =>
   new Date(JWTTimestamp * 1000) < new Date(passwordChangeTimestamp);
@@ -102,7 +99,7 @@ export const register = async userData => {
 export const login = async (email, password) => {
   const user = await userRepository.findUserByEmail(email);
 
-  if (!user || !(await comparePasswords(password, user.password)))
+  if (!user || !(await comparePasswords(user.password, password)))
     throw new AppError('Incorrect email or password', 401);
 
   if (!user.isActive) await userRepository.activateUser(user.id);
@@ -119,7 +116,7 @@ export const refreshToken = async token => {
 
   const user = await userRepository.findUserByRefreshToken(
     userId,
-    hashedRefreshToken
+    hashedRefreshToken,
   );
 
   // Token reuse detected
@@ -183,7 +180,7 @@ export const forgotPassword = async email => {
 
     throw new AppError(
       'Password reset email failed. Please try again later',
-      500
+      500,
     );
   }
 };
@@ -203,7 +200,7 @@ export const resetPassword = async (token, password, passwordConfirm) => {
 
   const { error } = passwordSchema.validate(
     { passwordCurrent, password, passwordConfirm },
-    { abortEarly: false }
+    { abortEarly: false },
   );
 
   if (error) throw error;
