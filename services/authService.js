@@ -50,8 +50,8 @@ export const createToken = () => {
   return { token, hashedToken };
 };
 
-export const comparePasswords = async (password, userPassword) =>
-  await argon2.verify(password, userPassword);
+export const comparePasswords = async (providedPassword, userPassword) =>
+  await argon2.verify(providedPassword, userPassword);
 
 export const checkForPasswordChange = (JWTTimestamp, passwordChangeTimestamp) =>
   new Date(JWTTimestamp * 1000) < new Date(passwordChangeTimestamp);
@@ -96,10 +96,10 @@ export const register = async userData => {
   return sanitizedUser;
 };
 
-export const login = async (email, password) => {
+export const login = async (email, providedPassword) => {
   const user = await userRepository.findUserByEmail(email);
 
-  if (!user || !(await comparePasswords(user.password, password)))
+  if (!user || !(await comparePasswords(user.password, providedPassword)))
     throw new AppError('Incorrect email or password', 401);
 
   if (!user.isActive) await userRepository.activateUser(user.id);
@@ -185,7 +185,7 @@ export const forgotPassword = async email => {
   }
 };
 
-export const resetPassword = async (token, password, passwordConfirm) => {
+export const resetPassword = async (token, newPassword, passwordConfirm) => {
   const hashedToken = hashToken(token);
 
   const user = await userRepository.findUserByPasswordResetToken(hashedToken);
@@ -195,32 +195,32 @@ export const resetPassword = async (token, password, passwordConfirm) => {
 
   let passwordCurrent = 'somestring';
 
-  if (await comparePasswords(String(password), user.password))
-    passwordCurrent = password;
+  if (await comparePasswords(user.password, String(newPassword)))
+    passwordCurrent = newPassword;
 
   const { error } = passwordSchema.validate(
-    { passwordCurrent, password, passwordConfirm },
+    { passwordCurrent, newPassword, passwordConfirm },
     { abortEarly: false },
   );
 
   if (error) throw error;
 
-  await setPassword(user.id, password);
+  await setPassword(user.id, newPassword);
 
   const sanitizedUser = sanitizeOutput(user);
 
   return sanitizedUser;
 };
 
-export const updatePassword = async (userId, passwordCurrent, password) => {
+export const updatePassword = async (userId, passwordCurrent, newPassword) => {
   const user = await userRepository.findUserById(userId);
 
   if (!user) throw new AppError('User does no longer exist', 404);
 
-  if (!(await comparePasswords(passwordCurrent, user.password)))
+  if (!(await comparePasswords(user.password, passwordCurrent)))
     throw new AppError('Your current password is incorrect', 401);
 
-  await setPassword(user.id, password);
+  await setPassword(user.id, newPassword);
 
   const sanitizedUser = sanitizeOutput(user);
 

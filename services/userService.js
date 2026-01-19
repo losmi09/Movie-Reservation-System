@@ -29,14 +29,14 @@ export const updateCurrentUser = async (userId, data) => {
   return sanitizedUser;
 };
 
-export const deactivateCurrentUser = async (userId, password) => {
+export const deactivateCurrentUser = async (userId, providedPassword) => {
   const user = await userRepository.findUserById(userId);
 
   if (!user) throw new AppError('User does no longer exist', 404);
 
   if (!user.isActive) return;
 
-  if (!(await comparePasswords(password, user.password)))
+  if (!(await comparePasswords(user.password, providedPassword)))
     throw new AppError('Your current password is incorrect', 401);
 
   await userRepository.deactivateUser(userId);
