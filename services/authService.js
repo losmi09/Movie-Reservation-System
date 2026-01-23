@@ -99,7 +99,13 @@ export const register = async userData => {
 export const login = async (email, providedPassword) => {
   const user = await userRepository.findUserByEmail(email);
 
-  if (!user || !(await comparePasswords(user.password, providedPassword)))
+  const DUMMY_HASH =
+    '$argon2id$v=19$m=65536,t=3,p=4$G8NYSxrA+UMGHJbZVIXXXQ$UrHyBcYfCEms+92QVzGmfYqrWtH54WJY9FuROBQi/X8';
+
+  // If no user is found with provided email, use dummy hash to prevent timing attack
+  const userPassword = user?.password ?? DUMMY_HASH;
+
+  if (!(await comparePasswords(userPassword, providedPassword)))
     throw new AppError('Incorrect email or password', 401);
 
   if (!user.isActive) await userRepository.activateUser(user.id);
