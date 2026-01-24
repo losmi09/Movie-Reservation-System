@@ -12,6 +12,7 @@ model Movie {
   title       String     @unique @db.VarChar(255)
   description String     @db.VarChar(255)
   posterImage String     @default("default.jpg") @map("poster_image") @db.Text
+  slug        String     @db.VarChar(255)
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
   Showtime    Showtime[]
@@ -52,6 +53,7 @@ model Cinema {
   address   String     @db.VarChar(255)
   phone     String     @unique @db.VarChar(255)
   email     String     @unique @db.VarChar(255)
+  slug      String     @db.VarChar(255)
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
   halls     Hall[]
