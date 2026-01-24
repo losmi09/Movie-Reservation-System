@@ -1,9 +1,9 @@
 import Joi from 'joi';
 
 const showtimeSchema = Joi.object({
-  movieId: Joi.number().required().integer().positive(),
-  cinemaId: Joi.number().required().integer().positive(),
-  hallId: Joi.number().required().integer().positive(),
+  movieId: Joi.string().guid(),
+  cinemaId: Joi.string().guid(),
+  hallId: Joi.string().guid(),
   startTime: Joi.date().required().greater('now'),
   endTime: Joi.date().required().min(Joi.ref('startTime')),
   language: Joi.string().trim(),

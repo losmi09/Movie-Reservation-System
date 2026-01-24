@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 const seatSchema = Joi.object({
-  rowId: Joi.number().positive().integer(),
+  rowId: Joi.string().guid(),
   number: Joi.number().required().integer().positive().max(20),
 });
 
