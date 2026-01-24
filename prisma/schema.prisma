@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Movie {
-  id          Int        @id @default(autoincrement())
+  id          String     @id @default(uuid())
   title       String     @unique @db.VarChar(255)
   description String     @db.VarChar(255)
   posterImage String     @default("default.jpg") @map("poster_image") @db.Text
@@ -21,7 +21,7 @@ model Movie {
 }
 
 model User {
-  id                           Int           @id @default(autoincrement())
+  id                           String        @id @default(uuid())
   firstName                    String        @map("first_name") @db.VarChar(255)
   lastName                     String        @map("last_name") @db.VarChar(255)
   email                        String        @unique @db.VarChar(255)
@@ -47,7 +47,7 @@ enum Role {
 }
 
 model Cinema {
-  id        Int        @id @default(autoincrement())
+  id        String     @id @default(uuid())
   name      String     @unique @db.VarChar(255)
   city      String     @db.VarChar(255)
   address   String     @db.VarChar(255)
@@ -64,10 +64,10 @@ model Cinema {
 }
 
 model Hall {
-  id        Int        @id @default(autoincrement())
+  id        String     @id @default(uuid())
   name      String     @db.VarChar(255)
   maxRows   Int        @map("max_rows")
-  cinemaId  Int        @map("cinema_id")
+  cinemaId  String     @map("cinema_id")
   cinema    Cinema     @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
@@ -79,10 +79,10 @@ model Hall {
 }
 
 model Row {
-  id           Int    @id @default(autoincrement())
+  id           String @id @default(uuid())
   label        String @db.VarChar(255)
   seatCapacity Int    @map("seat_capacity")
-  hallId       Int    @map("hall_id")
+  hallId       String @map("hall_id")
   hall         Hall   @relation(fields: [hallId], references: [id], onDelete: Cascade)
   Seat         Seat[]
 
@@ -91,8 +91,8 @@ model Row {
 }
 
 model Seat {
-  id          Int           @id @default(autoincrement())
-  rowId       Int           @map("row_id")
+  id          String        @id @default(uuid())
+  rowId       String        @map("row_id")
   row         Row           @relation(fields: [rowId], references: [id], onDelete: Cascade)
   number      Int
   Reservation Reservation[]
@@ -102,12 +102,12 @@ model Seat {
 }
 
 model Showtime {
-  id          Int           @id @default(autoincrement())
-  movieId     Int           @map("movie_id")
+  id          String        @id @default(uuid())
+  movieId     String        @map("movie_id")
   movie       Movie         @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  cinemaId    Int           @map("cinema_id")
+  cinemaId    String        @map("cinema_id")
   cinema      Cinema        @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
-  hallId      Int           @map("hall_id")
+  hallId      String        @map("hall_id")
   hall        Hall          @relation(fields: [hallId], references: [id], onDelete: Cascade)
   startTime   DateTime      @map("start_time")
   endTime     DateTime      @map("end_time")
@@ -120,12 +120,12 @@ model Showtime {
 }
 
 model Reservation {
-  id         Int      @id @default(autoincrement())
-  showtimeId Int      @map("showtime_id")
+  id         String   @id @default(uuid())
+  showtimeId String   @map("showtime_id")
   showtime   Showtime @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
-  seatId     Int?     @map("seat_id")
+  seatId     String?  @map("seat_id")
   seat       Seat?    @relation(fields: [seatId], references: [id], onDelete: Cascade)
-  userId     Int      @map("user_id")
+  userId     String   @map("user_id")
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   status     Status   @default(reserved)
 
