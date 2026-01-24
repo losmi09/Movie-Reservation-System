@@ -1,3 +1,4 @@
+import slugify from 'slugify';
 import getMetaData from '../utils/query/getMetaData.js';
 import { invalidateCache } from '../middlewares/caching.js';
 import * as crudRepository from '../repositories/crudRepository.js';
@@ -15,6 +16,18 @@ export const getAll = async (model, query) => {
 export const getOne = async (model, id) =>
   await crudRepository.getOne(model, id);
 
+const addSlugToData = (model, data) => {
+  const slugs = { movie: 'title', cinema: 'name' };
+
+  const slugField = slugs[model];
+
+  const value = data[slugField];
+
+  if (!slugField || !value) return;
+
+  data.slug = slugify(value, { lower: true });
+};
+
 export const createOne = async (model, data) => {
   if (model === 'showtime')
     showtimeService.convertShowtimeDatesToISOFormat(data);
@@ -28,6 +41,8 @@ export const createOne = async (model, data) => {
     await reservationService.addToWaitlist(showtimeId, hallId, data);
   }
 
+  addSlugToData(model, data);
+
   const createdDoc = await crudRepository.createOne(model, data);
 
   await invalidateCache(model);
@@ -38,6 +53,8 @@ export const createOne = async (model, data) => {
 export const updateOne = async (model, id, data) => {
   if (model === 'reservation')
     await reservationService.handleReservationCancellation(id);
+
+  addSlugToData(model, data);
 
   const updatedDoc = await crudRepository.updateOne(model, id, data);
 
