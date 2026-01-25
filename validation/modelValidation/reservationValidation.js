@@ -1,6 +1,7 @@
 import reservationSchema from '../../schemas/reservationSchema.js';
 import validateSchema from '../../utils/validation/validateSchema.js';
 import pushValidationError from '../../utils/validation/pushValidationError.js';
+import checkIfForeignKeysAreValid from '../../utils/validation/checkIfForeignKeysAreValid.js';
 import * as crudRepository from '../../repositories/crudRepository.js';
 import * as showtimeService from '../../services/showtimeService.js';
 import * as reservationService from '../../services/reservationService.js';
@@ -42,7 +43,8 @@ const validateReservation = async (body, isUpdating, reservationId) => {
     pushValidationError(errorObj, field, errorMessage);
   }
 
-  if (seatId) {
+  // Verify that seatId is provided and that it is a valid UUID
+  if (seatId && checkIfForeignKeysAreValid(errorObj.details)) {
     // Verify that seat exists
     const seat = await crudRepository.getOne('seat', seatId);
 
