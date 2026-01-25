@@ -12,12 +12,12 @@ export const checkIfReservationBelongsToUser = catchAsync(
   async (req, res, next) => {
     const reservation = await crudRepository.getOne(
       'reservation',
-      Number(req.params.id)
+      req.params.id,
     );
 
     if (reservation?.userId !== req.user.id)
       return next(new AppError('No reservation found with this ID', 404));
 
     next();
-  }
+  },
 );

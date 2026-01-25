@@ -28,7 +28,7 @@ export const getAll = model =>
 
 export const getOne = model =>
   catchAsync(async (req, res, next) => {
-    const doc = await crudService.getOne(model, Number(req.params.id));
+    const doc = await crudService.getOne(model, req.params.id);
 
     if (!doc) return next(new AppError(`No ${model} found with this ID`, 404));
 
@@ -48,7 +48,7 @@ export const createOne = model =>
 
     const parentId = parentFields[model];
 
-    if (parentId) data[parentId] = Number(req.params.id);
+    if (parentId) data[parentId] = req.params.id;
 
     const error = await validateBody(model, data);
 
@@ -63,22 +63,18 @@ export const updateOne = model =>
   catchAsync(async (req, res, next) => {
     const { body: data } = req;
 
-    const error = await validateBody(model, data, true, Number(req.params.id));
+    const error = await validateBody(model, data, true, req.params.id);
 
     if (error) return next(error);
 
-    const updatedDoc = await crudService.updateOne(
-      model,
-      Number(req.params.id),
-      data,
-    );
+    const updatedDoc = await crudService.updateOne(model, req.params.id, data);
 
     sendResponse(res, updatedDoc);
   });
 
 export const deleteOne = model =>
   catchAsync(async (req, res) => {
-    await crudService.deleteOne(model, Number(req.params.id));
+    await crudService.deleteOne(model, req.params.id);
 
     res.status(204).end();
   });

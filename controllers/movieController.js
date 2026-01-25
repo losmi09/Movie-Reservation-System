@@ -17,8 +17,8 @@ export const saveMoviePoster = catchAsync(async (req, res, next) => {
   if (!req.file) return next(new AppError('No image provided', 422));
 
   const movie = await movieService.saveMoviePoster(
-    Number(req.params.id),
-    req.file.fileName
+    req.params.id,
+    req.file.fileName,
   );
 
   res.status(200).json({ data: movie });
