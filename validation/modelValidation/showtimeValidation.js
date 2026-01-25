@@ -1,6 +1,7 @@
 import showtimeSchema from '../../schemas/showtimeSchema.js';
 import validateSchema from '../../utils/validation/validateSchema.js';
 import pushValidationError from '../../utils/validation/pushValidationError.js';
+import checkIfForeignKeysAreValid from '../../utils/validation/checkIfForeignKeysAreValid.js';
 import * as crudRepository from '../../repositories/crudRepository.js';
 import * as showtimeService from '../../services/showtimeService.js';
 
@@ -36,10 +37,12 @@ const checkIfInvalidTimeProvided = errorsArray =>
 const validateShowtime = async (data, isUpdating) => {
   const errorObj = validateSchema(showtimeSchema, data, isUpdating);
 
-  // Default to 0 to avoid undefined
-  const { movieId, cinemaId = 0, hallId = 0, startTime, endTime } = data;
+  // Default to '' to avoid undefined
+  const { movieId, cinemaId = '', hallId = '', startTime, endTime } = data;
 
-  if (!isUpdating) {
+  const areForeignKeysValid = checkIfForeignKeysAreValid(errorObj.details);
+
+  if (!isUpdating && areForeignKeysValid) {
     // Verify that every showtime reference exists
     const references = await getReferences(movieId, cinemaId, hallId);
 
@@ -59,7 +62,7 @@ const validateShowtime = async (data, isUpdating) => {
   const invalidTime = checkIfInvalidTimeProvided(errorObj.details);
 
   // Verify that hall does not have an active showtime in the given time range
-  if (!invalidTime) {
+  if (!invalidTime && areForeignKeysValid) {
     const isShowtimeOngoing = await showtimeService.isShowtimeOngoing(
       cinemaId,
       hallId,
