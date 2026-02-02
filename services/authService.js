@@ -42,7 +42,10 @@ const verifyToken = async (token, tokenType) => {
 const hashPassword = async password => await argon2.hash(password);
 
 export const hashToken = token =>
-  crypto.createHash('sha256').update(token).digest('hex');
+  crypto
+    .createHmac('sha256', process.env.TOKEN_SECRET)
+    .update(token)
+    .digest('hex');
 
 export const createToken = () => {
   const token = crypto.randomBytes(32).toString('hex');
@@ -205,7 +208,7 @@ export const resetPassword = async (token, newPassword, passwordConfirm) => {
     passwordCurrent = newPassword;
 
   const { error } = passwordSchema.validate(
-    { passwordCurrent, newPassword, passwordConfirm },
+    { passwordCurrent, password: newPassword, passwordConfirm },
     { abortEarly: false },
   );
 
