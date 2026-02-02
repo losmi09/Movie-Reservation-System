@@ -53,8 +53,8 @@ export const createToken = () => {
   return { token, hashedToken };
 };
 
-export const comparePasswords = async (providedPassword, userPassword) =>
-  await argon2.verify(providedPassword, userPassword);
+export const comparePasswords = async (userPassword, providedPassword) =>
+  await argon2.verify(userPassword, providedPassword);
 
 export const checkForPasswordChange = (JWTTimestamp, passwordChangeTimestamp) =>
   new Date(JWTTimestamp * 1000) < new Date(passwordChangeTimestamp);
