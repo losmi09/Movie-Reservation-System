@@ -6,20 +6,20 @@ import * as userRepository from '../repositories/userRepository.js';
 import { loginSchema } from '../schemas/userSchema.js';
 import { passwordSchema, emailSchema } from '../schemas/userSchema.js';
 
+const cookieOptions = {
+  httpOnly: true, // Ensure cookie is inaccessible via JavaScript on the client side
+  secure: process.env.NODE_ENV === 'production', // Cookie is sent over HTTPS, not HTTP
+  sameSite: 'Lax', // Allow cookie on top-level cross-site navigations (mainly GET)
+};
+
 const sendRefreshTokenCookie = (res, refreshToken) =>
   res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'Strict',
+    ...cookieOptions,
     expires: new Date(Date.now() + Number(process.env.COOKIE_EXPIRES_IN)),
   });
 
 const clearRefreshTokenCookie = res =>
-  res.clearCookie('refreshToken', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'Strict',
-  });
+  res.clearCookie('refreshToken', cookieOptions);
 
 const invalidateRefreshToken = async (res, userId) => {
   clearRefreshTokenCookie(res);
