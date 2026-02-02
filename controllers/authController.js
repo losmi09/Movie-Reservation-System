@@ -53,7 +53,7 @@ export const login = catchAsync(async (req, res, next) => {
 
   const { error } = loginSchema.validate(
     { email, password },
-    { abortEarly: false }
+    { abortEarly: false },
   );
 
   if (error) return next(error);
@@ -64,7 +64,7 @@ export const login = catchAsync(async (req, res, next) => {
 });
 
 export const logout = catchAsync(async (req, res) => {
-  invalidateRefreshToken(res, req.user.id);
+  await invalidateRefreshToken(res, req.user.id);
 
   res.status(204).end();
 });
@@ -77,9 +77,8 @@ export const refreshToken = catchAsync(async (req, res, next) => {
 
   clearRefreshTokenCookie(res);
 
-  const { newAccessToken, newRefreshToken } = await authService.refreshToken(
-    refreshToken
-  );
+  const { newAccessToken, newRefreshToken } =
+    await authService.refreshToken(refreshToken);
 
   sendRefreshTokenCookie(res, newRefreshToken);
 
@@ -120,10 +119,10 @@ export const resetPassword = catchAsync(async (req, res) => {
   const user = await authService.resetPassword(
     req.params.token,
     req.body.password,
-    req.body.passwordConfirm
+    req.body.passwordConfirm,
   );
 
-  invalidateRefreshToken(res, user.id);
+  await invalidateRefreshToken(res, user.id);
 
   sendPasswordUpdate(res, user);
 });
@@ -133,7 +132,7 @@ export const updateUserPassword = catchAsync(async (req, res, next) => {
 
   const { error } = passwordSchema.validate(
     { passwordCurrent, password, passwordConfirm },
-    { abortEarly: false }
+    { abortEarly: false },
   );
 
   if (error) return next(error);
@@ -141,10 +140,10 @@ export const updateUserPassword = catchAsync(async (req, res, next) => {
   const user = await authService.updatePassword(
     req.user.id,
     passwordCurrent,
-    password
+    password,
   );
 
-  invalidateRefreshToken(res, req.user.id);
+  await invalidateRefreshToken(res, req.user.id);
 
   sendPasswordUpdate(res, user);
 });
