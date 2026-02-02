@@ -3,7 +3,9 @@ const convertNumericStringsToNumbers = obj => {
 
   Object.entries(obj).forEach(entry => {
     const [key, value] = entry;
-    if (Number.isInteger(Number(value))) newObj[key] = Number(value);
+    const convertedToNumber = Number(value);
+    if (Number.isFinite(convertedToNumber) && !(value instanceof Date))
+      newObj[key] = convertedToNumber;
     else newObj[key] = value;
   });
 
