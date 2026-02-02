@@ -88,7 +88,7 @@ export const refreshToken = catchAsync(async (req, res, next) => {
 export const verifyEmail = catchAsync(async (req, res) => {
   const user = await authService.verifyEmail(req.params.token);
 
-  await res.status(200).json({
+  res.status(200).json({
     message: 'Email address has been successfully verified',
     data: { ...user, verifiedAt: new Date() },
   });
