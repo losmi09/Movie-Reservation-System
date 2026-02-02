@@ -57,7 +57,7 @@ export const comparePasswords = async (userPassword, providedPassword) =>
   await argon2.verify(userPassword, providedPassword);
 
 export const checkForPasswordChange = (JWTTimestamp, passwordChangeTimestamp) =>
-  new Date(JWTTimestamp * 1000) < new Date(passwordChangeTimestamp);
+  new Date(JWTTimestamp * 1000) < new Date(passwordChangeTimestamp); // Multiply JWT timestamp by 1000 because it is in seconds and Date constructor expects milliseconds
 
 const setPassword = async (userId, password) => {
   const hashedPassword = await hashPassword(password);
@@ -202,8 +202,10 @@ export const resetPassword = async (token, newPassword, passwordConfirm) => {
   if (!user)
     throw new AppError('Password reset token is invalid or has expired', 400);
 
+  // Default to some random string so passwordSchema validation won't throw an error that passwordCurrent is required. It checks if new password is not the same as current
   let passwordCurrent = 'somestring';
 
+  // Ensure that new password is not the same as current one
   if (await comparePasswords(user.password, String(newPassword)))
     passwordCurrent = newPassword;
 
