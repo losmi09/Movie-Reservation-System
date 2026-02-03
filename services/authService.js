@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import AppError from '../utils/appError.js';
 import * as userRepository from '../repositories/userRepository.js';
 import * as emailService from '../services/emailService.js';
+import * as redisService from '../services/redisService.js';
 import { passwordSchema } from '../schemas/userSchema.js';
 import sanitizeOutput from '../utils/sanitizeOutput.js';
 
@@ -71,7 +72,7 @@ export const prepareAccessAndRefreshToken = async userId => {
 
   const hashedRefreshToken = hashToken(refreshToken);
 
-  await userRepository.setRefreshToken(userId, hashedRefreshToken);
+  await redisService.setRefreshToken(userId, hashedRefreshToken);
 
   return { accessToken, refreshToken };
 };
@@ -123,18 +124,23 @@ export const refreshToken = async token => {
 
   const hashedRefreshToken = hashToken(token);
 
-  const user = await userRepository.findUserByRefreshToken(
-    userId,
-    hashedRefreshToken,
+  const storedToken = await redisService.getRefreshToken(userId);
+
+  // Prevent timming attack, even though it is currently impossible due to token rotation
+  const isMatch = crypto.timingSafeEqual(
+    Buffer.from(storedToken),
+    Buffer.from(hashedRefreshToken),
   );
 
   // Token reuse detected
-  if (!user) {
-    await userRepository.revokeRefreshToken(userId);
-    throw new AppError('You cannot use the same refresh token twice', 403);
+  if (!isMatch) {
+    await redisService.revokeRefreshToken(userId);
+    throw new AppError('Invalid refresh token', 401);
   }
 
-  if (!user.isActive) throw new AppError('Your account is deactivated', 403);
+  const { isActive } = await userRepository.findUserById(userId);
+
+  if (!isActive) throw new AppError('Your account is deactivated', 403);
 
   const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
     await prepareAccessAndRefreshToken(userId);

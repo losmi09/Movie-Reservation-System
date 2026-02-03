@@ -2,7 +2,7 @@ import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import userSchema from '../schemas/userSchema.js';
 import * as authService from '../services/authService.js';
-import * as userRepository from '../repositories/userRepository.js';
+import * as redisService from '../services/redisService.js';
 import { loginSchema } from '../schemas/userSchema.js';
 import { passwordSchema, emailSchema } from '../schemas/userSchema.js';
 
@@ -24,7 +24,7 @@ const clearRefreshTokenCookie = res =>
 const invalidateRefreshToken = async (res, userId) => {
   clearRefreshTokenCookie(res);
 
-  await userRepository.revokeRefreshToken(userId);
+  await redisService.revokeRefreshToken(userId);
 };
 
 const sendAuthResponse = async (res, user, statusCode) => {
