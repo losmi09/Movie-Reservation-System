@@ -1,9 +1,9 @@
 import slugify from 'slugify';
 import getMetaData from '../utils/query/getMetaData.js';
-import { invalidateCache } from '../middlewares/caching.js';
 import * as crudRepository from '../repositories/crudRepository.js';
 import * as showtimeService from '../services/showtimeService.js';
 import * as reservationService from '../services/reservationService.js';
+import * as redisService from '../services/redisService.js';
 
 export const getAll = async (model, query) => {
   const data = await crudRepository.getAll(model, query);
@@ -45,7 +45,7 @@ export const createOne = async (model, data) => {
 
   const createdDoc = await crudRepository.createOne(model, data);
 
-  await invalidateCache(model);
+  await redisService.invalidateCache(model);
 
   return createdDoc;
 };
@@ -58,7 +58,7 @@ export const updateOne = async (model, id, data) => {
 
   const updatedDoc = await crudRepository.updateOne(model, id, data);
 
-  await invalidateCache(model);
+  await redisService.invalidateCache(model);
 
   return updatedDoc;
 };
@@ -66,5 +66,5 @@ export const updateOne = async (model, id, data) => {
 export const deleteOne = async (model, id) => {
   await crudRepository.deleteOne(model, id);
 
-  await invalidateCache(model);
+  await redisService.invalidateCache(model);
 };
