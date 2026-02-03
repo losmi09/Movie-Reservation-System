@@ -49,10 +49,3 @@ export const cacheOne = model =>
 
     next();
   });
-
-export const invalidateCache = async model => {
-  // Find all keys that start with the model name (e.g. movie:12, movie:list:<hash>)
-  const keys = await redisClient.keys(`${model}:*`);
-
-  if (keys.length) await redisClient.del(keys);
-};
