@@ -19,6 +19,7 @@ const handleUniqueField = (err, res, instance) => {
     Hall: 'Hall with this name in this cinema already exists',
     Row: 'Row with this label in this hall already exists',
     Seat: 'Seat with this number in this row already exists',
+    Reservation: 'This seat is reserved',
   };
 
   const field = fields[modelName] ?? target;
@@ -41,7 +42,7 @@ export const throwValidationError = (res, error, instance) => {
   const errorObj = { errors: {} };
 
   error.forEach(
-    err => (errorObj.errors[err.path] = [err.message.replaceAll('"', '')])
+    err => (errorObj.errors[err.path] = [err.message.replaceAll('"', '')]),
   );
 
   res.status(422).json({
