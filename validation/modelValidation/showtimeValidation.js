@@ -48,10 +48,10 @@ const validateShowtime = async (data, isUpdating) => {
 
     checkIfEveryReferenceExists(references, data, errorObj);
 
-    const [, , hall] = references;
+    const [, cinema, hall] = references;
 
     // Verify that hall with provided ID belongs to cinema with provided ID
-    if (hall && hall.cinemaId !== cinemaId)
+    if (cinema && hall && hall.cinemaId !== cinema.id)
       pushValidationError(
         errorObj,
         'hallId',
