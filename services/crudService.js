@@ -6,9 +6,10 @@ import * as reservationService from '../services/reservationService.js';
 import * as redisService from '../services/redisService.js';
 
 export const getAll = async (model, query) => {
-  const data = await crudRepository.getAll(model, query);
-
-  const meta = await getMetaData(query, model);
+  const [data, meta] = await Promise.all([
+    crudRepository.getAll(model, query),
+    getMetaData(model, query),
+  ]);
 
   return { data, meta };
 };
