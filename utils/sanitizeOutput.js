@@ -1,21 +1,18 @@
 const sanitizeOutput = user => {
-  const userClone = { ...user };
+  const {
+    password,
+    passwordChangedAt,
+    passwordResetToken,
+    passwordResetTokenExpiry,
+    emailVerificationToken,
+    emailVerificationTokenExpiry,
+    isVerified,
+    isActive,
+    refreshToken,
+    ...cleanUser
+  } = user;
 
-  const sensitiveFields = [
-    'password',
-    'passwordChangedAt',
-    'passwordResetToken',
-    'passwordResetTokenExpiry',
-    'emailVerificationToken',
-    'emailVerificationTokenExpiry',
-    'isVerified',
-    'isActive',
-    'refreshToken',
-  ];
-
-  sensitiveFields.forEach(field => (userClone[field] = undefined));
-
-  return userClone;
+  return cleanUser;
 };
 
 export default sanitizeOutput;
