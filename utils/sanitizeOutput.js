@@ -1,5 +1,5 @@
 const sanitizeOutput = user => {
-  const userClone = structuredClone(user);
+  const userClone = { ...user };
 
   const sensitiveFields = [
     'password',
