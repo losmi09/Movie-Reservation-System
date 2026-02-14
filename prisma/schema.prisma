@@ -35,7 +35,6 @@ model User {
   emailVerificationTokenExpiry DateTime?     @map("email_verification_token_expiry")
   isVerified                   Boolean       @default(false) @map("is_verified")
   isActive                     Boolean       @default(true) @map("is_active")
-  refreshToken                 String?       @map("refresh_token")
   Reservation                  Reservation[]
 
   @@map("users")
