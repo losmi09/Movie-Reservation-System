@@ -8,7 +8,6 @@ const sanitizeOutput = user => {
     emailVerificationTokenExpiry,
     isVerified,
     isActive,
-    refreshToken,
     ...cleanUser
   } = user;
 
