@@ -14,14 +14,21 @@ export const getAll = async (model, query) => {
   });
 };
 
-export const getOne = async (model, id) =>
-  await prisma[model].findUnique({ where: { id } });
+// "baseConfig" refers to the object that would be passed without select config
+const selectParents = (baseConfig, select) => {
+  const finalConfig = { ...baseConfig };
+  if (select) finalConfig.select = select;
+  return finalConfig;
+};
 
-export const createOne = async (model, data) =>
-  await prisma[model].create({ data });
+export const getOne = async (model, id, select) =>
+  await prisma[model].findUnique(selectParents({ where: { id } }, select));
 
-export const updateOne = async (model, id, data) =>
-  await prisma[model].update({ where: { id }, data });
+export const createOne = async (model, data, select) =>
+  await prisma[model].create(selectParents({ data }, select));
+
+export const updateOne = async (model, id, data, select) =>
+  await prisma[model].update(selectParents({ where: { id }, data }, select));
 
 export const deleteOne = async (model, id) =>
   await prisma[model].delete({ where: { id } });
