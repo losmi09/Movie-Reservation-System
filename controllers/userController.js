@@ -20,13 +20,16 @@ export const getCurrentUser = catchAsync(async (req, res) => {
 });
 
 export const updateCurrentUser = catchAsync(async (req, res, next) => {
-  const { error } = updateUserSchema.validate(req.body, { abortEarly: false });
+  const { error } = updateUserSchema.validate(
+    { ...req.body },
+    { abortEarly: false },
+  );
 
   if (error) return next(error);
 
   const updatedUser = await userService.updateCurrentUser(
     req.user.id,
-    req.body
+    req.body,
   );
 
   res.status(200).json({
@@ -39,7 +42,7 @@ export const deactivateCurrentUser = catchAsync(async (req, res, next) => {
 
   const { error } = deactivateUserSchema.validate(
     { password },
-    { abortEarly: false }
+    { abortEarly: false },
   );
 
   if (error) return next(error);

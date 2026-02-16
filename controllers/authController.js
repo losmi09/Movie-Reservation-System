@@ -37,7 +37,7 @@ const sendAuthResponse = async (res, user, statusCode) => {
 };
 
 export const register = catchAsync(async (req, res, next) => {
-  const { body: userData } = req;
+  const userData = { ...req.body };
 
   const { error } = userSchema.validate(userData, { abortEarly: false });
 
