@@ -1,6 +1,6 @@
-import convertNumericStringsToNumbers from '../convertNumericStrings.js';
+import convertNumericStringsToNumbers from '../utils/convertNumericStrings.js';
 
-const paginate = query => {
+export const paginate = query => {
   const { page = 1, limit = 20 } = query;
 
   const skip = (Number(page) - 1) * Number(limit);
@@ -8,14 +8,14 @@ const paginate = query => {
   return { skip, limit: Number(limit) };
 };
 
-const sort = query =>
+export const sort = query =>
   query.sort?.split(',').map(sort => {
     return sort.startsWith('-')
       ? { [sort.slice(1)]: 'desc' }
       : { [sort]: 'asc' };
   });
 
-const selectSpecificFields = query => {
+export const selectSpecificFields = query => {
   const specificFields = {};
 
   query.fields?.split(',').forEach(field => (specificFields[field] = true));
@@ -24,7 +24,7 @@ const selectSpecificFields = query => {
   return Object.keys(specificFields).length > 0 ? specificFields : null;
 };
 
-const prepareQuery = query => {
+export const prepareQuery = query => {
   const cleanQuery = convertNumericStringsToNumbers(query);
 
   const { skip, limit } = paginate(cleanQuery);
@@ -37,5 +37,3 @@ const prepareQuery = query => {
 
   return { filters, skip, limit, orderBy, selectFields };
 };
-
-export default prepareQuery;
