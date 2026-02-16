@@ -27,6 +27,18 @@ const showtimeSelect = {
 };
 
 const selectParents = {
+  cinema() {
+    return {
+      id: true,
+      name: true,
+      city: true,
+      address: true,
+      phone: true,
+      email: true,
+      slug: true,
+    };
+  },
+
   showtime() {
     return showtimeSelect;
   },
