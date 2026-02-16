@@ -1,7 +1,7 @@
-import prisma from '../../server.js';
-import convertNumericStringsToNumbers from '../convertNumericStrings.js';
+import prisma from '../server.js';
+import convertNumericStringsToNumbers from '../utils/convertNumericStrings.js';
 
-const getMetaData = async (model, query) => {
+export const getMetaData = async (model, query) => {
   const { page = 1, limit = 20, sort, fields, ...filters } = query;
 
   const cleanFilters = convertNumericStringsToNumbers(filters);
@@ -21,5 +21,3 @@ const getMetaData = async (model, query) => {
     hasPrevPage: page > 1 && page <= totalPages,
   };
 };
-
-export default getMetaData;
