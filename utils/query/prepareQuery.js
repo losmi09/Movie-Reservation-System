@@ -1,4 +1,3 @@
-import excludeFromQuery from './excludeFromQuery.js';
 import convertNumericStringsToNumbers from '../convertNumericStrings.js';
 
 const paginate = query => {
@@ -26,20 +25,17 @@ const selectSpecificFields = query => {
 };
 
 const prepareQuery = query => {
-  let queryClone = structuredClone(query);
+  const cleanQuery = convertNumericStringsToNumbers(query);
 
-  queryClone = convertNumericStringsToNumbers(queryClone);
+  const { skip, limit } = paginate(cleanQuery);
 
-  const { skip, limit } = paginate(queryClone);
+  const selectFields = selectSpecificFields(cleanQuery);
 
-  const selectFields = selectSpecificFields(queryClone);
+  const orderBy = sort(cleanQuery);
 
-  const orderBy = sort(queryClone);
+  const { page, limit: limitQ, sort: sortQ, fields, ...filters } = cleanQuery;
 
-  // Prevent overwriting for special query params
-  excludeFromQuery(queryClone, 'page', 'limit', 'sort', 'fields');
-
-  return { queryClone, skip, limit, orderBy, selectFields };
+  return { filters, skip, limit, orderBy, selectFields };
 };
 
 export default prepareQuery;

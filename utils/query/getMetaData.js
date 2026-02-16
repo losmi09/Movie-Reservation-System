@@ -1,18 +1,12 @@
 import prisma from '../../server.js';
 import convertNumericStringsToNumbers from '../convertNumericStrings.js';
-import excludeFromQuery from './excludeFromQuery.js';
 
 const getMetaData = async (model, query) => {
-  let queryClone = structuredClone(query);
+  const { page = 1, limit = 20, sort, fields, ...filters } = query;
 
-  queryClone = convertNumericStringsToNumbers(queryClone);
+  const cleanFilters = convertNumericStringsToNumbers(filters);
 
-  // Prevent overwriting for special query params
-  excludeFromQuery(queryClone, 'page', 'limit', 'sort', 'fields');
-
-  const totalCount = await prisma[model].count({ where: queryClone });
-
-  const { page = 1, limit = 20 } = query;
+  const totalCount = await prisma[model].count({ where: cleanFilters });
 
   const pageSize = Number(limit);
 
