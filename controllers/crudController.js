@@ -17,7 +17,7 @@ const parentFields = {
 
 export const getAll = model =>
   catchAsync(async (req, res) => {
-    const data = await crudService.getAll(model, req.query);
+    const data = await crudService.getAll(model, { ...req.query });
 
     const { cacheKey } = req;
 
