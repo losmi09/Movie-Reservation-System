@@ -2,13 +2,12 @@ import prepareQuery from '../utils/query/prepareQuery.js';
 import prisma from '../server.js';
 
 export const getAll = async (model, query) => {
-  const { queryClone, skip, limit, orderBy, selectFields } =
-    prepareQuery(query);
+  const { filters, skip, limit, orderBy, selectFields } = prepareQuery(query);
 
   return await prisma[model].findMany({
     skip,
     take: limit,
-    where: queryClone,
+    where: filters,
     orderBy,
     select: selectFields,
   });
