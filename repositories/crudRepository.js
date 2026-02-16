@@ -1,8 +1,9 @@
-import prepareQuery from '../utils/query/prepareQuery.js';
+import * as queryService from '../services/queryService.js';
 import prisma from '../server.js';
 
 export const getAll = async (model, query) => {
-  const { filters, skip, limit, orderBy, selectFields } = prepareQuery(query);
+  const { filters, skip, limit, orderBy, selectFields } =
+    queryService.prepareQuery(query);
 
   return await prisma[model].findMany({
     skip,

@@ -1,15 +1,15 @@
 import slugify from 'slugify';
-import getMetaData from '../utils/query/getMetaData.js';
 import selectParents from '../repositories/prismaSelects.js';
 import * as crudRepository from '../repositories/crudRepository.js';
 import * as showtimeService from '../services/showtimeService.js';
 import * as reservationService from '../services/reservationService.js';
 import * as redisService from '../services/redisService.js';
+import * as paginationService from '../services/paginationService.js';
 
 export const getAll = async (model, query) => {
   const [data, meta] = await Promise.all([
     crudRepository.getAll(model, query),
-    getMetaData(model, query),
+    paginationService.getMetaData(model, query),
   ]);
 
   return { data, meta };
