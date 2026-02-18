@@ -6,15 +6,6 @@ import { redisClient } from '../server.js';
 import formatResponse from '../mappers/formatResponse.js';
 import * as crudService from '../services/crudService.js';
 
-// Parent field comes from nested route e.g. /cinemas/:id/halls where is cinema parent to hall
-const parentFields = {
-  hall: 'cinemaId',
-  row: 'hallId',
-  seat: 'rowId',
-  showtime: 'movieId',
-  reservation: 'showtimeId',
-};
-
 export const getAll = model =>
   catchAsync(async (req, res) => {
     const { query, cacheKey } = req;
@@ -53,7 +44,16 @@ export const createOne = model =>
   catchAsync(async (req, res, next) => {
     const data = { ...req.body };
 
-    const parentId = parentFields[model];
+    // Parent field comes from nested route, e.g. /cinemas/:id/halls
+    const parentIds = {
+      hall: 'cinemaId',
+      row: 'hallId',
+      seat: 'rowId',
+      showtime: 'movieId',
+      reservation: 'showtimeId',
+    };
+
+    const parentId = parentIds[model];
 
     if (parentId) data[parentId] = req.params.id;
 
