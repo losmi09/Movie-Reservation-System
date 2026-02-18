@@ -1,5 +1,5 @@
 import slugify from 'slugify';
-import selectParents from '../repositories/prismaSelects.js';
+import { selectSingleDoc } from '../repositories/prismaSelects.js';
 import * as crudRepository from '../repositories/crudRepository.js';
 import * as showtimeService from '../services/showtimeService.js';
 import * as reservationService from '../services/reservationService.js';
@@ -16,7 +16,7 @@ export const getAll = async (model, query) => {
 };
 
 export const getOne = async (model, id) =>
-  await crudRepository.getOne(model, id, selectParents?.[model]?.());
+  await crudRepository.getOne(model, id, selectSingleDoc?.[model]?.());
 
 const addSlugToData = (model, data) => {
   const slugs = { movie: 'title', cinema: 'name' };
@@ -48,7 +48,7 @@ export const createOne = async (model, data) => {
   const createdDoc = await crudRepository.createOne(
     model,
     data,
-    selectParents?.[model]?.(),
+    selectSingleDoc?.[model]?.(),
   );
 
   await redisService.invalidateCache(model);
@@ -66,7 +66,7 @@ export const updateOne = async (model, id, data) => {
     model,
     id,
     data,
-    selectParents?.[model]?.(),
+    selectSingleDoc?.[model]?.(),
   );
 
   await redisService.invalidateCache(model);
