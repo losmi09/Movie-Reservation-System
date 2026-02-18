@@ -17,14 +17,16 @@ const parentFields = {
 
 export const getAll = model =>
   catchAsync(async (req, res) => {
-    const data = await crudService.getAll(model, { ...req.query });
+    const { query, cacheKey } = req;
 
-    const { cacheKey } = req;
+    const { data, meta } = await crudService.getAll(model, { ...query });
 
     if (cacheKey)
-      await redisClient.set(cacheKey, JSON.stringify(data), { EX: 300 });
+      await redisClient.set(cacheKey, JSON.stringify({ data, meta }), {
+        EX: 300,
+      });
 
-    res.status(200).json(data);
+    res.status(200).json({ data, meta });
   });
 
 const getFormatedDoc = (model, doc) => formatResponse?.[model]?.(doc) ?? doc;
