@@ -1,7 +1,7 @@
 import seatSchema from '../../schemas/seatSchema.js';
-import validateSchema from '../../utils/validation/validateSchema.js';
-import checkIfParentExists from '../../utils/validation/checkIfParentExists.js';
-import pushValidationError from '../../utils/validation/pushValidationError.js';
+import validateSchema from '../utils/validateSchema.js';
+import checkIfParentExists from '../utils/checkIfParentExists.js';
+import pushValidationError from '../utils/pushValidationError.js';
 import * as rowService from '../../services/rowService.js';
 
 const validateSeat = async (data, isUpdating) => {

@@ -1,6 +1,6 @@
 import hallSchema from '../../schemas/hallSchema.js';
-import checkIfParentExists from '../../utils/validation/checkIfParentExists.js';
-import validateSchema from '../../utils/validation/validateSchema.js';
+import checkIfParentExists from '../utils/checkIfParentExists.js';
+import validateSchema from '../utils/validateSchema.js';
 
 const validateHall = async (data, isUpdating) => {
   const errorObj = validateSchema(hallSchema, data, isUpdating);

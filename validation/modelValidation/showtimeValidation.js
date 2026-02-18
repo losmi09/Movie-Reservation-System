@@ -1,7 +1,7 @@
 import showtimeSchema from '../../schemas/showtimeSchema.js';
-import validateSchema from '../../utils/validation/validateSchema.js';
-import pushValidationError from '../../utils/validation/pushValidationError.js';
-import checkIfForeignKeysAreValid from '../../utils/validation/checkIfForeignKeysAreValid.js';
+import validateSchema from '../utils/validateSchema.js';
+import pushValidationError from '../utils/pushValidationError.js';
+import checkIfForeignKeysAreValid from '../utils/checkIfForeignKeysAreValid.js';
 import * as crudRepository from '../../repositories/crudRepository.js';
 import * as showtimeService from '../../services/showtimeService.js';
 
