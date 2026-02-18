@@ -2,6 +2,9 @@ import { selectForManyDocs } from './prismaSelects.js';
 import * as queryService from '../services/queryService.js';
 import prisma from '../server.js';
 
+export const count = async (model, filters) =>
+  await prisma[model].count({ where: filters });
+
 export const getAll = async (model, query) => {
   const { filters, skip, limit, orderBy, selectFields } =
     queryService.prepareQuery(query);

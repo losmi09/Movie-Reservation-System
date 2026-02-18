@@ -1,12 +1,12 @@
-import prisma from '../server.js';
 import convertNumericStringsToNumbers from '../utils/convertNumericStrings.js';
+import * as crudRepository from '../repositories/crudRepository.js';
 
 export const getMetaData = async (model, query) => {
   const { page = 1, limit = 20, sort, fields, ...filters } = query;
 
   const cleanFilters = convertNumericStringsToNumbers(filters);
 
-  const totalCount = await prisma[model].count({ where: cleanFilters });
+  const totalCount = await crudRepository.count(model, cleanFilters);
 
   const pageSize = Number(limit);
 
