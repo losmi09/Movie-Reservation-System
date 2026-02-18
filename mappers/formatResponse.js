@@ -19,12 +19,8 @@ const formatResponse = {
     const { row, ...seatData } = seat;
     return {
       ...reservationData,
-      showtime: showtimeData,
-      seat: seatData,
-      row,
-      movie,
-      cinema,
-      hall,
+      showtime: { ...showtimeData, movie, cinema, hall },
+      seat: { ...seatData, row },
     };
   },
 };
