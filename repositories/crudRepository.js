@@ -1,3 +1,4 @@
+import { selectForManyDocs } from './prismaSelects.js';
 import * as queryService from '../services/queryService.js';
 import prisma from '../server.js';
 
@@ -5,12 +6,14 @@ export const getAll = async (model, query) => {
   const { filters, skip, limit, orderBy, selectFields } =
     queryService.prepareQuery(query);
 
+  const select = selectFields ?? selectForManyDocs?.[model]?.() ?? null;
+
   return await prisma[model].findMany({
     skip,
     take: limit,
     where: filters,
     orderBy,
-    select: selectFields,
+    select,
   });
 };
 
