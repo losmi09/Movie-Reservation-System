@@ -1,4 +1,5 @@
 import convertNumericStringsToNumbers from '../utils/convertNumericStrings.js';
+import { selectForQueryFields } from '../repositories/prismaSelects.js';
 
 export const paginate = query => {
   const { page = 1, limit = 20 } = query;
@@ -18,7 +19,11 @@ export const sort = query =>
 export const selectSpecificFields = query => {
   const specificFields = {};
 
-  query.fields?.split(',').forEach(field => (specificFields[field] = true));
+  query.fields?.split(',').forEach(field => {
+    const fieldConfig = selectForQueryFields[field];
+    if (fieldConfig) specificFields[field] = { select: fieldConfig() };
+    else specificFields[field] = true;
+  });
 
   // If the fields are not specified in the query, return null which selects all fields
   return Object.keys(specificFields).length > 0 ? specificFields : null;
