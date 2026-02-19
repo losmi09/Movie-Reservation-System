@@ -9,6 +9,7 @@ export const getAll = async (model, query) => {
   const { filters, skip, limit, orderBy, selectFields } =
     queryService.prepareQuery(query);
 
+  // null selects all fields
   const select = selectFields ?? selectForManyDocs?.[model]?.() ?? null;
 
   return await prisma[model].findMany({
@@ -21,11 +22,8 @@ export const getAll = async (model, query) => {
 };
 
 // "baseConfig" refers to the object that would be passed without select config
-const selectParents = (baseConfig, select) => {
-  const finalConfig = { ...baseConfig };
-  if (select) finalConfig.select = select;
-  return finalConfig;
-};
+const selectParents = (baseConfig, select) =>
+  select ? { ...baseConfig, select } : baseConfig;
 
 export const getOne = async (model, id, select) =>
   await prisma[model].findUnique(selectParents({ where: { id } }, select));
