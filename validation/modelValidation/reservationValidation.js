@@ -42,15 +42,15 @@ const validateReservation = async (body, isUpdating, reservationId, userId) => {
 
   if (!isUpdating) {
     // Check if the user has reserved the maximum number of seats allowed
-    const RESERVED_SEATS_LIMIT = 5;
+    const reservedSeatsLimit = Number(process.env.RESERVED_SEATS_LIMIT);
 
     const reservedSeatsByUser =
       await reservationService.countShowtimeReservations(showtimeId, userId);
 
-    if (reservedSeatsByUser >= RESERVED_SEATS_LIMIT)
+    if (reservedSeatsByUser >= reservedSeatsLimit)
       return throwValidationError(
         'reservationLimit',
-        `You cannot reserve more than ${RESERVED_SEATS_LIMIT} seats`,
+        `You cannot reserve more than ${reservedSeatsLimit} seats`,
       );
   }
 
