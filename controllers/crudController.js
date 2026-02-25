@@ -57,7 +57,11 @@ export const createOne = model =>
 
     if (parentId) data[parentId] = req.params.id;
 
-    const error = await validateBody(model, data);
+    const error = await validateBody({
+      model,
+      body: data,
+      userId: req.user.id,
+    });
 
     if (error) return next(error);
 
@@ -70,11 +74,19 @@ export const updateOne = model =>
   catchAsync(async (req, res, next) => {
     const data = { ...req.body };
 
-    const error = await validateBody(model, data, true, req.params.id);
+    const { id } = req.params;
+
+    const error = await validateBody({
+      model,
+      body: data,
+      id,
+      isUpdating: true,
+      userId: req.user.id,
+    });
 
     if (error) return next(error);
 
-    const updatedDoc = await crudService.updateOne(model, req.params.id, data);
+    const updatedDoc = await crudService.updateOne(model, id, data);
 
     sendResponse(res, getFormatedDoc(model, updatedDoc));
   });
