@@ -21,10 +21,10 @@ const validation = {
   },
   hall: (body, isUpdating) => validateHall(body, isUpdating),
   row: (body, isUpdating) => validateRow(body, isUpdating),
-  seat: (body, updating, seatId) => validateSeat(body, updating, seatId),
-  showtime: (body, updating) => validateShowtime(body, updating),
-  reservation: (body, updating, reservationId) =>
-    validateReservation(body, updating, reservationId),
+  seat: (body, isUpdating, seatId) => validateSeat(body, isUpdating, seatId),
+  showtime: (body, isUpdating) => validateShowtime(body, isUpdating),
+  reservation: (body, isUpdating, reservationId) =>
+    validateReservation(body, isUpdating, reservationId),
 };
 
 const validateBody = async (model, body, isUpdating = false, id) => {
