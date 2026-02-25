@@ -23,12 +23,18 @@ const validation = {
   row: (body, isUpdating) => validateRow(body, isUpdating),
   seat: (body, isUpdating, seatId) => validateSeat(body, isUpdating, seatId),
   showtime: (body, isUpdating) => validateShowtime(body, isUpdating),
-  reservation: (body, isUpdating, reservationId) =>
-    validateReservation(body, isUpdating, reservationId),
+  reservation: (body, isUpdating, reservationId, userId) =>
+    validateReservation(body, isUpdating, reservationId, userId),
 };
 
-const validateBody = async (model, body, isUpdating = false, id) => {
-  const error = await validation[model](body, isUpdating, id);
+const validateBody = async ({
+  model,
+  body,
+  isUpdating = false,
+  id,
+  userId,
+}) => {
+  const error = await validation[model](body, isUpdating, id, userId);
 
   if (!error) return;
 
