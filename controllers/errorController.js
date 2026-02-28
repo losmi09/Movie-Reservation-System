@@ -13,20 +13,26 @@ const handleNotFoundRecord = err => {
 const handleUniqueField = (err, res, instance) => {
   const { modelName, target } = err.meta;
 
-  const fields = { Hall: ['name'], Seat: ['number'], Reservation: ['seatId'] };
+  const fields = {
+    Hall: 'name',
+    Seat: 'number',
+    Reservation: 'seatId',
+    Review: 'movieId',
+  };
 
   const messages = {
     Hall: 'Hall with this name in this cinema already exists',
     Row: 'Row with this label in this hall already exists',
     Seat: 'Seat with this number in this row already exists',
     Reservation: 'This seat is reserved',
+    Review: 'You have already reviewed this movie',
   };
 
   const field = fields[modelName] ?? target;
 
   const message = `${modelName} with this ${field} already exists`;
 
-  const error = [{ path: field[0], message: messages[modelName] ?? message }];
+  const error = [{ path: field, message: messages[modelName] ?? message }];
 
   return throwValidationError(res, error, instance);
 };
