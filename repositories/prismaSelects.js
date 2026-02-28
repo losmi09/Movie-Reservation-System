@@ -8,6 +8,16 @@ const BASE_ROW = { id: true, label: true };
 
 const BASE_SEAT = { id: true, number: true };
 
+const BASE_REVIEW = {
+  id: true,
+  comment: true,
+  rating: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
+const BASE_USER = { id: true, firstName: true, lastName: true, photo: true };
+
 const hallWithCinemaSelect = {
   select: { ...BASE_HALL, cinema: { select: BASE_CINEMA } },
 };
@@ -40,7 +50,7 @@ export const selectForQueryFields = {
   movie: () => MOVIE_MINIMAL_SELECT,
   cinema: () => CINEMA_MINIMAL_SELECT,
   hall: () => BASE_HALL,
-  user: () => ({ id: true, firstName: true, lastName: true, photo: true }),
+  user: () => BASE_USER,
 };
 
 // Used when getting an array of documents, selects most important fields only
@@ -81,6 +91,8 @@ export const selectForManyDocs = {
     showtime: { select: selectForQueryFields.showtime() },
     seat: { select: BASE_SEAT },
   }),
+
+  review: () => ({ ...BASE_REVIEW, user: { select: BASE_USER } }),
 };
 
 // Used for getting a single document
@@ -123,5 +135,11 @@ export const selectSingleDoc = {
     seat: {
       select: { id: true, number: true, row: { select: BASE_ROW } },
     },
+  }),
+
+  review: () => ({
+    ...BASE_REVIEW,
+    movie: { select: BASE_MOVIE },
+    user: { select: BASE_USER },
   }),
 };
