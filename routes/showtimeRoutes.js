@@ -14,12 +14,12 @@ movieShowtimeRouter
   .get(
     checkIfExists('movie'), // Check if parent movie from nested route exists
     cacheAll('showtime'),
-    showtimeController.getAllShowtimes
+    showtimeController.getAllShowtimes,
   )
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    showtimeController.createShowtime
+    showtimeController.createShowtime,
   );
 
 // Used for nested /cinemas/:id/showtimes route
@@ -29,7 +29,7 @@ cinemaShowtimeRouter.get(
   '/',
   checkIfExists('cinema'), // Check if parent cinema from nested route exists
   cacheAll('showtime'),
-  showtimeController.getAllShowtimes
+  showtimeController.getAllShowtimes,
 );
 
 // Separate showtime router
@@ -38,13 +38,13 @@ export const showtimeRouter = Router();
 showtimeRouter.use(
   '/:id/reservations',
   authMiddleware.protect,
-  reservationRouter
+  reservationRouter,
 );
 
 showtimeRouter.get(
   '/',
   cacheAll('showtime'),
-  showtimeController.getAllShowtimes
+  showtimeController.getAllShowtimes,
 );
 
 showtimeRouter
@@ -53,10 +53,11 @@ showtimeRouter
   .patch(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    showtimeController.updateShowtime
+    showtimeController.updateShowtime,
   )
   .delete(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    showtimeController.deleteShowtime
+    validateId,
+    showtimeController.deleteShowtime,
   );
