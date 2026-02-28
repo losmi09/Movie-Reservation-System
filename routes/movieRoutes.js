@@ -7,14 +7,17 @@ import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import * as imageMiddleware from '../middlewares/image.js';
 import { movieShowtimeRouter as showtimeRouter } from './showtimeRoutes.js';
+import { movieReviewRouter as reviewRouter } from './reviewRoutes.js';
 
 export const movieRouter = Router();
+
+movieRouter.use('/:id/reviews', setParentFilter('movie'), reviewRouter);
 
 movieRouter.use(
   '/:id/showtimes',
   validateId,
   setParentFilter('movie'),
-  showtimeRouter
+  showtimeRouter,
 );
 
 movieRouter
@@ -23,7 +26,7 @@ movieRouter
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    movieController.createMovie
+    movieController.createMovie,
   );
 
 movieRouter
@@ -33,13 +36,13 @@ movieRouter
     validateId,
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    movieController.updateMovie
+    movieController.updateMovie,
   )
   .delete(
     validateId,
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    movieController.deleteMovie
+    movieController.deleteMovie,
   );
 
 movieRouter.patch(
@@ -50,5 +53,5 @@ movieRouter.patch(
   checkIfExists('movie'),
   imageMiddleware.uploadMoviePoster,
   imageMiddleware.resizeImage('movie'),
-  movieController.saveMoviePoster
+  movieController.saveMoviePoster,
 );
