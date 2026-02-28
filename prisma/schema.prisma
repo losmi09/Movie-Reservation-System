@@ -16,6 +16,7 @@ model Movie {
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
   Showtime    Showtime[]
+  Review      Review[]
 
   @@map("movies")
 }
@@ -36,6 +37,7 @@ model User {
   isVerified                   Boolean       @default(false) @map("is_verified")
   isActive                     Boolean       @default(true) @map("is_active")
   Reservation                  Reservation[]
+  Review                       Review[]
 
   @@map("users")
 }
@@ -137,4 +139,19 @@ enum Status {
   reserved
   cancelled
   waitlist
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  movieId   String   @map("movie_id")
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   String   @db.VarChar(255)
+  rating    Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([movieId, userId])
+  @@map("reviews")
 }
