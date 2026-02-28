@@ -5,6 +5,7 @@ import validateRow from './modelValidation/rowValidation.js';
 import validateSeat from './modelValidation/seatValidation.js';
 import validateShowtime from './modelValidation/showtimeValidation.js';
 import validateReservation from './modelValidation/reservationValidation.js';
+import validateReview from './modelValidation/reviewValidation.js';
 
 // When updating, required-field validation errors are ignored
 const excludeRequiredErrors = error =>
@@ -25,6 +26,7 @@ const validation = {
   showtime: (body, isUpdating) => validateShowtime(body, isUpdating),
   reservation: (body, isUpdating, reservationId, userId) =>
     validateReservation(body, isUpdating, reservationId, userId),
+  review: (body, isUpdating) => validateReview(body, isUpdating),
 };
 
 const validateBody = async ({
