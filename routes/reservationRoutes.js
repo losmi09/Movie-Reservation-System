@@ -7,7 +7,7 @@ import * as reservationController from '../controllers/reservationController.js'
 import * as authMiddleware from '../middlewares/auth.js';
 
 // Used to create a reservation
-export const reservationRouter = Router({ mergeParams: true }); // Used to create a reservation
+export const reservationRouter = Router({ mergeParams: true });
 
 reservationRouter.post(
   '/',
