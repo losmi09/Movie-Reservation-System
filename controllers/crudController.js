@@ -51,6 +51,7 @@ export const createOne = model =>
       seat: 'rowId',
       showtime: 'movieId',
       reservation: 'showtimeId',
+      review: 'movieId',
     };
 
     const parentId = parentIds[model];
