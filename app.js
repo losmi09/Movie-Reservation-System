@@ -18,11 +18,12 @@ import { rowRouter } from './routes/rowRoutes.js';
 import { seatRouter } from './routes/seatRoutes.js';
 import { showtimeRouter } from './routes/showtimeRoutes.js';
 import { allReservationRouter as reservationRouter } from './routes/reservationRoutes.js';
+import { reviewRouter } from './routes/reviewRoutes.js';
 
 // Initialize express app
 const app = express();
 
-// Secure HTTP headers
+// Set secure HTTP headers
 app.use(helmet());
 
 // Set up CORS
@@ -72,10 +73,11 @@ app.use(`${API_PREFIX}rows`, limit, rowRouter);
 app.use(`${API_PREFIX}seats`, limit, seatRouter);
 app.use(`${API_PREFIX}showtimes`, limit, showtimeRouter);
 app.use(`${API_PREFIX}reservations`, limit, reservationRouter);
+app.use(`${API_PREFIX}reviews`, limit, reviewRouter);
 
 // Handle unhandled routes
 app.use((req, res, next) =>
-  next(new AppError('The requested resource was not found', 404))
+  next(new AppError('The requested resource was not found', 404)),
 );
 
 app.use(globalErrorHandler);
