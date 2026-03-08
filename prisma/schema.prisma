@@ -129,6 +129,8 @@ model Reservation {
   userId     String   @map("user_id")
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   status     Status   @default(reserved)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   // There is a unique composite partial index (added by a manual migration) that cannot be displayed in the schema, it allows only one reservation for a specific showtime and seat with the status reserved
   @@map("reservations")
