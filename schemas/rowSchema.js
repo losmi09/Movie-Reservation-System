@@ -6,7 +6,7 @@ const rowSchema = Joi.object({
     .trim()
     .valid('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'),
   seatCapacity: Joi.number().required().positive().integer().max(20),
-  hallId: Joi.string().required().guid(),
+  hallId: Joi.string().trim().required().guid(),
 });
 
 export default rowSchema;
