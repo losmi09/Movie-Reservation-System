@@ -1,8 +1,8 @@
-import catchAsync from '../utils/catchAsync.js';
+import { catchAsync } from '../utils/catchAsync.js';
 import { updateUserSchema } from '../schemas/userSchema.js';
 import { deactivateUserSchema } from '../schemas/userSchema.js';
-import AppError from '../utils/appError.js';
-import sendResponse from '../utils/sendResponse.js';
+import { AppError } from '../utils/appError.js';
+import { sendResponse } from './utils/sendResponse.js';
 import * as userService from '../services/userService.js';
 
 export const saveUserPhoto = catchAsync(async (req, res, next) => {
@@ -32,9 +32,7 @@ export const updateCurrentUser = catchAsync(async (req, res, next) => {
     req.body,
   );
 
-  res.status(200).json({
-    data: { ...updatedUser, updatedAt: new Date() },
-  });
+  sendResponse(res, { ...updatedUser, updatedAt: new Date() });
 });
 
 export const deactivateCurrentUser = catchAsync(async (req, res, next) => {
@@ -49,5 +47,5 @@ export const deactivateCurrentUser = catchAsync(async (req, res, next) => {
 
   await userService.deactivateCurrentUser(req.user.id, password);
 
-  res.status(204).end();
+  sendResponse(res, null, 204);
 });
