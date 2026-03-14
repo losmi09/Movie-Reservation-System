@@ -1,4 +1,4 @@
-import catchAsync from '../utils/catchAsync.js';
+import { catchAsync } from '../utils/catchAsync.js';
 import { upload } from '../utils/multer.js';
 import * as imageService from '../services/imageService.js';
 
@@ -19,7 +19,7 @@ export const resizeImage = type =>
     await imageService.resizeImage(
       `${field}s`,
       req.file.buffer,
-      req.file.fileName
+      req.file.fileName,
     );
 
     next();

@@ -1,5 +1,5 @@
-import AppError from '../utils/appError.js';
-import catchAsync from '../utils/catchAsync.js';
+import { AppError } from '../utils/appError.js';
+import { catchAsync } from '../utils/catchAsync.js';
 import * as authService from '../services/authService.js';
 
 export const protect = catchAsync(async (req, res, next) => {

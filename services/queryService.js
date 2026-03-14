@@ -1,4 +1,4 @@
-import convertNumericStringsToNumbers from '../utils/convertNumericStrings.js';
+import { convertNumericStringsToNumbers } from '../utils/convertNumericStrings.js';
 import { selectForQueryFields } from '../repositories/prismaSelects.js';
 
 export const paginate = query => {

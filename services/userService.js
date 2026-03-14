@@ -1,6 +1,6 @@
-import AppError from '../utils/appError.js';
+import { AppError } from '../utils/appError.js';
 import { comparePasswords } from './authService.js';
-import sanitizeOutput from '../utils/sanitizeOutput.js';
+import { sanitizeOutput } from '../utils/sanitizeOutput.js';
 import * as userRepository from '../repositories/userRepository.js';
 
 const filterObj = (obj, ...allowedFields) => {

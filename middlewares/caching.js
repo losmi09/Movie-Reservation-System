@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import catchAsync from '../utils/catchAsync.js';
-import sendResponse from '../utils/sendResponse.js';
+import { catchAsync } from '../utils/catchAsync.js';
+import { sendResponse } from '../controllers/utils/sendResponse.js';
 import { redisClient } from '../server.js';
 
 const getCacheKey = originalUrl => {

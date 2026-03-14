@@ -1,4 +1,4 @@
-import convertNumericStringsToNumbers from '../utils/convertNumericStrings.js';
+import { convertNumericStringsToNumbers } from '../utils/convertNumericStrings.js';
 import * as crudRepository from '../repositories/crudRepository.js';
 
 export const getMetaData = async (model, query) => {

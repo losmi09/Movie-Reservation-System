@@ -1,12 +1,12 @@
 import crypto from 'crypto';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
-import AppError from '../utils/appError.js';
+import { AppError } from '../utils/appError.js';
+import { passwordSchema } from '../schemas/userSchema.js';
+import { sanitizeOutput } from '../utils/sanitizeOutput.js';
 import * as userRepository from '../repositories/userRepository.js';
 import * as emailService from '../services/emailService.js';
 import * as redisService from '../services/redisService.js';
-import { passwordSchema } from '../schemas/userSchema.js';
-import sanitizeOutput from '../utils/sanitizeOutput.js';
 
 const generateAccessToken = userId =>
   jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
