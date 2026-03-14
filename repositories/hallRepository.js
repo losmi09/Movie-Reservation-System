@@ -1,13 +1,11 @@
-import prisma from '../server.js';
+import { selectSingleDoc } from './prismaSelects.js';
+import { prisma } from '../server.js';
 
-export const getSeatsPerRow = async hallId =>
+export const getHall = async (hallId, fields) =>
   await prisma.hall.findUnique({
     where: { id: hallId },
-    select: { seatsPerRow: true },
+    ...(fields && { select: fields }),
   });
 
-export const getMaxRows = async hallId =>
-  await prisma.hall.findUnique({
-    where: { id: hallId },
-    select: { maxRows: true },
-  });
+export const createHall = async data =>
+  await prisma.hall.create({ data, select: selectSingleDoc.hall() });

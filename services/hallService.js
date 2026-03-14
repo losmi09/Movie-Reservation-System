@@ -1,11 +1,14 @@
+import { ensureParentExists } from './utils/ensureParentExists.js';
 import * as hallRepository from '../repositories/hallRepository.js';
-import * as rowService from './rowService.js';
+import * as redisService from '../services/redisService.js';
 
-export const isHallFullOfRows = async hallId => {
-  const [{ maxRows }, rowsInHall] = await Promise.all([
-    await hallRepository.getMaxRows(hallId),
-    await rowService.getRowsInHall(hallId),
-  ]);
+export const getHall = (hallId, fields) =>
+  hallRepository.getHall(hallId, fields);
 
-  return maxRows <= rowsInHall.length;
+export const createHall = async data => {
+  await ensureParentExists('cinema', data.cinemaId);
+
+  await redisService.invalidateCache('hall');
+
+  return await hallRepository.createHall(data);
 };
