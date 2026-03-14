@@ -1,28 +1,112 @@
+import { checkIfRecordExists } from '../repositories/utils/checkIfRecordExists.js';
+import { BusinessLogicError } from '../utils/BusinessLogicError.js';
 import * as showtimeRepository from '../repositories/showtimeRepository.js';
-import * as rowService from '../services/rowService.js';
-import * as seatService from '../services/seatService.js';
-import * as reservationService from '../services/reservationService.js';
+import * as redisService from '../services/redisService.js';
+import * as cinemaService from '../services/cinemaService.js';
+import * as hallService from '../services/hallService.js';
 
-export const isShowtimeOngoing = async (cinemaId, hallId, startTime, endTime) =>
-  await showtimeRepository.isShowtimeOngoing(
+export const getShowtime = async (showtimeId, fields) =>
+  await showtimeRepository.getShowtime(showtimeId, fields);
+
+export const getSeatStatus = async (showtimeId, hallId, seatId) => {
+  const { isSeatReserved, areAllSeatsReserved } =
+    await showtimeRepository.getSeatStatus(showtimeId, hallId, seatId);
+
+  return { isSeatReserved, areAllSeatsReserved };
+};
+
+const checkIfShowtimeIsOngoing = async (
+  errorClass,
+  cinemaId,
+  hallId,
+  startTime,
+  endTime,
+) => {
+  // Verify that hall does not have an active showtime in the given time range
+  const isShowtimeOngoing = await showtimeRepository.isShowtimeOngoing(
     cinemaId,
     hallId,
     startTime,
-    endTime
+    endTime,
   );
 
-export const areAllSeatsReserved = async (showtimeId, hallId) => {
-  const rowIds = (await rowService.getRowsInHall(hallId)).map(row => row.id);
-
-  const [totalHallSeats, reservedSeats] = await Promise.all([
-    seatService.countSeatsInHall(rowIds),
-    reservationService.countShowtimeReservations(showtimeId),
-  ]);
-
-  return totalHallSeats <= reservedSeats;
+  if (isShowtimeOngoing)
+    errorClass.pushError(
+      'startTime',
+      'Hall already has an active showtime in the given time range',
+    );
 };
 
-export const convertShowtimeDatesToISOFormat = showtimeData => {
-  showtimeData.startTime = new Date(showtimeData.startTime);
-  showtimeData.endTime = new Date(showtimeData.endTime);
+export const createShowtime = async data => {
+  const { movieId, cinemaId, hallId, startTime, endTime } = data;
+
+  // Verify that every showtime reference exists
+  const [movieExists, cinema, hall] = await Promise.all([
+    checkIfRecordExists('movie', movieId),
+    cinemaService.getCinema(cinemaId, { id: true }),
+    hallService.getHall(hallId, { cinemaId: true }),
+  ]);
+
+  const errorClass = new BusinessLogicError();
+
+  if (!movieExists)
+    errorClass.pushError('movieId', 'No movie found with this ID');
+
+  if (!cinema) errorClass.pushError('cinemaId', 'No cinema found with this ID');
+
+  if (!hall) errorClass.pushError('hallId', 'No hall found with this ID');
+
+  // Verify that hall with provided ID belongs to cinema with provided ID
+  if (cinema && hall && hall.cinemaId !== cinema.id)
+    errorClass.pushError(
+      'hallId',
+      'Hall with this ID does not belong to this cinema',
+    );
+
+  await checkIfShowtimeIsOngoing(
+    errorClass,
+    cinemaId,
+    hallId,
+    startTime,
+    endTime,
+  );
+
+  errorClass.throwIfNotEmpty();
+
+  await redisService.invalidateCache('showtime');
+
+  return await showtimeRepository.createShowtime(data);
+};
+
+export const updateShowtime = async (showtimeId, data) => {
+  const { startTime, endTime } = data;
+
+  const showtime = await showtimeRepository.getShowtime(showtimeId, {
+    cinemaId: true,
+    hallId: true,
+  });
+
+  if (!showtime)
+    throw new BusinessLogicError(
+      'showtimeId',
+      'No showtime found with this ID',
+    );
+
+  const errorClass = new BusinessLogicError();
+
+  if (startTime && endTime) {
+    await checkIfShowtimeIsOngoing(
+      errorClass,
+      showtime.cinemaId,
+      showtime.hallId,
+      startTime,
+      endTime,
+    );
+  }
+
+  errorClass.throwIfNotEmpty();
+
+  await redisService.invalidateCache('showtime');
+
+  return showtimeRepository.updateShowtime(showtimeId, data);
 };
