@@ -1,4 +1,4 @@
-import AppError from '../utils/appError.js';
+import { AppError } from '../utils/appError.js';
 
 const handleNotFoundRecord = err => {
   const { modelName, constraint } = err.meta;
@@ -10,11 +10,43 @@ const handleNotFoundRecord = err => {
   return new AppError(`No ${field} found with this ID`, 404);
 };
 
+const handleSemanticError = (res, error, instance) => {
+  const errorObj = { errors: {} };
+
+  error.details.forEach(
+    err => (errorObj.errors[err.path] = [err.message.replaceAll('"', '')]),
+  );
+
+  const { name: type } = error;
+
+  const title =
+    type === 'ValidationError'
+      ? 'Validation Failed'
+      : 'Business Logic Violation';
+
+  const detail =
+    type === 'ValidationError'
+      ? 'One or more fields failed validation'
+      : 'The request could not be processed due to business rule constraints';
+
+  const STATUS_CODE = 422;
+
+  res.status(STATUS_CODE).json({
+    title,
+    status: STATUS_CODE,
+    detail,
+    timestamp: new Date(),
+    instance,
+    ...errorObj,
+  });
+};
+
 const handleUniqueField = (err, res, instance) => {
   const { modelName, target } = err.meta;
 
   const fields = {
     Hall: 'name',
+    Row: 'label',
     Seat: 'number',
     Reservation: 'seatId',
     Review: 'movieId',
@@ -32,9 +64,11 @@ const handleUniqueField = (err, res, instance) => {
 
   const message = `${modelName} with this ${field} already exists`;
 
-  const error = [{ path: field, message: messages[modelName] ?? message }];
+  const error = {
+    details: [{ path: field, message: messages[modelName] ?? message }],
+  };
 
-  return throwValidationError(res, error, instance);
+  return handleSemanticError(res, error, instance);
 };
 
 const handleInvalidQuery = () => new AppError('Invalid query', 400);
@@ -43,23 +77,6 @@ const handleTooLargePayload = () =>
   new AppError('Request payload is too large', 413);
 
 const handleMulterError = err => new AppError(err.message, 422);
-
-export const throwValidationError = (res, error, instance) => {
-  const errorObj = { errors: {} };
-
-  error.forEach(
-    err => (errorObj.errors[err.path] = [err.message.replaceAll('"', '')]),
-  );
-
-  res.status(422).json({
-    title: 'Validation Failed',
-    status: 422,
-    detail: 'One or more fields failed validation',
-    timestamp: new Date(),
-    instance,
-    ...errorObj,
-  });
-};
 
 const sendError = (err, res, instance) => {
   const { isOperational, message, status, title, timestamp, stack } = err;
@@ -84,31 +101,26 @@ const sendError = (err, res, instance) => {
   });
 };
 
-const globalErrorHandler = (err, req, res, next) => {
-  let error = Object.create(err);
+export const globalErrorHandler = (err, req, res, next) => {
+  let error = { ...err };
   error.title = error.title || 'Internal Server Error';
   error.status = error.status || 500;
 
-  if (err.name === 'ValidationError')
-    return throwValidationError(res, err.details, req.originalUrl);
+  const { name, code, message } = err;
 
-  if (error.code === 'P2002')
-    return handleUniqueField(error, res, req.originalUrl);
+  if (name === 'ValidationError' || name === 'BusinessLogicError')
+    return handleSemanticError(res, err, req.originalUrl);
 
-  if (err.name === 'MulterError') error = handleMulterError(err);
+  if (code === 'P2002') return handleUniqueField(error, res, req.originalUrl);
 
-  if (error.code === 'P2025' || error.code === 'P2003')
-    error = handleNotFoundRecord(err);
+  if (name === 'MulterError') error = handleMulterError(err);
 
-  if (err.name === 'PayloadTooLargeError') error = handleTooLargePayload();
+  if (code === 'P2025' || code === 'P2003') error = handleNotFoundRecord(err);
 
-  if (
-    err.message.includes('Error in query') ||
-    err.message === 'unexpected empty path'
-  )
+  if (name === 'PayloadTooLargeError') error = handleTooLargePayload();
+
+  if (message.includes('Error in query') || message === 'unexpected empty path')
     error = handleInvalidQuery();
 
   sendError(error, res, req.originalUrl);
 };
-
-export default globalErrorHandler;
