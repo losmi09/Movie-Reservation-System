@@ -1,7 +1,9 @@
 import { Router } from 'express';
-import validateId from '../middlewares/validateId.js';
-import checkIfExists from '../middlewares/checkIfExists.js';
-import setParentFilter from '../middlewares/setParentFilter.js';
+import { validateId } from '../middlewares/validateId.js';
+import { checkIfExists } from '../middlewares/checkIfExists.js';
+import { setParentFilter } from '../middlewares/setParentFilter.js';
+import { validateSchema } from '../middlewares/validateSchema.js';
+import { movieSchema } from '../schemas/movieSchema.js';
 import * as movieController from '../controllers/movieController.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import * as authMiddleware from '../middlewares/auth.js';
@@ -13,12 +15,7 @@ export const movieRouter = Router();
 
 movieRouter.use('/:id/reviews', setParentFilter('movie'), reviewRouter);
 
-movieRouter.use(
-  '/:id/showtimes',
-  validateId,
-  setParentFilter('movie'),
-  showtimeRouter,
-);
+movieRouter.use('/:id/showtimes', setParentFilter('movie'), showtimeRouter);
 
 movieRouter
   .route('/')
@@ -26,6 +23,7 @@ movieRouter
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    validateSchema(movieSchema),
     movieController.createMovie,
   );
 
@@ -36,6 +34,7 @@ movieRouter
     validateId,
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    validateSchema(movieSchema, true),
     movieController.updateMovie,
   )
   .delete(

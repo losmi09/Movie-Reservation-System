@@ -1,8 +1,10 @@
 import { Router } from 'express';
-import validateId from '../middlewares/validateId.js';
-import setUserId from '../middlewares/setUserId.js';
-import { getUserReservations } from '../middlewares/reservations.js';
-import { checkIfReservationBelongsToUser } from '../middlewares/reservations.js';
+import { validateId } from '../middlewares/validateId.js';
+import { setUserId } from '../middlewares/setUserId.js';
+import { setParentId } from '../middlewares/setParentId.js';
+import { validateSchema } from '../middlewares/validateSchema.js';
+import { reservationSchema } from '../schemas/reservationSchema.js';
+import { getUserReservations } from '../middlewares/getUserReservations.js';
 import * as reservationController from '../controllers/reservationController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
@@ -14,6 +16,8 @@ reservationRouter.post(
   authMiddleware.protect,
   authMiddleware.restrictTo('user'),
   setUserId,
+  setParentId('showtime'),
+  validateSchema(reservationSchema),
   reservationController.createReservation,
 );
 
@@ -29,16 +33,8 @@ userReservationRouter.get(
 
 userReservationRouter
   .route('/:id')
-  .get(
-    validateId,
-    checkIfReservationBelongsToUser,
-    reservationController.getReservation,
-  )
-  .patch(
-    validateId,
-    checkIfReservationBelongsToUser,
-    reservationController.cancelReservation,
-  );
+  .get(validateId, reservationController.getReservation)
+  .patch(validateId, reservationController.cancelReservation);
 
 export const allReservationRouter = Router(); // Used for admin to see all reservations
 

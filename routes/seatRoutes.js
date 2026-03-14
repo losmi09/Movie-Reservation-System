@@ -1,8 +1,11 @@
 import { Router } from 'express';
-import validateId from '../middlewares/validateId.js';
-import setParentFilter from '../middlewares/setParentFilter.js';
+import { validateId } from '../middlewares/validateId.js';
+import { validateSchema } from '../middlewares/validateSchema.js';
+import { setParentId } from '../middlewares/setParentId.js';
+import { seatSchema } from '../schemas/seatSchema.js';
+import { setParentFilter } from '../middlewares/setParentFilter.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
-import checkIfExists from '../middlewares/checkIfExists.js';
+import { checkIfExists } from '../middlewares/checkIfExists.js';
 import * as seatController from '../controllers/seatController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
@@ -17,9 +20,14 @@ rowSeatRouter
     checkIfExists('row'),
     setParentFilter('row'),
     cacheAll('seat'),
-    seatController.getAllSeats
+    seatController.getAllSeats,
   )
-  .post(authMiddleware.restrictTo('admin'), seatController.createSeat);
+  .post(
+    authMiddleware.restrictTo('admin'),
+    setParentId('row'),
+    validateSchema(seatSchema),
+    seatController.createSeat,
+  );
 
 // Separate router for non-nested routes
 export const seatRouter = Router();
@@ -32,10 +40,11 @@ seatRouter
   .patch(
     authMiddleware.restrictTo('admin'),
     validateId,
-    seatController.updateSeat
+    validateSchema(seatSchema, true),
+    seatController.updateSeat,
   )
   .delete(
     authMiddleware.restrictTo('admin'),
     validateId,
-    seatController.deleteSeat
+    seatController.deleteSeat,
   );

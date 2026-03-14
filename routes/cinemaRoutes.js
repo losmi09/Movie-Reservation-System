@@ -1,11 +1,13 @@
 import { Router } from 'express';
-import validateId from '../middlewares/validateId.js';
+import { validateId } from '../middlewares/validateId.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import * as cinemaController from '../controllers/cinemaController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import { cinemaHallRouter as hallRouter } from './hallRoutes.js';
 import { cinemaShowtimeRouter as showtimeRouter } from './showtimeRoutes.js';
-import setParentFilter from '../middlewares/setParentFilter.js';
+import { setParentFilter } from '../middlewares/setParentFilter.js';
+import { validateSchema } from '../middlewares/validateSchema.js';
+import { cinemaSchema } from '../schemas/cinemaSchema.js';
 
 export const cinemaRouter = Router();
 
@@ -13,14 +15,14 @@ cinemaRouter.use(
   '/:id/showtimes',
   validateId,
   setParentFilter('cinema'),
-  showtimeRouter
+  showtimeRouter,
 );
 
 cinemaRouter.use(
   '/:id/halls',
   validateId,
   setParentFilter('cinema'),
-  hallRouter
+  hallRouter,
 );
 
 cinemaRouter
@@ -29,7 +31,8 @@ cinemaRouter
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    cinemaController.createCinema
+    validateSchema(cinemaSchema),
+    cinemaController.createCinema,
   );
 
 cinemaRouter
@@ -39,11 +42,12 @@ cinemaRouter
     validateId,
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    cinemaController.updateCinema
+    validateSchema(cinemaSchema, true),
+    cinemaController.updateCinema,
   )
   .delete(
     validateId,
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    cinemaController.deleteCinema
+    cinemaController.deleteCinema,
   );

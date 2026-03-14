@@ -2,9 +2,12 @@ import { Router } from 'express';
 import * as showtimeController from '../controllers/showtimeController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import { reservationRouter } from './reservationRoutes.js';
-import validateId from '../middlewares/validateId.js';
+import { validateId } from '../middlewares/validateId.js';
+import { setParentId } from '../middlewares/setParentId.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
-import checkIfExists from '../middlewares/checkIfExists.js';
+import { checkIfExists } from '../middlewares/checkIfExists.js';
+import { validateSchema } from '../middlewares/validateSchema.js';
+import { showtimeSchema } from '../schemas/showtimeSchema.js';
 
 // Used for nested /movies/:id/showtimes route
 export const movieShowtimeRouter = Router({ mergeParams: true });
@@ -19,6 +22,8 @@ movieShowtimeRouter
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    setParentId('movie'),
+    validateSchema(showtimeSchema),
     showtimeController.createShowtime,
   );
 
@@ -53,6 +58,8 @@ showtimeRouter
   .patch(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    validateId,
+    validateSchema(showtimeSchema, true),
     showtimeController.updateShowtime,
   )
   .delete(

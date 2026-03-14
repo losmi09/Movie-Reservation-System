@@ -1,13 +1,15 @@
 import { Router } from 'express';
-import setUserId from '../middlewares/setUserId.js';
-import validateId from '../middlewares/validateId.js';
-import checkIfExists from '../middlewares/checkIfExists.js';
-import { checkIfReviewBelongsToUser } from '../middlewares/reviews.js';
+import { setUserId } from '../middlewares/setUserId.js';
+import { validateId } from '../middlewares/validateId.js';
+import { validateSchema } from '../middlewares/validateSchema.js';
+import { reviewSchema } from '../schemas/reviewSchema.js';
+import { setParentId } from '../middlewares/setParentId.js';
+import { checkIfExists } from '../middlewares/checkIfExists.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import * as reviewController from '../controllers/reviewController.js';
 
-// Used to get all reviews on a specific movie (/movies/:id/reviews route)
+// Used to get all reviews on specific movie and to create review (/movies/:id/reviews route)
 export const movieReviewRouter = Router({ mergeParams: true });
 
 movieReviewRouter.use(authMiddleware.protect);
@@ -23,6 +25,8 @@ movieReviewRouter
   .post(
     authMiddleware.restrictTo('user'),
     setUserId,
+    setParentId('movie'),
+    validateSchema(reviewSchema),
     reviewController.createReview,
   );
 
@@ -36,11 +40,7 @@ reviewRouter
   .get(validateId, cacheOne('review'), reviewController.getReview)
   .patch(
     validateId,
-    checkIfReviewBelongsToUser('update'),
+    validateSchema(reviewSchema, true),
     reviewController.updateReview,
   )
-  .delete(
-    validateId,
-    checkIfReviewBelongsToUser('delete'),
-    reviewController.deleteReview,
-  );
+  .delete(validateId, reviewController.deleteReview);
