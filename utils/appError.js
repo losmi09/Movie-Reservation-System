@@ -9,7 +9,7 @@ const errorMessages = {
   500: 'Internal Server Error',
 };
 
-class AppError extends Error {
+export class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
     this.status = statusCode;
@@ -19,5 +19,3 @@ class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
-
-export default AppError;

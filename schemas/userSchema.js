@@ -51,12 +51,10 @@ export const deactivateUserSchema = Joi.object({
 });
 
 // Used for registration
-const userSchema = Joi.object({
+export const userSchema = Joi.object({
   firstName: Joi.string().required().trim(),
   lastName: Joi.string().required().trim(),
   ...emailField,
   ...passwordField,
   ...passwordConfirmField,
 });
-
-export default userSchema;

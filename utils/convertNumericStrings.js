@@ -1,4 +1,4 @@
-const convertNumericStringsToNumbers = obj => {
+export const convertNumericStringsToNumbers = obj => {
   const newObj = {};
 
   Object.entries(obj).forEach(entry => {
@@ -11,5 +11,3 @@ const convertNumericStringsToNumbers = obj => {
 
   return newObj;
 };
-
-export default convertNumericStringsToNumbers;

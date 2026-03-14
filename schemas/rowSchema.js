@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-const rowSchema = Joi.object({
+export const rowSchema = Joi.object({
   label: Joi.string()
     .required()
     .trim()
@@ -8,5 +8,3 @@ const rowSchema = Joi.object({
   seatCapacity: Joi.number().required().positive().integer().max(20),
   hallId: Joi.string().trim().required().guid(),
 });
-
-export default rowSchema;

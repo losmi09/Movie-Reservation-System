@@ -1,4 +1,4 @@
-const sanitizeOutput = user => {
+export const sanitizeOutput = user => {
   const {
     password,
     passwordChangedAt,
@@ -13,5 +13,3 @@ const sanitizeOutput = user => {
 
   return cleanUser;
 };
-
-export default sanitizeOutput;

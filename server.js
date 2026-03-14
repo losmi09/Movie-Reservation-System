@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { createClient } from 'redis';
-import app from './app.js';
+import { app } from './app.js';
 
 const logError = (err, type) => {
   const error =
@@ -12,7 +12,7 @@ const logError = (err, type) => {
 const port = process.env.PORT ?? 8000;
 
 const server = app.listen(port, () =>
-  console.log(`Server running on port ${port}...`)
+  console.log(`Server running on port ${port}...`),
 );
 
 process.on('uncaughtException', err => {
@@ -20,7 +20,7 @@ process.on('uncaughtException', err => {
   server.close(() => process.exit(1));
 });
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 const createRedisClient = async () => {
   const redisClient = createClient();
@@ -38,5 +38,3 @@ process.on('unhandledRejection', err => {
   logError(err, 'rejection');
   server.close(() => process.exit(1));
 });
-
-export default prisma;

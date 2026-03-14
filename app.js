@@ -7,8 +7,8 @@ import { xss } from 'express-xss-sanitizer';
 import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
-import AppError from './utils/appError.js';
-import globalErrorHandler from './controllers/errorController.js';
+import { AppError } from './utils/appError.js';
+import { globalErrorHandler } from './controllers/errorController.js';
 import { movieRouter } from './routes/movieRoutes.js';
 import { authRouter } from './routes/authRoutes.js';
 import { userRouter } from './routes/userRoutes.js';
@@ -21,7 +21,7 @@ import { allReservationRouter as reservationRouter } from './routes/reservationR
 import { reviewRouter } from './routes/reviewRoutes.js';
 
 // Initialize express app
-const app = express();
+export const app = express();
 
 // Set secure HTTP headers
 app.use(helmet());
@@ -81,5 +81,3 @@ app.use((req, res, next) =>
 );
 
 app.use(globalErrorHandler);
-
-export default app;
