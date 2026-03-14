@@ -1,14 +1,14 @@
+import { ensureCapacityAndExistance } from './utils/ensureCapacityAndExistance.js';
+import * as redisService from '../services/redisService.js';
 import * as rowRepository from '../repositories/rowRepository.js';
-import * as seatService from '../services/seatService.js';
 
-export const isRowFullOfSeats = async rowId => {
-  const [{ seatCapacity }, seatsInRow] = await Promise.all([
-    rowRepository.getSeatCapacity(rowId),
-    seatService.countSeatsInRow(rowId),
-  ]);
+export const getRow = async (rowId, fields) =>
+  await rowRepository.getRow(rowId, fields);
 
-  return seatCapacity <= seatsInRow;
+export const createRow = async data => {
+  await ensureCapacityAndExistance('hall', data.hallId);
+
+  await redisService.invalidateCache('row');
+
+  return await rowRepository.createRow(data);
 };
-
-export const getRowsInHall = async hallId =>
-  await rowRepository.getRowsInHall(hallId);

@@ -1,10 +1,11 @@
-import prisma from '../server.js';
+import { selectSingleDoc } from './prismaSelects.js';
+import { prisma } from '../server.js';
 
-export const getSeatCapacity = async rowId =>
+export const getRow = async (rowId, fields) =>
   await prisma.row.findUnique({
     where: { id: rowId },
-    select: { seatCapacity: true },
+    ...(fields && { select: fields }),
   });
 
-export const getRowsInHall = async hallId =>
-  await prisma.row.findMany({ where: { hallId } });
+export const createRow = async data =>
+  await prisma.row.create({ data, select: selectSingleDoc.row() });
