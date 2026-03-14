@@ -1,5 +1,5 @@
 // Extract nested parents and put them to the root level, this improves response structure
-const formatResponse = {
+export const formatResponse = {
   row(data) {
     const { hall, ...rowData } = data;
     const { cinema, ...hallData } = hall;
@@ -14,15 +14,14 @@ const formatResponse = {
   },
 
   reservation(data) {
-    const { showtime, seat, ...reservationData } = data;
+    const { showtime, seat, id, status } = data;
     const { movie, cinema, hall, ...showtimeData } = showtime;
-    const { row, ...seatData } = seat;
+    const { row, ...seatData } = seat ?? {}; // Seat is null when status is waitlist
     return {
-      ...reservationData,
+      id,
+      status,
       showtime: { ...showtimeData, movie, cinema, hall },
-      seat: { ...seatData, row },
+      ...(seat && { seat: { ...seatData, row } }),
     };
   },
 };
-
-export default formatResponse;
