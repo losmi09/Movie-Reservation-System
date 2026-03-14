@@ -1,9 +1,37 @@
+import { catchAsync } from '../utils/catchAsync.js';
+import { formatResponse } from '../mappers/formatResponse.js';
+import { sendResponse } from './utils/sendResponse.js';
 import * as crudController from './crudController.js';
+import * as reservationService from '../services/reservationService.js';
 
 export const getAllReservations = crudController.getAll('reservation');
 
-export const getReservation = crudController.getOne('reservation');
+export const getReservation = catchAsync(async (req, res) => {
+  const reservation = await reservationService.getReservation(
+    req.params.id,
+    req.user.id,
+  );
 
-export const createReservation = crudController.createOne('reservation');
+  sendResponse(res, formatResponse.reservation(reservation));
+});
 
-export const cancelReservation = crudController.updateOne('reservation');
+export const createReservation = catchAsync(async (req, res) => {
+  const { showtimeId, seatId } = req.body;
+
+  const reservation = await reservationService.createReservation(
+    showtimeId,
+    seatId,
+    req.user.id,
+  );
+
+  sendResponse(res, formatResponse.reservation(reservation), 201);
+});
+
+export const cancelReservation = catchAsync(async (req, res) => {
+  const cancelledReservation = await reservationService.cancelReservation(
+    req.params.id,
+    req.user.id,
+  );
+
+  sendResponse(res, cancelledReservation);
+});

@@ -1,5 +1,6 @@
-import catchAsync from '../utils/catchAsync.js';
-import AppError from '../utils/appError.js';
+import { catchAsync } from '../utils/catchAsync.js';
+import { AppError } from '../utils/appError.js';
+import { sendResponse } from './utils/sendResponse.js';
 import * as crudController from './crudController.js';
 import * as movieService from '../services/movieService.js';
 
@@ -7,9 +8,19 @@ export const getAllMovies = crudController.getAll('movie');
 
 export const getMovie = crudController.getOne('movie');
 
-export const createMovie = crudController.createOne('movie');
+export const createMovie = catchAsync(async (req, res) => {
+  const movie = await movieService.createMovie({ ...req.body });
 
-export const updateMovie = crudController.updateOne('movie');
+  sendResponse(res, movie, 201);
+});
+
+export const updateMovie = catchAsync(async (req, res) => {
+  const updatedMovie = await movieService.updateMovie(req.params.id, {
+    ...req.body,
+  });
+
+  sendResponse(res, updatedMovie);
+});
 
 export const deleteMovie = crudController.deleteOne('movie');
 
@@ -21,5 +32,5 @@ export const saveMoviePoster = catchAsync(async (req, res, next) => {
     req.file.fileName,
   );
 
-  res.status(200).json({ data: movie });
+  sendResponse(res, movie);
 });
