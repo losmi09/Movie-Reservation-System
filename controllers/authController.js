@@ -1,10 +1,11 @@
-import catchAsync from '../utils/catchAsync.js';
-import AppError from '../utils/appError.js';
-import userSchema from '../schemas/userSchema.js';
-import * as authService from '../services/authService.js';
-import * as redisService from '../services/redisService.js';
+import { catchAsync } from '../utils/catchAsync.js';
+import { AppError } from '../utils/appError.js';
+import { sendResponse } from './utils/sendResponse.js';
+import { userSchema } from '../schemas/userSchema.js';
 import { loginSchema } from '../schemas/userSchema.js';
 import { passwordSchema, emailSchema } from '../schemas/userSchema.js';
+import * as authService from '../services/authService.js';
+import * as redisService from '../services/redisService.js';
 
 const cookieOptions = {
   httpOnly: true, // Ensure cookie is inaccessible via JavaScript on the client side
@@ -66,7 +67,7 @@ export const login = catchAsync(async (req, res, next) => {
 export const logout = catchAsync(async (req, res) => {
   await invalidateRefreshToken(res, req.user.id);
 
-  res.status(204).end();
+  sendResponse(res, null, 204);
 });
 
 export const refreshToken = catchAsync(async (req, res, next) => {
