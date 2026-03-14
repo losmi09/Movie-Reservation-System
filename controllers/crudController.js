@@ -1,10 +1,14 @@
-import catchAsync from '../utils/catchAsync.js';
-import AppError from '../utils/appError.js';
-import validateBody from '../validation/validateBody.js';
-import sendResponse from '../utils/sendResponse.js';
+import { catchAsync } from '../utils/catchAsync.js';
+import { AppError } from '../utils/appError.js';
+import { sendResponse } from './utils/sendResponse.js';
 import { redisClient } from '../server.js';
-import formatResponse from '../mappers/formatResponse.js';
+import { formatResponse } from '../mappers/formatResponse.js';
 import * as crudService from '../services/crudService.js';
+
+const setCache = async (key, data) =>
+  await redisClient.set(key, JSON.stringify(data), {
+    EX: Number(process.env.CACHE_EXPIRY),
+  });
 
 export const getAll = model =>
   catchAsync(async (req, res) => {
@@ -12,10 +16,7 @@ export const getAll = model =>
 
     const { data, meta } = await crudService.getAll(model, { ...query });
 
-    if (cacheKey)
-      await redisClient.set(cacheKey, JSON.stringify({ data, meta }), {
-        EX: 300,
-      });
+    if (cacheKey) await setCache(cacheKey, { data, meta });
 
     res.status(200).json({ data, meta });
   });
@@ -32,62 +33,16 @@ export const getOne = model =>
 
     const { cacheKey } = req;
 
-    if (cacheKey)
-      await redisClient.set(cacheKey, JSON.stringify(finalDoc), {
-        EX: 300,
-      });
+    if (cacheKey) await setCache(cacheKey, finalDoc);
 
     sendResponse(res, finalDoc);
   });
 
-export const createOne = model =>
-  catchAsync(async (req, res, next) => {
-    const data = { ...req.body };
-
-    // Parent field comes from nested route, e.g. /cinemas/:id/halls
-    const parentIds = {
-      hall: 'cinemaId',
-      row: 'hallId',
-      seat: 'rowId',
-      showtime: 'movieId',
-      reservation: 'showtimeId',
-      review: 'movieId',
-    };
-
-    const parentId = parentIds[model];
-
-    if (parentId) data[parentId] = req.params.id;
-
-    const error = await validateBody({
-      model,
-      body: data,
-      userId: req.user.id,
-    });
-
-    if (error) return next(error);
-
-    const newDoc = await crudService.createOne(model, data);
-
-    sendResponse(res, getFormatedDoc(model, newDoc), 201);
-  });
-
 export const updateOne = model =>
-  catchAsync(async (req, res, next) => {
-    const data = { ...req.body };
-
-    const { id } = req.params;
-
-    const error = await validateBody({
-      model,
-      body: data,
-      id,
-      isUpdating: true,
-      userId: req.user.id,
+  catchAsync(async (req, res) => {
+    const updatedDoc = await crudService.updateOne(model, req.params.id, {
+      ...req.body,
     });
-
-    if (error) return next(error);
-
-    const updatedDoc = await crudService.updateOne(model, id, data);
 
     sendResponse(res, getFormatedDoc(model, updatedDoc));
   });
@@ -96,5 +51,5 @@ export const deleteOne = model =>
   catchAsync(async (req, res) => {
     await crudService.deleteOne(model, req.params.id);
 
-    res.status(204).end();
+    sendResponse(res, null, 204);
   });
