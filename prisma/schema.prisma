@@ -36,6 +36,8 @@ model User {
   emailVerificationTokenExpiry DateTime?     @map("email_verification_token_expiry")
   isVerified                   Boolean       @default(false) @map("is_verified")
   isActive                     Boolean       @default(true) @map("is_active")
+  createdAt                    DateTime      @default(now()) @map("created_at")
+  updatedAt                    DateTime      @updatedAt @map("updated_at")
   Reservation                  Reservation[]
   Review                       Review[]
 
@@ -80,11 +82,13 @@ model Hall {
 }
 
 model Row {
-  id           String @id @default(uuid())
-  label        String @db.VarChar(255)
-  seatCapacity Int    @map("seat_capacity")
-  hallId       String @map("hall_id")
-  hall         Hall   @relation(fields: [hallId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid())
+  label        String   @db.VarChar(255)
+  seatCapacity Int      @map("seat_capacity")
+  hallId       String   @map("hall_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  hall         Hall     @relation(fields: [hallId], references: [id], onDelete: Cascade)
   Seat         Seat[]
 
   @@unique([label, hallId])
@@ -96,6 +100,8 @@ model Seat {
   rowId       String        @map("row_id")
   row         Row           @relation(fields: [rowId], references: [id], onDelete: Cascade)
   number      Int
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
   Reservation Reservation[]
 
   @@unique([rowId, number])
@@ -114,6 +120,8 @@ model Showtime {
   endTime     DateTime      @map("end_time")
   language    String        @default("English") @db.VarChar(255)
   price       Decimal
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
   Reservation Reservation[]
 
   @@unique([movieId, cinemaId, hallId, startTime])
