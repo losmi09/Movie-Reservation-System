@@ -17,8 +17,6 @@ const handleSemanticError = (res, error, instance) => {
     err => (errorObj.errors[err.path] = [err.message.replaceAll('"', '')]),
   );
 
-  const { name: type } = error;
-
   const config = {
     ValidationError: {
       title: 'Validation Failed',
@@ -33,10 +31,12 @@ const handleSemanticError = (res, error, instance) => {
 
   const STATUS_CODE = 422;
 
+  const { title, detail } = config[error.name];
+
   res.status(STATUS_CODE).json({
-    title: config[type].title,
+    title,
     status: STATUS_CODE,
-    detail: config[type].detail,
+    detail,
     timestamp: new Date(),
     instance,
     ...errorObj,
@@ -46,28 +46,39 @@ const handleSemanticError = (res, error, instance) => {
 const handleUniqueField = (err, res, instance) => {
   const { modelName, target } = err.meta;
 
-  const fields = {
-    Hall: 'name',
-    Row: 'label',
-    Seat: 'number',
-    Reservation: 'seatId',
-    Review: 'movieId',
+  const customConfig = {
+    Hall: {
+      field: 'name',
+      message: 'Hall with this name in this cinema already exists',
+    },
+    Row: {
+      field: 'label',
+      message: 'Row with this label in this hall already exists',
+    },
+    Seat: {
+      field: 'number',
+      message: 'Seat with this number in this row already exists',
+    },
+    Reservation: {
+      field: 'seatId',
+      message: 'This seat is reserved',
+    },
+    Review: {
+      field: 'movieId',
+      message: 'You have already reviewed this movie',
+    },
   };
 
-  const messages = {
-    Hall: 'Hall with this name in this cinema already exists',
-    Row: 'Row with this label in this hall already exists',
-    Seat: 'Seat with this number in this row already exists',
-    Reservation: 'This seat is reserved',
-    Review: 'You have already reviewed this movie',
-  };
+  const modelConfig = customConfig[modelName] ?? {};
 
-  const field = fields[modelName] ?? target;
+  const field = modelConfig.field ?? target;
 
-  const message = `${modelName} with this ${field} already exists`;
+  const message =
+    modelConfig.message ?? `${modelName} with this ${field} already exists`;
 
+  // Error object structure that fits handleSemanticError function
   const error = {
-    details: [{ path: field, message: messages[modelName] ?? message }],
+    details: [{ path: field, message }],
     name: 'BusinessLogicError',
   };
 
