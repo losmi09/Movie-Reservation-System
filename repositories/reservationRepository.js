@@ -3,17 +3,16 @@ import { prisma } from '../server.js';
 
 const reservationSelection = selectSingleDoc.reservation();
 
-export const getReservation = async (reservationId, userId, format) =>
-  await prisma.reservation.findFirst({
+export const getReservation = async (reservationId, userId, fields) => {
+  const selectFields = fields
+    ? fields
+    : { ...reservationSelection, userId: true };
+
+  return await prisma.reservation.findFirst({
     where: { id: reservationId, ...(userId && { userId }) },
-    ...(format && { select: { ...reservationSelection, userId: true } }),
+    select: selectFields,
   });
-
-export const getReservedReservation = async (showtimeId, seatId) =>
-  await prisma.reservation.findFirst({
-    where: { showtimeId, seatId, status: 'reserved' },
-  });
-
+};
 export const createReservation = async data =>
   await prisma.reservation.create({ data, select: reservationSelection });
 
@@ -22,10 +21,11 @@ export const countShowtimeReservations = async (showtimeId, userId) =>
     where: { showtimeId, status: 'reserved', ...(userId && { userId }) },
   });
 
-export const getFirstInWaitlist = async showtimeId =>
+export const getFirstInWaitlist = async (showtimeId, fields) =>
   await prisma.reservation.findFirst({
     where: { showtimeId, status: 'waitlist' },
     orderBy: { createdAt: 'asc' },
+    ...(fields && { select: fields }),
   });
 
 export const cancelReservation = reservationId =>
@@ -39,6 +39,7 @@ export const reserveSeatForFirstInWaitlist = (waitlistId, seatId) =>
   prisma.reservation.update({
     where: { id: waitlistId },
     data: { seatId, status: 'reserved' },
+    select: { id: true },
   });
 
 export const waitlistTransaction = async (

@@ -10,14 +10,10 @@ const throwReservationNotFoundError = () => {
 };
 
 export const getReservation = async (reservationId, userId) => {
-  const reservation = await reservationRepository.getReservation(
-    reservationId,
-    null,
-    true,
-  );
+  const reservation = await reservationRepository.getReservation(reservationId);
 
   // Verify that reservation belongs to user
-  if (reservation.userId !== userId) throwReservationNotFoundError();
+  if (reservation?.userId !== userId) throwReservationNotFoundError();
 
   return reservation;
 };
@@ -102,6 +98,7 @@ export const cancelReservation = async (reservationId, userId) => {
   const reservation = await reservationRepository.getReservation(
     reservationId,
     userId,
+    { status: true, userId: true, showtimeId: true, seatId: true },
   );
 
   // Verify that reservation exists and belongs to user
@@ -125,6 +122,7 @@ export const cancelReservation = async (reservationId, userId) => {
   // Check if there are reservations with status of waitlist
   const firstInWaitlist = await reservationRepository.getFirstInWaitlist(
     reservation.showtimeId,
+    { id: true },
   );
 
   // Cancel reservation and reserve seat for first in waitlist

@@ -95,13 +95,14 @@ export const register = async userData => {
 
   await emailService.sendEmailVerification(newUser, verificationToken);
 
-  const sanitizedUser = sanitizeOutput(newUser);
-
-  return sanitizedUser;
+  return newUser;
 };
 
 export const login = async (email, providedPassword) => {
-  const user = await userRepository.findUserByEmail(email);
+  const user = await userRepository.findUserByEmail(email, {
+    password: true,
+    isActive: true,
+  });
 
   const DUMMY_HASH =
     '$argon2id$v=19$m=65536,t=3,p=4$G8NYSxrA+UMGHJbZVIXXXQ$UrHyBcYfCEms+92QVzGmfYqrWtH54WJY9FuROBQi/X8';
@@ -138,9 +139,9 @@ export const refreshToken = async token => {
     throw new AppError('Invalid refresh token', 401);
   }
 
-  const { isActive } = await userRepository.findUserById(userId);
+  const isUserActive = await userRepository.isUserActive(userId);
 
-  if (!isActive) throw new AppError('Your account is deactivated', 403);
+  if (!isUserActive) throw new AppError('Your account is deactivated', 403);
 
   const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
     await prepareAccessAndRefreshToken(userId);
@@ -151,7 +152,9 @@ export const refreshToken = async token => {
 export const protect = async accessToken => {
   const { userId, issuedAt } = await verifyToken(accessToken, 'access');
 
-  const user = await userRepository.findUserById(userId);
+  const user = await userRepository.findUserById(userId, {
+    passwordChangedAt: true,
+  });
 
   if (!user)
     throw new AppError('The user belonging to token does no longer exist', 401);
@@ -174,9 +177,7 @@ export const verifyEmail = async token => {
 
   await userRepository.setUserVerified(user.id);
 
-  const sanitizedUser = sanitizeOutput(user);
-
-  return sanitizedUser;
+  return user;
 };
 
 export const forgotPassword = async email => {
@@ -203,7 +204,9 @@ export const forgotPassword = async email => {
 export const resetPassword = async (token, newPassword, passwordConfirm) => {
   const hashedToken = hashToken(token);
 
-  const user = await userRepository.findUserByPasswordResetToken(hashedToken);
+  const user = await userRepository.findUserByPasswordResetToken(hashedToken, {
+    password: true,
+  });
 
   if (!user)
     throw new AppError('Password reset token is invalid or has expired', 400);
@@ -230,7 +233,7 @@ export const resetPassword = async (token, newPassword, passwordConfirm) => {
 };
 
 export const updatePassword = async (userId, passwordCurrent, newPassword) => {
-  const user = await userRepository.findUserById(userId);
+  const user = await userRepository.findUserById(userId, { password: true });
 
   if (!user) throw new AppError('User does no longer exist', 404);
 
