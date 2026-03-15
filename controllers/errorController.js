@@ -19,22 +19,24 @@ const handleSemanticError = (res, error, instance) => {
 
   const { name: type } = error;
 
-  const title =
-    type === 'ValidationError'
-      ? 'Validation Failed'
-      : 'Business Logic Violation';
-
-  const detail =
-    type === 'ValidationError'
-      ? 'One or more fields failed validation'
-      : 'The request could not be processed due to business rule constraints';
+  const config = {
+    ValidationError: {
+      title: 'Validation Failed',
+      detail: 'One or more fields failed validation',
+    },
+    BusinessLogicError: {
+      title: 'Business Logic Violation',
+      detail:
+        'The request could not be processed due to business rule constraints',
+    },
+  };
 
   const STATUS_CODE = 422;
 
   res.status(STATUS_CODE).json({
-    title,
+    title: config[type].title,
     status: STATUS_CODE,
-    detail,
+    detail: config[type].detail,
     timestamp: new Date(),
     instance,
     ...errorObj,
@@ -78,40 +80,60 @@ const handleTooLargePayload = () =>
 
 const handleMulterError = err => new AppError(err.message, 422);
 
-const sendError = (err, res, instance) => {
-  const { isOperational, message, status, title, timestamp, stack } = err;
+const DEFAULT_ERROR_STATUS_CODE = 500;
 
-  if (!isOperational && process.env.NODE_ENV === 'production')
-    return res.status(500).json({
+const sendError = (err, res, instance) => {
+  const { isOperational, status, title, timestamp } = err;
+
+  // Extract non-enumerable properties and rest of the error object
+  const { name, message, stack, ...rest } = err;
+
+  const statusCode = status ?? DEFAULT_ERROR_STATUS_CODE;
+
+  // Handle errors in development environment
+  if (process.env.NODE_ENV === 'development')
+    return res.status(statusCode).json({
+      name,
+      message,
+      err: rest,
+      stack,
+    });
+
+  // Handle non-operational errors in production
+  if (!isOperational)
+    return res.status(DEFAULT_ERROR_STATUS_CODE).json({
       title: 'Internal Server Error',
-      status: 500,
+      status: DEFAULT_ERROR_STATUS_CODE,
       detail: 'Something Went Wrong!',
       instance,
       timestamp: new Date(),
     });
 
+  // Handle operational errors in production
   res.status(status).json({
     title,
     status,
     detail: message,
-    timestamp,
     instance,
-    error: process.env.NODE_ENV === 'development' ? err : undefined,
-    stack: process.env.NODE_ENV === 'development' ? stack : undefined,
+    timestamp,
   });
 };
 
 export const globalErrorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  error.title = error.title || 'Internal Server Error';
-  error.status = error.status || 500;
+  const { name, message, code, stack, ...rest } = err;
 
-  const { name, code, message } = err;
+  // Cannot make shallow copy using {...err} syntax because spread operator does not see non-enumerable properties of an error object (name, message and stack)
+  let error = { name, message, code, stack, ...rest };
+
+  error.title ??= 'Internal Server Error';
+  error.status ??= DEFAULT_ERROR_STATUS_CODE;
+
+  const { originalUrl: instance } = req;
 
   if (name === 'ValidationError' || name === 'BusinessLogicError')
-    return handleSemanticError(res, err, req.originalUrl);
+    return handleSemanticError(res, err, instance);
 
-  if (code === 'P2002') return handleUniqueField(error, res, req.originalUrl);
+  if (code === 'P2002') return handleUniqueField(error, res, instance);
 
   if (name === 'MulterError') error = handleMulterError(err);
 
@@ -122,5 +144,5 @@ export const globalErrorHandler = (err, req, res, next) => {
   if (message.includes('Error in query') || message === 'unexpected empty path')
     error = handleInvalidQuery();
 
-  sendError(error, res, req.originalUrl);
+  sendError(error, res, instance);
 };
