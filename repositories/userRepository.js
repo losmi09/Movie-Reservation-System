@@ -19,16 +19,16 @@ export const updateUser = async (userId, data) =>
     select: selectFields,
   });
 
-export const findUserById = async (userId, additionaSelectFields) =>
+export const findUserById = async (userId, additionalSelectFields) =>
   await prisma.user.findUnique({
     where: { id: userId },
-    select: { ...selectFields, ...additionaSelectFields },
+    select: { ...selectFields, ...additionalSelectFields },
   });
 
-export const findUserByEmail = async (email, additionaSelectFields) =>
+export const findUserByEmail = async (email, additionalSelectFields) =>
   await prisma.user.findUnique({
     where: { email },
-    select: { ...selectFields, ...additionaSelectFields },
+    select: { ...selectFields, ...additionalSelectFields },
   });
 
 export const setEmailVerificationToken = async (userId, token) => {
@@ -79,14 +79,14 @@ export const setPasswordResetToken = async (email, passwordResetToken) => {
 
 export const findUserByPasswordResetToken = async (
   passwordResetToken,
-  additionaSelectFields,
+  additionalSelectFields,
 ) =>
   await prisma.user.findUnique({
     where: {
       passwordResetToken,
       passwordResetTokenExpiry: { gte: new Date() },
     },
-    select: { ...selectFields, ...additionaSelectFields },
+    select: { ...selectFields, ...additionalSelectFields },
   });
 
 export const clearPasswordResetToken = async email =>
