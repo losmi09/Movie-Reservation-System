@@ -13,7 +13,7 @@ export const validateSchema = (schema, isUpdating) => (req, res, next) => {
 
   if (isUpdating) {
     // When updating, required-field validation errors are ignored
-    errors = error.details.filter(err => !err.message.endsWith('required'));
+    errors = errors.filter(err => !err.message.endsWith('required'));
     errors = [...errors, ...getReferenceErrors(data)];
   }
 
