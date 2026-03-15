@@ -68,6 +68,7 @@ const handleUniqueField = (err, res, instance) => {
 
   const error = {
     details: [{ path: field, message: messages[modelName] ?? message }],
+    name: 'BusinessLogicError',
   };
 
   return handleSemanticError(res, error, instance);
@@ -123,6 +124,7 @@ export const globalErrorHandler = (err, req, res, next) => {
   const { name, message, code, stack, ...rest } = err;
 
   // Cannot make shallow copy using {...err} syntax because spread operator does not see non-enumerable properties of an error object (name, message and stack)
+
   let error = { name, message, code, stack, ...rest };
 
   error.title ??= 'Internal Server Error';
