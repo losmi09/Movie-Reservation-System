@@ -8,15 +8,17 @@ datasource db {
 }
 
 model Movie {
-  id          String     @id @default(uuid())
-  title       String     @unique @db.VarChar(255)
-  description String     @db.VarChar(255)
-  posterImage String     @default("default.jpg") @map("poster_image") @db.Text
-  slug        String     @db.VarChar(255)
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
-  Showtime    Showtime[]
-  Review      Review[]
+  id            String     @id @default(uuid())
+  title         String     @unique @db.VarChar(255)
+  description   String     @db.VarChar(255)
+  posterImage   String     @default("default.jpg") @map("poster_image") @db.Text
+  slug          String     @db.VarChar(255)
+  reviewsCount  Int        @default(0) @map("reviews_count")
+  averageRating Int        @default(0) @map("average_rating")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  Showtime      Showtime[]
+  Review        Review[]
 
   @@map("movies")
 }
