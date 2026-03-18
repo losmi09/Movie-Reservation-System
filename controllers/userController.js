@@ -1,5 +1,4 @@
 import { catchAsync } from '../utils/catchAsync.js';
-import { updateUserSchema } from '../schemas/userSchema.js';
 import { AppError } from '../utils/appError.js';
 import { sendResponse } from './utils/sendResponse.js';
 import * as userService from '../services/userService.js';
@@ -18,18 +17,10 @@ export const getCurrentUser = catchAsync(async (req, res) => {
   sendResponse(res, currentUser);
 });
 
-export const updateCurrentUser = catchAsync(async (req, res, next) => {
-  const { error } = updateUserSchema.validate(
-    { ...req.body },
-    { abortEarly: false },
-  );
-
-  if (error) return next(error);
-
-  const updatedUser = await userService.updateCurrentUser(
-    req.user.id,
-    req.body,
-  );
+export const updateCurrentUser = catchAsync(async (req, res) => {
+  const updatedUser = await userService.updateCurrentUser(req.user.id, {
+    ...req.body,
+  });
 
   sendResponse(res, { ...updatedUser, updatedAt: new Date() });
 });

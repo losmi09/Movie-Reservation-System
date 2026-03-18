@@ -1,9 +1,6 @@
 import { catchAsync } from '../utils/catchAsync.js';
 import { AppError } from '../utils/appError.js';
 import { sendResponse } from './utils/sendResponse.js';
-import { userSchema } from '../schemas/userSchema.js';
-import { loginSchema } from '../schemas/userSchema.js';
-import { passwordSchema, emailSchema } from '../schemas/userSchema.js';
 import * as authService from '../services/authService.js';
 import * as redisService from '../services/redisService.js';
 
@@ -37,27 +34,16 @@ const sendAuthResponse = async (res, user, statusCode) => {
   res.status(statusCode).json({ accessToken, data: user });
 };
 
-export const register = catchAsync(async (req, res, next) => {
+export const register = catchAsync(async (req, res) => {
   const userData = { ...req.body };
-
-  const { error } = userSchema.validate(userData, { abortEarly: false });
-
-  if (error) return next(error);
 
   const newUser = await authService.register(userData);
 
   sendAuthResponse(res, newUser, 201);
 });
 
-export const login = catchAsync(async (req, res, next) => {
+export const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-
-  const { error } = loginSchema.validate(
-    { email, password },
-    { abortEarly: false },
-  );
-
-  if (error) return next(error);
 
   const user = await authService.login(email, password);
 
@@ -95,12 +81,8 @@ export const verifyEmail = catchAsync(async (req, res) => {
   });
 });
 
-export const forgotPassword = catchAsync(async (req, res, next) => {
+export const forgotPassword = catchAsync(async (req, res) => {
   const { email } = req.body;
-
-  const { error } = emailSchema.validate({ email });
-
-  if (error) return next(error);
 
   await authService.forgotPassword(email);
 
@@ -128,15 +110,8 @@ export const resetPassword = catchAsync(async (req, res) => {
   sendPasswordUpdate(res, user);
 });
 
-export const updateUserPassword = catchAsync(async (req, res, next) => {
-  const { passwordCurrent, password, passwordConfirm } = req.body;
-
-  const { error } = passwordSchema.validate(
-    { passwordCurrent, password, passwordConfirm },
-    { abortEarly: false },
-  );
-
-  if (error) return next(error);
+export const updateUserPassword = catchAsync(async (req, res) => {
+  const { passwordCurrent, password } = req.body;
 
   const user = await authService.updatePassword(
     req.user.id,
