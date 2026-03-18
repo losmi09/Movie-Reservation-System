@@ -8,27 +8,34 @@ import * as userRepository from '../repositories/userRepository.js';
 import * as emailService from '../services/emailService.js';
 import * as redisService from '../services/redisService.js';
 
+const JWT_ALGORITHM = 'HS256';
+const HMAC_ALGORITHM = 'sha256';
+const TOKEN_BYTES = 32;
+const TOKEN_ENCODING = 'hex';
+
+const JWTSecrets = {
+  access: process.env.ACCESS_TOKEN_SECRET,
+  refresh: process.env.REFRESH_TOKEN_SECRET,
+};
+
 const generateAccessToken = userId =>
-  jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
+  jwt.sign({ id: userId }, JWTSecrets.access, {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
-    algorithm: 'HS256',
+    algorithm: JWT_ALGORITHM,
   });
 
 const generateRefreshToken = userId =>
-  jwt.sign({ id: userId }, process.env.REFRESH_TOKEN_SECRET, {
+  jwt.sign({ id: userId }, JWTSecrets.refresh, {
     expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
-    algorithm: 'HS256',
+    algorithm: JWT_ALGORITHM,
   });
 
 const verifyToken = async (token, tokenType) => {
   try {
-    const secret =
-      tokenType === 'access'
-        ? process.env.ACCESS_TOKEN_SECRET
-        : process.env.REFRESH_TOKEN_SECRET;
+    const secret = JWTSecrets[tokenType];
 
     const { id: userId, iat: issuedAt } = await jwt.verify(token, secret, {
-      algorithms: ['HS256'],
+      algorithms: [JWT_ALGORITHM],
     });
 
     return { userId, issuedAt };
@@ -44,12 +51,12 @@ const hashPassword = async password => await argon2.hash(password);
 
 export const hashToken = token =>
   crypto
-    .createHmac('sha256', process.env.TOKEN_SECRET)
+    .createHmac(HMAC_ALGORITHM, process.env.TOKEN_SECRET)
     .update(token)
-    .digest('hex');
+    .digest(TOKEN_ENCODING);
 
 export const createToken = () => {
-  const token = crypto.randomBytes(32).toString('hex');
+  const token = crypto.randomBytes(TOKEN_BYTES).toString(TOKEN_ENCODING);
   const hashedToken = hashToken(token);
   return { token, hashedToken };
 };
@@ -57,8 +64,15 @@ export const createToken = () => {
 export const comparePasswords = async (userPassword, providedPassword) =>
   await argon2.verify(userPassword, providedPassword);
 
-export const checkForPasswordChange = (JWTTimestamp, passwordChangeTimestamp) =>
-  new Date(JWTTimestamp * 1000) < new Date(passwordChangeTimestamp); // Multiply JWT timestamp by 1000 because it is in seconds and Date constructor expects milliseconds
+export const checkForPasswordChange = (
+  JWTTimestamp, // Represented in seconds
+  passwordChangeTimestamp, // Represented in milliseconds
+) => {
+  // Date constructor expects timestamp in milliseconds
+  const JWTTimestampInMilliseconds = JWTTimestamp * 1000;
+  // Check if JWT was issued before the password was changed
+  return JWTTimestampInMilliseconds < passwordChangeTimestamp;
+};
 
 const setPassword = async (userId, password) => {
   const hashedPassword = await hashPassword(password);
@@ -110,8 +124,12 @@ export const login = async (email, providedPassword) => {
   // If no user is found with provided email, use dummy hash to prevent timing attack
   const userPassword = user?.password ?? DUMMY_HASH;
 
-  if (!(await comparePasswords(userPassword, providedPassword)))
-    throw new AppError('Incorrect email or password', 401);
+  const doPasswordsMatch = await comparePasswords(
+    userPassword,
+    providedPassword,
+  );
+
+  if (!doPasswordsMatch) throw new AppError('Incorrect email or password', 401);
 
   if (!user.isActive) await userRepository.activateUser(user.id);
 
@@ -159,7 +177,12 @@ export const protect = async accessToken => {
   if (!user)
     throw new AppError('The user belonging to token does no longer exist', 401);
 
-  if (checkForPasswordChange(issuedAt, user.passwordChangedAt))
+  const hasPasswordChanged = checkForPasswordChange(
+    issuedAt,
+    user.passwordChangedAt,
+  );
+
+  if (hasPasswordChanged)
     throw new AppError('Password was changed. Please log in again', 401);
 
   const sanitizedUser = sanitizeOutput(user);
@@ -215,8 +238,12 @@ export const resetPassword = async (token, newPassword, passwordConfirm) => {
   let passwordCurrent = 'somestring';
 
   // Ensure that new password is not the same as current one
-  if (await comparePasswords(user.password, String(newPassword)))
-    passwordCurrent = newPassword;
+  const isNewPasswordSameAsOldOne = await comparePasswords(
+    user.password,
+    String(newPassword),
+  );
+
+  if (isNewPasswordSameAsOldOne) passwordCurrent = newPassword;
 
   const { error } = passwordSchema.validate(
     { passwordCurrent, password: newPassword, passwordConfirm },
@@ -237,7 +264,12 @@ export const updatePassword = async (userId, passwordCurrent, newPassword) => {
 
   if (!user) throw new AppError('User does no longer exist', 404);
 
-  if (!(await comparePasswords(user.password, passwordCurrent)))
+  const doPasswordsMatch = await comparePasswords(
+    user.password,
+    passwordCurrent,
+  );
+
+  if (!doPasswordsMatch)
     throw new AppError('Your current password is incorrect', 401);
 
   await setPassword(user.id, newPassword);
