@@ -129,7 +129,8 @@ export const login = async (email, providedPassword) => {
     providedPassword,
   );
 
-  if (!doPasswordsMatch) throw new AppError('Incorrect email or password', 401);
+  if (!user || !doPasswordsMatch)
+    throw new AppError('Incorrect email or password', 401);
 
   if (!user.isActive) await userRepository.activateUser(user.id);
 
