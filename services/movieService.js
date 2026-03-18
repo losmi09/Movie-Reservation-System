@@ -16,10 +16,14 @@ export const createMovie = async data => {
 export const updateMovie = async (movieId, data) => {
   const { title } = data;
 
-  const updatedMovie = movieRepository.updateMovie(movieId, {
-    ...data,
-    ...(title && { slug: slugify(title, { lower: true }) }),
-  });
+  const updatedMovie = movieRepository.updateMovie(
+    movieId,
+    {
+      ...data,
+      ...(title && { slug: slugify(title, { lower: true }) }),
+    },
+    true,
+  );
 
   await redisService.invalidateCache('movie');
 
@@ -28,3 +32,6 @@ export const updateMovie = async (movieId, data) => {
 
 export const saveMoviePoster = (movieId, fileName) =>
   movieRepository.saveMoviePoster(movieId, fileName);
+
+export const updateMovieReviewStats = (tx, movieId) =>
+  movieRepository.updateMovieReviewStats(tx, movieId);
