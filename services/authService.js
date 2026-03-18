@@ -263,8 +263,6 @@ export const resetPassword = async (token, newPassword, passwordConfirm) => {
 export const updatePassword = async (userId, passwordCurrent, newPassword) => {
   const user = await userRepository.findUserById(userId, { password: true });
 
-  if (!user) throw new AppError('User does no longer exist', 404);
-
   const doPasswordsMatch = await comparePasswords(
     user.password,
     passwordCurrent,
