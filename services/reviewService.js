@@ -1,8 +1,10 @@
 import { ensureParentExists } from './utils/ensureParentExists.js';
 import { AppError } from '../utils/appError.js';
+import { BusinessLogicError } from '../utils/BusinessLogicError.js';
 import * as redisService from '../services/redisService.js';
 import * as reviewRepository from '../repositories/reviewRepository.js';
 import * as movieService from '../services/movieService.js';
+import * as reservationService from '../services/reservationService.js';
 import { prisma } from '../server.js';
 
 const checkIfReviewExistsAndBelongsToUser = async (
@@ -24,10 +26,11 @@ const checkIfReviewExistsAndBelongsToUser = async (
   return review;
 };
 
-const invalidateReviewAndMovieCache = async () => {
-  await redisService.invalidateCache('review');
-  await redisService.invalidateCache('movie');
-};
+const invalidateReviewAndMovieCache = () =>
+  Promise.all([
+    redisService.invalidateCache('review'),
+    redisService.invalidateCache('movie'),
+  ]);
 
 const reviewOperations = {
   create: ({ tx, data }) => reviewRepository.createReview(tx, data),
@@ -49,10 +52,30 @@ const reviewTransaction = async ({ data, operation, reviewId, movieId }) =>
     return review;
   });
 
-export const createReview = async data => {
+export const createReview = async (data, userId) => {
   const { movieId } = data;
 
   await ensureParentExists('movie', movieId);
+
+  // Check if user has watched the movie that he wants to review, this function returns first user's reservation with status of reserved for a showtime where this movie was shown
+  const reservation =
+    await reservationService.getUserEarliestReservationForMovie(
+      movieId,
+      userId,
+    );
+
+  if (!reservation)
+    throw new BusinessLogicError(
+      'movieId',
+      "You cannot review a movie that you haven't watched yet",
+    );
+
+  // Check if the first showtime where the user watched this movie is still ongoing
+  if (reservation.showtime.endTime > new Date())
+    throw new BusinessLogicError(
+      'movieId',
+      'You cannot review the movie until showtime ends',
+    );
 
   const review = await reviewTransaction({
     data,

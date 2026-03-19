@@ -8,7 +8,7 @@ export const getAllReviews = crudController.getAll('review');
 export const getReview = crudController.getOne('review');
 
 export const createReview = catchAsync(async (req, res) => {
-  const review = await reviewService.createReview({ ...req.body });
+  const review = await reviewService.createReview({ ...req.body }, req.user.id);
 
   sendResponse(res, review, 201);
 });
