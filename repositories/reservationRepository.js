@@ -13,6 +13,14 @@ export const getReservation = async (reservationId, userId, fields) => {
     select: selectFields,
   });
 };
+
+export const getUserEarliestReservationForMovie = async (movieId, userId) =>
+  await prisma.reservation.findFirst({
+    where: { userId, showtime: { movieId }, status: 'reserved' },
+    orderBy: { showtime: { endTime: 'asc' } },
+    select: { showtime: { select: { endTime: true } } },
+  });
+
 export const createReservation = async data =>
   await prisma.reservation.create({ data, select: reservationSelection });
 

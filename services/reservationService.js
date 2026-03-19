@@ -5,18 +5,11 @@ import * as showtimeService from './showtimeService.js';
 import * as rowService from './rowService.js';
 import * as seatService from './seatService.js';
 
-const throwReservationNotFoundError = () => {
-  throw new AppError('No reservation found with this ID', 404);
-};
+export const getReservation = async (reservationId, userId, fields) =>
+  await reservationRepository.getReservation(reservationId, userId, fields);
 
-export const getReservation = async (reservationId, userId) => {
-  const reservation = await reservationRepository.getReservation(reservationId);
-
-  // Verify that reservation belongs to user
-  if (reservation?.userId !== userId) throwReservationNotFoundError();
-
-  return reservation;
-};
+export const getUserEarliestReservationForMovie = (movieId, userId) =>
+  reservationRepository.getUserEarliestReservationForMovie(movieId, userId);
 
 export const countShowtimeReservations = (showtimeId, userId) =>
   reservationRepository.countShowtimeReservations(showtimeId, userId);
@@ -102,7 +95,8 @@ export const cancelReservation = async (reservationId, userId) => {
   );
 
   // Verify that reservation exists and belongs to user
-  if (reservation?.userId !== userId) throwReservationNotFoundError();
+  if (reservation?.userId !== userId)
+    throw new AppError('No reservation found with this ID', 404);
 
   const showtime = await showtimeService.getShowtime(reservation.showtimeId);
 
