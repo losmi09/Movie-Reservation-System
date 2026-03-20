@@ -78,7 +78,7 @@ export const createReview = async (data, userId) => {
     );
 
   const review = await reviewTransaction({
-    data,
+    data: { ...data, userId },
     operation: 'create',
     movieId,
   });
