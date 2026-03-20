@@ -5,8 +5,8 @@ import { redisClient } from '../server.js';
 import { formatResponse } from '../mappers/formatResponse.js';
 import * as crudService from '../services/crudService.js';
 
-const setCache = async (key, data) =>
-  await redisClient.set(key, JSON.stringify(data), {
+const setCache = (key, data) =>
+  redisClient.set(key, JSON.stringify(data), {
     EX: Number(process.env.CACHE_EXPIRY),
   });
 
@@ -16,7 +16,7 @@ export const getAll = model =>
 
     const { data, meta } = await crudService.getAll(model, { ...query });
 
-    if (cacheKey) await setCache(cacheKey, { data, meta });
+    if (cacheKey) setCache(cacheKey, { data, meta });
 
     res.status(200).json({ data, meta });
   });
@@ -33,7 +33,7 @@ export const getOne = model =>
 
     const { cacheKey } = req;
 
-    if (cacheKey) await setCache(cacheKey, finalDoc);
+    if (cacheKey) setCache(cacheKey, finalDoc);
 
     sendResponse(res, finalDoc);
   });

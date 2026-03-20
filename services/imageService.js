@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 
-export const resizeImage = async (folder, buffer, fileName) =>
-  await sharp(buffer)
+export const resizeImage = (folder, buffer, fileName) =>
+  sharp(buffer)
     .resize(500, 500)
     .toFormat('jpg')
     .jpeg({ quality: 90 })

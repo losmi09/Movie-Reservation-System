@@ -2,8 +2,7 @@ import { ensureCapacityAndExistance } from './utils/ensureCapacityAndExistance.j
 import * as redisService from '../services/redisService.js';
 import * as rowRepository from '../repositories/rowRepository.js';
 
-export const getRow = async (rowId, fields) =>
-  await rowRepository.getRow(rowId, fields);
+export const getRow = (rowId, fields) => rowRepository.getRow(rowId, fields);
 
 export const createRow = async data => {
   await ensureCapacityAndExistance('hall', data.hallId);

@@ -5,8 +5,8 @@ import * as redisService from '../services/redisService.js';
 import * as cinemaService from '../services/cinemaService.js';
 import * as hallService from '../services/hallService.js';
 
-export const getShowtime = async (showtimeId, fields) =>
-  await showtimeRepository.getShowtime(showtimeId, fields);
+export const getShowtime = (showtimeId, fields) =>
+  showtimeRepository.getShowtime(showtimeId, fields);
 
 export const getSeatStatus = async (showtimeId, hallId, seatId) => {
   const { isSeatReserved, areAllSeatsReserved } =

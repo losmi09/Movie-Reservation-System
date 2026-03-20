@@ -5,8 +5,8 @@ import * as showtimeService from './showtimeService.js';
 import * as rowService from './rowService.js';
 import * as seatService from './seatService.js';
 
-export const getReservation = async (reservationId, userId, fields) =>
-  await reservationRepository.getReservation(reservationId, userId, fields);
+export const getReservation = (reservationId, userId, fields) =>
+  reservationRepository.getReservation(reservationId, userId, fields);
 
 export const getUserEarliestReservationForMovie = (movieId, userId) =>
   reservationRepository.getUserEarliestReservationForMovie(movieId, userId);

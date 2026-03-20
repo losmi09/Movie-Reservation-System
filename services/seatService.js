@@ -2,8 +2,8 @@ import { ensureCapacityAndExistance } from './utils/ensureCapacityAndExistance.j
 import * as redisService from '../services/redisService.js';
 import * as seatRepository from '../repositories/seatRepository.js';
 
-export const getSeat = async (seatId, fields) =>
-  await seatRepository.getSeat(seatId, fields);
+export const getSeat = (seatId, fields) =>
+  seatRepository.getSeat(seatId, fields);
 
 export const createSeat = async data => {
   await ensureCapacityAndExistance('row', data.rowId);
