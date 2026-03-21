@@ -1,13 +1,6 @@
+import { paginate } from './paginationService.js';
 import { convertNumericStringsToNumbers } from '../utils/convertNumericStrings.js';
 import { selectForQueryFields } from '../repositories/prismaSelects.js';
-
-export const paginate = query => {
-  const { page = 1, limit = 20 } = query;
-
-  const skip = (Number(page) - 1) * Number(limit);
-
-  return { skip, limit: Number(limit) };
-};
 
 export const sort = query =>
   query.sort?.split(',').map(sort => {
