@@ -61,6 +61,6 @@ movieRouter.patch(
   validateId,
   checkIfExists('movie'),
   imageMiddleware.uploadMoviePoster,
-  imageMiddleware.resizeImage('movie'),
+  imageMiddleware.resizeImage('posterImage'),
   movieController.saveMoviePoster,
 );
