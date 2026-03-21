@@ -1,9 +1,7 @@
 import { Router } from 'express';
-import { setUserId } from '../middlewares/setUserId.js';
 import { validateId } from '../middlewares/validateId.js';
 import { validateSchema } from '../middlewares/validateSchema.js';
 import { reviewSchema } from '../schemas/reviewSchema.js';
-import { setParentId } from '../middlewares/setParentId.js';
 import { checkIfExists } from '../middlewares/checkIfExists.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import * as authMiddleware from '../middlewares/auth.js';
@@ -24,8 +22,6 @@ movieReviewRouter
   )
   .post(
     authMiddleware.restrictTo('user'),
-    setUserId,
-    setParentId('movie'),
     validateSchema(reviewSchema),
     reviewController.createReview,
   );

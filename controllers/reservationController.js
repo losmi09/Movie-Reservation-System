@@ -18,12 +18,12 @@ export const getReservation = catchAsync(async (req, res) => {
 });
 
 export const createReservation = catchAsync(async (req, res) => {
-  const { showtimeId, seatId } = req.body;
+  const { params, body, user } = req;
 
   const reservation = await reservationService.createReservation(
-    showtimeId,
-    seatId,
-    req.user.id,
+    params.id,
+    body.seatId,
+    user.id,
   );
 
   sendResponse(res, formatResponse.reservation(reservation), 201);

@@ -13,9 +13,19 @@ import { movieReviewRouter as reviewRouter } from './reviewRoutes.js';
 
 export const movieRouter = Router();
 
-movieRouter.use('/:id/reviews', setParentFilter('movie'), reviewRouter);
+movieRouter.use(
+  '/:id/reviews',
+  validateId,
+  setParentFilter('movie'),
+  reviewRouter,
+);
 
-movieRouter.use('/:id/showtimes', setParentFilter('movie'), showtimeRouter);
+movieRouter.use(
+  '/:id/showtimes',
+  validateId,
+  setParentFilter('movie'),
+  showtimeRouter,
+);
 
 movieRouter
   .route('/')

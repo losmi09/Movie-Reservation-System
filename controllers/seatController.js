@@ -9,7 +9,9 @@ export const getAllSeats = crudController.getAll('seat');
 export const getSeat = crudController.getOne('seat');
 
 export const createSeat = catchAsync(async (req, res) => {
-  const seat = await seatService.createSeat({ ...req.body });
+  const { body, params } = req;
+
+  const seat = await seatService.createSeat({ ...body, rowId: params.id });
 
   sendResponse(res, formatResponse.seat(seat), 201);
 });

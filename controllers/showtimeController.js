@@ -8,7 +8,12 @@ export const getAllShowtimes = crudController.getAll('showtime');
 export const getShowtime = crudController.getOne('showtime');
 
 export const createShowtime = catchAsync(async (req, res) => {
-  const showtime = await showtimeService.createShowtime({ ...req.body });
+  const { body, params } = req;
+
+  const showtime = await showtimeService.createShowtime({
+    ...body,
+    movieId: params.id,
+  });
 
   sendResponse(res, showtime, 201);
 });

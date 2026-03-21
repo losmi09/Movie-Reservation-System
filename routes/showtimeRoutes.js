@@ -3,7 +3,6 @@ import * as showtimeController from '../controllers/showtimeController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 import { reservationRouter } from './reservationRoutes.js';
 import { validateId } from '../middlewares/validateId.js';
-import { setParentId } from '../middlewares/setParentId.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
 import { checkIfExists } from '../middlewares/checkIfExists.js';
 import { validateSchema } from '../middlewares/validateSchema.js';
@@ -15,6 +14,7 @@ export const movieShowtimeRouter = Router({ mergeParams: true });
 movieShowtimeRouter
   .route('/')
   .get(
+    validateId,
     checkIfExists('movie'), // Check if parent movie from nested route exists
     cacheAll('showtime'),
     showtimeController.getAllShowtimes,
@@ -22,7 +22,6 @@ movieShowtimeRouter
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    setParentId('movie'),
     validateSchema(showtimeSchema),
     showtimeController.createShowtime,
   );
@@ -43,6 +42,7 @@ export const showtimeRouter = Router();
 showtimeRouter.use(
   '/:id/reservations',
   authMiddleware.protect,
+  validateId,
   reservationRouter,
 );
 

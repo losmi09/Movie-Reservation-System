@@ -8,9 +8,12 @@ export const getAllReviews = crudController.getAll('review');
 export const getReview = crudController.getOne('review');
 
 export const createReview = catchAsync(async (req, res) => {
-  const { body, user } = req;
+  const { params, body, user } = req;
 
-  const review = await reviewService.createReview({ ...body }, user.id);
+  const review = await reviewService.createReview(
+    { ...body, movieId: params.id },
+    user.id,
+  );
 
   sendResponse(res, review, 201);
 });

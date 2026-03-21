@@ -1,7 +1,5 @@
 import { Router } from 'express';
 import { validateId } from '../middlewares/validateId.js';
-import { setUserId } from '../middlewares/setUserId.js';
-import { setParentId } from '../middlewares/setParentId.js';
 import { validateSchema } from '../middlewares/validateSchema.js';
 import { reservationSchema } from '../schemas/reservationSchema.js';
 import { getUserReservations } from '../middlewares/getUserReservations.js';
@@ -15,8 +13,6 @@ reservationRouter.post(
   '/',
   authMiddleware.protect,
   authMiddleware.restrictTo('user'),
-  setUserId,
-  setParentId('showtime'),
   validateSchema(reservationSchema),
   reservationController.createReservation,
 );

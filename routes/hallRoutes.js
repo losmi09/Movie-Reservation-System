@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { validateId } from '../middlewares/validateId.js';
 import { validateSchema } from '../middlewares/validateSchema.js';
 import { hallSchema } from '../schemas/hallSchema.js';
-import { setParentId } from '../middlewares/setParentId.js';
 import { setParentFilter } from '../middlewares/setParentFilter.js';
 import { checkIfExists } from '../middlewares/checkIfExists.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
@@ -19,7 +18,6 @@ cinemaHallRouter
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
-    setParentId('cinema'),
     validateSchema(hallSchema),
     hallController.createHall,
   );

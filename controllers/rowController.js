@@ -9,7 +9,9 @@ export const getAllRows = crudController.getAll('row');
 export const getRow = crudController.getOne('row');
 
 export const createRow = catchAsync(async (req, res) => {
-  const row = await rowService.createRow({ ...req.body });
+  const { body, params } = req;
+
+  const row = await rowService.createRow({ ...body, hallId: params.id });
 
   sendResponse(res, formatResponse.row(row), 201);
 });

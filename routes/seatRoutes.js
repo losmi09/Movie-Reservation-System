@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { validateId } from '../middlewares/validateId.js';
 import { validateSchema } from '../middlewares/validateSchema.js';
-import { setParentId } from '../middlewares/setParentId.js';
 import { seatSchema } from '../schemas/seatSchema.js';
 import { setParentFilter } from '../middlewares/setParentFilter.js';
 import { cacheAll, cacheOne } from '../middlewares/caching.js';
@@ -24,7 +23,6 @@ rowSeatRouter
   )
   .post(
     authMiddleware.restrictTo('admin'),
-    setParentId('row'),
     validateSchema(seatSchema),
     seatController.createSeat,
   );
