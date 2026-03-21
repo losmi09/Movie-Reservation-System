@@ -1,11 +1,11 @@
-import slugify from 'slugify';
+import { generateSlugObject } from './utils/slugObject.js';
 import * as redisService from '../services/redisService.js';
 import * as movieRepository from '../repositories/movieRepository.js';
 
 export const createMovie = async data => {
-  const movie = movieRepository.createMovie({
+  const movie = await movieRepository.createMovie({
     ...data,
-    slug: slugify(data.title, { lower: true }),
+    ...generateSlugObject(data.title),
   });
 
   await redisService.invalidateCache('movie');
@@ -16,12 +16,9 @@ export const createMovie = async data => {
 export const updateMovie = async (movieId, data) => {
   const { title } = data;
 
-  const updatedMovie = movieRepository.updateMovie(
+  const updatedMovie = await movieRepository.updateMovie(
     movieId,
-    {
-      ...data,
-      ...(title && { slug: slugify(title, { lower: true }) }),
-    },
+    { ...data, ...(title && generateSlugObject(title)) },
     true,
   );
 
