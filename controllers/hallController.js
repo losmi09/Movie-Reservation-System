@@ -8,7 +8,9 @@ export const getAllHalls = crudController.getAll('hall');
 export const getHall = crudController.getOne('hall');
 
 export const createHall = catchAsync(async (req, res) => {
-  const hall = await hallService.createHall({ ...req.body });
+  const { id: cinemaId } = req.params;
+
+  const hall = await hallService.createHall({ ...req.body, cinemaId });
 
   sendResponse(res, hall, 201);
 });

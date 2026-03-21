@@ -15,9 +15,9 @@ export const createMovie = catchAsync(async (req, res) => {
 });
 
 export const updateMovie = catchAsync(async (req, res) => {
-  const updatedMovie = await movieService.updateMovie(req.params.id, {
-    ...req.body,
-  });
+  const { params, body } = req;
+
+  const updatedMovie = await movieService.updateMovie(params.id, { ...body });
 
   sendResponse(res, updatedMovie);
 });
@@ -25,12 +25,11 @@ export const updateMovie = catchAsync(async (req, res) => {
 export const deleteMovie = crudController.deleteOne('movie');
 
 export const saveMoviePoster = catchAsync(async (req, res, next) => {
-  if (!req.file) return next(new AppError('No image provided', 422));
+  const { file, params } = req;
 
-  const movie = await movieService.saveMoviePoster(
-    req.params.id,
-    req.file.fileName,
-  );
+  if (!file) return next(new AppError('No image provided', 422));
+
+  const movie = await movieService.saveMoviePoster(params.id, file.fileName);
 
   sendResponse(res, movie);
 });

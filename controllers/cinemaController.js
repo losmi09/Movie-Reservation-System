@@ -14,8 +14,10 @@ export const createCinema = catchAsync(async (req, res) => {
 });
 
 export const updateCinema = catchAsync(async (req, res) => {
-  const updatedCinema = await cinemaService.updateCinema(req.params.id, {
-    ...req.body,
+  const { params, body } = req;
+
+  const updatedCinema = await cinemaService.updateCinema(params.id, {
+    ...body,
   });
 
   sendResponse(res, updatedCinema);

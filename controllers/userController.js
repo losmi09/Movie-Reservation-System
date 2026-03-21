@@ -4,9 +4,11 @@ import { sendResponse } from './utils/sendResponse.js';
 import * as userService from '../services/userService.js';
 
 export const saveUserPhoto = catchAsync(async (req, res, next) => {
-  if (!req.file) return next(new AppError('No image provided', 422));
+  const { file } = req;
 
-  const user = await userService.saveUserPhoto(req.user.id, req.file.fileName);
+  if (!file) return next(new AppError('No image provided', 422));
+
+  const user = await userService.saveUserPhoto(req.user.id, file.fileName);
 
   sendResponse(res, user);
 });
@@ -18,9 +20,9 @@ export const getCurrentUser = catchAsync(async (req, res) => {
 });
 
 export const updateCurrentUser = catchAsync(async (req, res) => {
-  const updatedUser = await userService.updateCurrentUser(req.user.id, {
-    ...req.body,
-  });
+  const { user, body } = req;
+
+  const updatedUser = await userService.updateCurrentUser(user.id, { ...body });
 
   sendResponse(res, { ...updatedUser, updatedAt: new Date() });
 });

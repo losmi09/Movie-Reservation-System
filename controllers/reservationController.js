@@ -7,9 +7,11 @@ import * as reservationService from '../services/reservationService.js';
 export const getAllReservations = crudController.getAll('reservation');
 
 export const getReservation = catchAsync(async (req, res) => {
+  const { params, user } = req;
+
   const reservation = await reservationService.getReservation(
-    req.params.id,
-    req.user.id,
+    params.id,
+    user.id,
   );
 
   sendResponse(res, formatResponse.reservation(reservation));
@@ -28,9 +30,11 @@ export const createReservation = catchAsync(async (req, res) => {
 });
 
 export const cancelReservation = catchAsync(async (req, res) => {
+  const { params, user } = req;
+
   const cancelledReservation = await reservationService.cancelReservation(
-    req.params.id,
-    req.user.id,
+    params.id,
+    user.id,
   );
 
   sendResponse(res, cancelledReservation);

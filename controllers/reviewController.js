@@ -8,23 +8,27 @@ export const getAllReviews = crudController.getAll('review');
 export const getReview = crudController.getOne('review');
 
 export const createReview = catchAsync(async (req, res) => {
-  const review = await reviewService.createReview({ ...req.body }, req.user.id);
+  const { body, user } = req;
+
+  const review = await reviewService.createReview({ ...body }, user.id);
 
   sendResponse(res, review, 201);
 });
 
 export const updateReview = catchAsync(async (req, res) => {
-  const updatedReview = await reviewService.updateReview(
-    req.params.id,
-    req.user.id,
-    { ...req.body },
-  );
+  const { params, user, body } = req;
+
+  const updatedReview = await reviewService.updateReview(params.id, user.id, {
+    ...body,
+  });
 
   sendResponse(res, updatedReview);
 });
 
 export const deleteReview = catchAsync(async (req, res) => {
-  await reviewService.deleteReview(req.params.id, req.user.id);
+  const { params, user } = req;
+
+  await reviewService.deleteReview(params.id, user.id);
 
   sendResponse(res, null, 204);
 });

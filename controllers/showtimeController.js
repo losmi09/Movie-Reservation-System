@@ -14,8 +14,10 @@ export const createShowtime = catchAsync(async (req, res) => {
 });
 
 export const updateShowtime = catchAsync(async (req, res) => {
-  const updatedShowtime = await showtimeService.updateShowtime(req.params.id, {
-    ...req.body,
+  const { params, body } = req;
+
+  const updatedShowtime = await showtimeService.updateShowtime(params.id, {
+    ...body,
   });
 
   sendResponse(res, updatedShowtime);
