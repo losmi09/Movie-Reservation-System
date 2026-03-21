@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { validateId } from '../middlewares/validateId.js';
 import { validateSchema } from '../middlewares/validateSchema.js';
 import { reservationSchema } from '../schemas/reservationSchema.js';
-import { getUserReservations } from '../middlewares/getUserReservations.js';
+import { attachUserIdToQuery } from '../middlewares/attachUserIdToQuery.js';
 import * as reservationController from '../controllers/reservationController.js';
 import * as authMiddleware from '../middlewares/auth.js';
 
@@ -23,7 +23,7 @@ userReservationRouter.use(authMiddleware.protect);
 
 userReservationRouter.get(
   '/',
-  getUserReservations,
+  attachUserIdToQuery,
   reservationController.getAllReservations,
 );
 
