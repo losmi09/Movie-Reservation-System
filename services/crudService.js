@@ -14,6 +14,8 @@ export const getAll = async (model, query) => {
 
 const selectConfig = model => selectSingleDoc?.[model]?.();
 
+const invalidateModelCache = model => redisService.invalidateCache(model);
+
 export const getOne = async (model, id) =>
   await crudRepository.getOne(model, id, selectConfig(model));
 
@@ -25,7 +27,7 @@ export const updateOne = async (model, id, data) => {
     selectConfig(model),
   );
 
-  await redisService.invalidateCache(model);
+  await invalidateModelCache(model);
 
   return updatedDoc;
 };
@@ -33,5 +35,5 @@ export const updateOne = async (model, id, data) => {
 export const deleteOne = async (model, id) => {
   await crudRepository.deleteOne(model, id);
 
-  await redisService.invalidateCache(model);
+  await invalidateModelCache(model);
 };

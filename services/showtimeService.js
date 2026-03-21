@@ -15,6 +15,8 @@ export const getSeatStatus = async (showtimeId, hallId, seatId) => {
   return { isSeatReserved, areAllSeatsReserved };
 };
 
+const invalidateShowtimeCache = () => redisService.invalidateCache('showtime');
+
 const checkIfShowtimeIsOngoing = async (
   errorClass,
   cinemaId,
@@ -73,7 +75,7 @@ export const createShowtime = async data => {
 
   errorClass.throwIfNotEmpty();
 
-  await redisService.invalidateCache('showtime');
+  await invalidateShowtimeCache();
 
   return await showtimeRepository.createShowtime(data);
 };
@@ -106,7 +108,7 @@ export const updateShowtime = async (showtimeId, data) => {
 
   errorClass.throwIfNotEmpty();
 
-  await redisService.invalidateCache('showtime');
+  await invalidateShowtimeCache();
 
   return showtimeRepository.updateShowtime(showtimeId, data);
 };

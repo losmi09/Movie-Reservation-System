@@ -2,13 +2,15 @@ import { generateSlugObject } from './utils/slugObject.js';
 import * as redisService from '../services/redisService.js';
 import * as movieRepository from '../repositories/movieRepository.js';
 
+const invalidateMovieCache = () => redisService.invalidateCache('movie');
+
 export const createMovie = async data => {
   const movie = await movieRepository.createMovie({
     ...data,
     ...generateSlugObject(data.title),
   });
 
-  await redisService.invalidateCache('movie');
+  await invalidateMovieCache();
 
   return movie;
 };
@@ -22,7 +24,7 @@ export const updateMovie = async (movieId, data) => {
     true,
   );
 
-  await redisService.invalidateCache('movie');
+  await invalidateMovieCache();
 
   return updatedMovie;
 };

@@ -5,13 +5,15 @@ import * as redisService from '../services/redisService.js';
 export const getCinema = (cinemaId, fields) =>
   cinemaRepository.getCinema(cinemaId, fields);
 
+const invalidateCinemaCache = () => redisService.invalidateCache('cinema');
+
 export const createCinema = async data => {
   const cinema = await cinemaRepository.createCinema({
     ...data,
     ...generateSlugObject(data.name),
   });
 
-  await redisService.invalidateCache('cinema');
+  await invalidateCinemaCache();
 
   return cinema;
 };
@@ -24,7 +26,7 @@ export const updateCinema = async (cinemaId, data) => {
     ...(name && generateSlugObject(name)),
   });
 
-  await redisService.invalidateCache('cinema');
+  await invalidateCinemaCache();
 
   return updatedCinema;
 };
