@@ -8,19 +8,20 @@ export const uploadMoviePoster = upload.single('posterImage');
 
 export const resizeImage = type =>
   catchAsync(async (req, res, next) => {
-    if (!req.file) return next();
+    const { file, user, params } = req;
 
-    const identifier = type === 'photo' ? req.user.id : req.params.id;
+    if (!file) return next();
 
-    const field = type === 'photo' ? 'user' : 'movie';
+    const config = {
+      photo: { identifier: user.id, field: 'user' },
+      posterImage: { identifier: params.id, field: 'movie' },
+    };
+
+    const { identifier, field } = config[type];
 
     req.file.fileName = `${field}-${identifier}-${Date.now()}.jpg`;
 
-    await imageService.resizeImage(
-      `${field}s`,
-      req.file.buffer,
-      req.file.fileName,
-    );
+    await imageService.resizeImage(`${field}s`, file.buffer, req.file.fileName);
 
     next();
   });
