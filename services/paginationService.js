@@ -1,7 +1,5 @@
 import { AppError } from '../utils/appError.js';
 
-export const DEFAULT_PAGE_SIZE = 20;
-
 export const decodeCursorToken = cursorToken => {
   try {
     const { createdAt: cursorCreatedAt, id: cursorId } = JSON.parse(
