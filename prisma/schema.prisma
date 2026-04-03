@@ -20,6 +20,7 @@ model Movie {
   Showtime      Showtime[]
   Review        Review[]
 
+  @@index([createdAt, id])
   @@map("movies")
 }
 
@@ -65,6 +66,7 @@ model Cinema {
   Showtime  Showtime[]
 
   @@unique([name, city])
+  @@index([createdAt, id])
   @@map("cinemas")
 }
 
@@ -80,6 +82,7 @@ model Hall {
   Row       Row[]
 
   @@unique([cinemaId, name])
+  @@index([createdAt, id])
   @@map("halls")
 }
 
@@ -94,6 +97,7 @@ model Row {
   Seat         Seat[]
 
   @@unique([label, hallId])
+  @@index([createdAt, id])
   @@map("rows")
 }
 
@@ -107,6 +111,7 @@ model Seat {
   Reservation Reservation[]
 
   @@unique([rowId, number])
+  @@index([createdAt, id])
   @@map("seats")
 }
 
@@ -127,6 +132,7 @@ model Showtime {
   Reservation Reservation[]
 
   @@unique([movieId, cinemaId, hallId, startTime])
+  @@index([createdAt, id])
   @@map("showtimes")
 }
 
@@ -142,7 +148,9 @@ model Reservation {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
-  // There is a unique composite partial index (added by a manual migration) that cannot be displayed in the schema, it allows only one reservation for a specific showtime and seat with the status reserved
+  // There is alse a unique composite partial index (added by a manual migration) that cannot be displayed in the schema, it allows only one reservation for a specific showtime and seat with the status reserved
+
+  @@index([createdAt, id])
   @@map("reservations")
 }
 
@@ -165,5 +173,6 @@ model Review {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([movieId, userId])
+  @@index([createdAt, id])
   @@map("reviews")
 }
