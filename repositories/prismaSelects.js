@@ -8,13 +8,7 @@ const BASE_ROW = { id: true, label: true };
 
 const BASE_SEAT = { id: true, number: true };
 
-const BASE_REVIEW = {
-  id: true,
-  comment: true,
-  rating: true,
-  createdAt: true,
-  updatedAt: true,
-};
+const BASE_REVIEW = { id: true, comment: true, rating: true, updatedAt: true };
 
 const BASE_USER = { id: true, firstName: true, lastName: true, photo: true };
 
@@ -55,6 +49,14 @@ export const selectForQueryFields = {
 
 // Used when getting an array of documents, selects most important fields only
 export const selectForManyDocs = {
+  movie: () => ({
+    ...BASE_MOVIE,
+    description: true,
+    reviewsCount: true,
+    averageRating: true,
+    createdAt: true,
+  }),
+
   showtime: () => ({
     id: true,
     startTime: true,
