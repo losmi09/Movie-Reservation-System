@@ -1,31 +1,18 @@
-import { convertNumericStringsToNumbers } from '../utils/convertNumericStrings.js';
-import * as crudRepository from '../repositories/crudRepository.js';
+import { AppError } from '../utils/appError.js';
 
-export const paginate = query => {
-  const { page = 1, limit = 20 } = query;
+export const DEFAULT_PAGE_SIZE = 20;
 
-  const skip = (Number(page) - 1) * Number(limit);
+export const decodeCursorToken = cursorToken => {
+  try {
+    const { createdAt: cursorCreatedAt, id: cursorId } = JSON.parse(
+      Buffer.from(cursorToken, 'base64').toString('utf8'),
+    );
 
-  return { skip, limit: Number(limit) };
+    return { cursorCreatedAt, cursorId };
+  } catch {
+    throw new AppError('Invalid cursor', 400);
+  }
 };
 
-export const getMetaData = async (model, query) => {
-  const { page = 1, limit = 20, sort, fields, ...filters } = query;
-
-  const cleanFilters = convertNumericStringsToNumbers(filters);
-
-  const totalCount = await crudRepository.count(model, cleanFilters);
-
-  const pageSize = Number(limit);
-
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  return {
-    totalCount,
-    page: Number(page),
-    pageSize,
-    totalPages,
-    hasNextPage: page < totalPages,
-    hasPrevPage: page > 1 && page <= totalPages,
-  };
-};
+export const encodeCursorToken = (createdAt, id) =>
+  Buffer.from(JSON.stringify({ createdAt, id })).toString('base64');

@@ -1,37 +1,29 @@
-import { paginate } from './paginationService.js';
 import { convertNumericStringsToNumbers } from '../utils/convertNumericStrings.js';
 import { selectForQueryFields } from '../repositories/prismaSelects.js';
 
-export const sort = query =>
-  query.sort?.split(',').map(sort => {
-    return sort.startsWith('-')
-      ? { [sort.slice(1)]: 'desc' }
-      : { [sort]: 'asc' };
-  });
+export const DEFAULT_PAGE_SIZE = 20;
 
-export const selectSpecificFields = query => {
+export const parseSelectFields = fieldsParam => {
+  if (!fieldsParam) return;
+
   const specificFields = {};
 
-  query.fields?.split(',').forEach(field => {
+  fieldsParam.split(',').forEach(field => {
+    // Get predefined select config for field (used for relations)
     const fieldConfig = selectForQueryFields[field];
     if (fieldConfig) specificFields[field] = { select: fieldConfig() };
     else specificFields[field] = true;
   });
 
-  // If the fields are not specified in the query, return null which selects all fields
-  return Object.keys(specificFields).length > 0 ? specificFields : null;
+  return specificFields;
 };
 
 export const prepareQuery = query => {
   const cleanQuery = convertNumericStringsToNumbers(query);
 
-  const { skip, limit } = paginate(cleanQuery);
+  const selectFields = parseSelectFields(cleanQuery.fields);
 
-  const selectFields = selectSpecificFields(cleanQuery);
+  const { cursor, limit = DEFAULT_PAGE_SIZE, fields, ...filters } = cleanQuery;
 
-  const orderBy = sort(cleanQuery);
-
-  const { page, limit: limitQ, sort: sortQ, fields, ...filters } = cleanQuery;
-
-  return { filters, skip, limit, orderBy, selectFields };
+  return { cursor, pageSize: limit, filters, selectFields };
 };
