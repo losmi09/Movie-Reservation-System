@@ -82,7 +82,7 @@ model Hall {
   Row       Row[]
 
   @@unique([cinemaId, name])
-  @@index([createdAt, id])
+  @@index([cinemaId, createdAt, id])
   @@map("halls")
 }
 
