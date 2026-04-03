@@ -132,7 +132,6 @@ model Showtime {
   Reservation Reservation[]
 
   @@unique([movieId, cinemaId, hallId, startTime])
-  @@index([createdAt, id])
   @@map("showtimes")
 }
 
@@ -150,7 +149,7 @@ model Reservation {
 
   // There is alse a unique composite partial index (added by a manual migration) that cannot be displayed in the schema, it allows only one reservation for a specific showtime and seat with the status reserved
 
-  @@index([createdAt, id])
+  @@index([userId, createdAt, id])
   @@map("reservations")
 }
 
