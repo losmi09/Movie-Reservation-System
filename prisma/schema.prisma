@@ -172,6 +172,6 @@ model Review {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([movieId, userId])
-  @@index([createdAt, id])
+  @@index([movieId, createdAt, id])
   @@map("reviews")
 }
