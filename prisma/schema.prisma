@@ -97,7 +97,7 @@ model Row {
   Seat         Seat[]
 
   @@unique([label, hallId])
-  @@index([createdAt, id])
+  @@index([hallId, createdAt, id])
   @@map("rows")
 }
 
