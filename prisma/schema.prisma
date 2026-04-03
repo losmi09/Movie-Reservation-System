@@ -111,7 +111,7 @@ model Seat {
   Reservation Reservation[]
 
   @@unique([rowId, number])
-  @@index([createdAt, id])
+  @@index([rowId, createdAt, id])
   @@map("seats")
 }
 
