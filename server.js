@@ -3,9 +3,11 @@ const logError = (err, message) => {
   console.error(`${err.name}: ${err.message}`);
 };
 
+const ERROR_EXIT_CODE = 1;
+
 process.on('uncaughtException', err => {
   logError(err, 'UNCAUGHT EXCEPTION');
-  process.exit(1);
+  process.exit(ERROR_EXIT_CODE);
 });
 
 import { PrismaClient } from '@prisma/client';
@@ -35,7 +37,7 @@ export const redisClient = await createRedisClient();
 const shutDownServer = async () => {
   await prisma.$disconnect();
   await redisClient.quit();
-  server.close(() => process.exit(1));
+  server.close(() => process.exit(ERROR_EXIT_CODE));
 };
 
 process.on('unhandledRejection', err => {
