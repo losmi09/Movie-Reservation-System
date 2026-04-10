@@ -13,26 +13,30 @@ const HMAC_ALGORITHM = 'sha256';
 const TOKEN_BYTES = 32;
 const TOKEN_ENCODING = 'hex';
 
-const JWTSecrets = {
-  access: process.env.ACCESS_TOKEN_SECRET,
-  refresh: process.env.REFRESH_TOKEN_SECRET,
-};
+const {
+  ACCESS_TOKEN_SECRET,
+  REFRESH_TOKEN_SECRET,
+  ACCESS_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_EXPIRES_IN,
+  TOKEN_SECRET,
+} = process.env;
 
 const generateAccessToken = userId =>
-  jwt.sign({ id: userId }, JWTSecrets.access, {
-    expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
+  jwt.sign({ id: userId }, ACCESS_TOKEN_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     algorithm: JWT_ALGORITHM,
   });
 
 const generateRefreshToken = userId =>
-  jwt.sign({ id: userId }, JWTSecrets.refresh, {
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
+  jwt.sign({ id: userId }, REFRESH_TOKEN_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
     algorithm: JWT_ALGORITHM,
   });
 
 const verifyToken = async (token, tokenType) => {
   try {
-    const secret = JWTSecrets[tokenType];
+    const secret =
+      tokenType === 'access' ? ACCESS_TOKEN_SECRET : REFRESH_TOKEN_SECRET;
 
     const { id: userId, iat: issuedAt } = await jwt.verify(token, secret, {
       algorithms: [JWT_ALGORITHM],
@@ -51,7 +55,7 @@ const hashPassword = async password => await argon2.hash(password);
 
 export const hashToken = token =>
   crypto
-    .createHmac(HMAC_ALGORITHM, process.env.TOKEN_SECRET)
+    .createHmac(HMAC_ALGORITHM, TOKEN_SECRET)
     .update(token)
     .digest(TOKEN_ENCODING);
 

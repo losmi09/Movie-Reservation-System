@@ -4,16 +4,18 @@ import { sendResponse } from './utils/sendResponse.js';
 import * as authService from '../services/authService.js';
 import * as redisService from '../services/redisService.js';
 
+const { NODE_ENV, COOKIE_EXPIRES_IN } = process.env;
+
 const cookieOptions = {
   httpOnly: true, // Ensure cookie is inaccessible via JavaScript on the client side
-  secure: process.env.NODE_ENV === 'production', // Cookie is sent over HTTPS, not HTTP
+  secure: NODE_ENV === 'production', // Cookie is sent over HTTPS, not HTTP
   sameSite: 'Lax', // Allow cookie on top-level cross-site navigations (mainly GET)
 };
 
 const sendRefreshTokenCookie = (res, refreshToken) =>
   res.cookie('refreshToken', refreshToken, {
     ...cookieOptions,
-    expires: new Date(Date.now() + Number(process.env.COOKIE_EXPIRES_IN)),
+    expires: new Date(Date.now() + Number(COOKIE_EXPIRES_IN)),
   });
 
 const clearRefreshTokenCookie = res =>

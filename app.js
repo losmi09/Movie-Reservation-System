@@ -20,6 +20,15 @@ import { showtimeRouter } from './routes/showtimeRoutes.js';
 import { allReservationRouter as reservationRouter } from './routes/reservationRoutes.js';
 import { reviewRouter } from './routes/reviewRoutes.js';
 
+const {
+  FRONTEND_URL,
+  RATE_LIMIT_MAX,
+  RATE_LIMIT_WINDOW,
+  AUTH_RATE_LIMIT_MAX,
+  AUTH_RATE_LIMIT_WINDOW,
+  NODE_ENV,
+} = process.env;
+
 // Initialize express app
 export const app = express();
 
@@ -27,19 +36,19 @@ export const app = express();
 app.use(helmet());
 
 // Set up CORS
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 
 // Rate limit
 const limit = rateLimit({
-  max: Number(process.env.RATE_LIMIT_MAX),
-  windowMs: Number(process.env.RATE_LIMIT_WINDOW),
+  max: Number(RATE_LIMIT_MAX),
+  windowMs: Number(RATE_LIMIT_WINDOW),
   message: 'Too many requests. Please try again later',
 });
 
 // Rate limit for auth routes
 const authLimit = rateLimit({
-  max: Number(process.env.AUTH_RATE_LIMIT_MAX),
-  windowMs: Number(process.env.AUTH_RATE_LIMIT_WINDOW),
+  max: Number(AUTH_RATE_LIMIT_MAX),
+  windowMs: Number(AUTH_RATE_LIMIT_WINDOW),
   message: 'Too many requests. Please try again later',
 });
 
@@ -59,7 +68,7 @@ app.use(hpp());
 app.use(compression());
 
 // Log requests in development
-if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
+if (NODE_ENV === 'development') app.use(morgan('dev'));
 
 const API_PREFIX = '/api/v1/';
 
