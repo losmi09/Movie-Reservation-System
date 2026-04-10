@@ -22,13 +22,13 @@ const {
 } = process.env;
 
 const generateAccessToken = userId =>
-  jwt.sign({ id: userId }, ACCESS_TOKEN_SECRET, {
+  jwt.sign({ sub: userId }, ACCESS_TOKEN_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     algorithm: JWT_ALGORITHM,
   });
 
 const generateRefreshToken = userId =>
-  jwt.sign({ id: userId }, REFRESH_TOKEN_SECRET, {
+  jwt.sign({ sub: userId }, REFRESH_TOKEN_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRES_IN,
     algorithm: JWT_ALGORITHM,
   });
@@ -38,7 +38,7 @@ const verifyToken = async (token, tokenType) => {
     const secret =
       tokenType === 'access' ? ACCESS_TOKEN_SECRET : REFRESH_TOKEN_SECRET;
 
-    const { id: userId, iat: issuedAt } = await jwt.verify(token, secret, {
+    const { sub: userId, iat: issuedAt } = await jwt.verify(token, secret, {
       algorithms: [JWT_ALGORITHM],
     });
 
