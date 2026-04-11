@@ -1,6 +1,7 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
+import { createHmac, randomBytes } from 'crypto';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../utils/appError.js';
 import { passwordSchema } from '../schemas/userSchema.js';
 import { sanitizeOutput } from '../utils/sanitizeOutput.js';
@@ -18,8 +19,12 @@ const {
   REFRESH_TOKEN_SECRET,
   ACCESS_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_EXPIRES_IN,
-  TOKEN_SECRET,
+  REFRESH_TOKEN_EXPIRY_IN_SECONDS,
+  HMAC_SECRET,
 } = process.env;
+
+export const hash = string =>
+  createHmac(HMAC_ALGORITHM, HMAC_SECRET).update(string).digest('hex');
 
 const generateAccessToken = userId =>
   jwt.sign({ sub: userId }, ACCESS_TOKEN_SECRET, {
@@ -27,22 +32,35 @@ const generateAccessToken = userId =>
     algorithm: JWT_ALGORITHM,
   });
 
-const generateRefreshToken = userId =>
-  jwt.sign({ sub: userId }, REFRESH_TOKEN_SECRET, {
+const generateRefreshToken = async userId => {
+  const jti = uuidv4();
+
+  const hashedJti = hash(jti);
+
+  await redisService.addUserJti(
+    userId,
+    hashedJti,
+    REFRESH_TOKEN_EXPIRY_IN_SECONDS,
+  );
+
+  return jwt.sign({ sub: userId, jti }, REFRESH_TOKEN_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRES_IN,
     algorithm: JWT_ALGORITHM,
   });
+};
 
 const verifyToken = async (token, tokenType) => {
   try {
     const secret =
       tokenType === 'access' ? ACCESS_TOKEN_SECRET : REFRESH_TOKEN_SECRET;
 
-    const { sub: userId, iat: issuedAt } = await jwt.verify(token, secret, {
+    const decoded = await jwt.verify(token, secret, {
       algorithms: [JWT_ALGORITHM],
     });
 
-    return { userId, issuedAt };
+    const { sub: userId, jti, iat: issuedAt } = decoded;
+
+    return { userId, jti, issuedAt };
   } catch (err) {
     if (err.name === 'TokenExpiredError')
       throw new AppError(`${tokenType} token has expired`, 401);
@@ -51,19 +69,16 @@ const verifyToken = async (token, tokenType) => {
   }
 };
 
-const hashPassword = async password => await argon2.hash(password);
-
-export const hashToken = token =>
-  createHmac(HMAC_ALGORITHM, TOKEN_SECRET).update(token).digest(TOKEN_ENCODING);
+const hashPassword = password => argon2.hash(password);
 
 export const createToken = () => {
   const token = randomBytes(TOKEN_BYTES).toString(TOKEN_ENCODING);
-  const hashedToken = hashToken(token);
+  const hashedToken = hash(token);
   return { token, hashedToken };
 };
 
-export const comparePasswords = async (userPassword, providedPassword) =>
-  await argon2.verify(userPassword, providedPassword);
+export const comparePasswords = (userPassword, providedPassword) =>
+  argon2.verify(userPassword, providedPassword);
 
 export const checkForPasswordChange = (
   JWTTimestamp, // Represented in seconds
@@ -83,11 +98,7 @@ const setPassword = async (userId, password) => {
 
 export const prepareAccessAndRefreshToken = async userId => {
   const accessToken = generateAccessToken(userId);
-  const refreshToken = generateRefreshToken(userId);
-
-  const hashedRefreshToken = hashToken(refreshToken);
-
-  await redisService.setRefreshToken(userId, hashedRefreshToken);
+  const refreshToken = await generateRefreshToken(userId);
 
   return { accessToken, refreshToken };
 };
@@ -140,24 +151,30 @@ export const login = async (email, providedPassword) => {
   return sanitizedUser;
 };
 
+export const logout = async refreshToken => {
+  const { userId, jti } = await verifyToken(refreshToken, 'refresh');
+
+  const hashedJti = hash(jti);
+
+  await redisService.revokeUserJti(userId, hashedJti);
+};
+
 export const refreshToken = async token => {
-  const { userId } = await verifyToken(token, 'refresh');
+  const { userId, jti } = await verifyToken(token, 'refresh');
 
-  const hashedRefreshToken = hashToken(token);
+  const hashedJti = hash(jti);
 
-  const storedToken = await redisService.getRefreshToken(userId);
-
-  // Prevent timming attack, even though it is currently impossible due to token rotation
-  const isMatch = timingSafeEqual(
-    Buffer.from(storedToken),
-    Buffer.from(hashedRefreshToken),
-  );
+  const isJtiValid = await redisService.isJtiValid(userId, hashedJti);
 
   // Token reuse detected
-  if (!isMatch) {
-    await redisService.revokeRefreshToken(userId);
+  if (!isJtiValid) {
+    // Revoke all jtis
+    await redisService.revokeAllUserJtis(userId);
     throw new AppError('Invalid refresh token', 401);
   }
+
+  // Revoke used jti
+  await redisService.revokeUserJti(userId, hashedJti);
 
   const isUserActive = await userRepository.isUserActive(userId);
 
@@ -193,7 +210,7 @@ export const protect = async accessToken => {
 };
 
 export const verifyEmail = async token => {
-  const hashedToken = hashToken(token);
+  const hashedToken = hash(token);
 
   const user = await userRepository.findUserByVerificationToken(hashedToken);
 
@@ -227,7 +244,7 @@ export const forgotPassword = async email => {
 };
 
 export const resetPassword = async (token, newPassword, passwordConfirm) => {
-  const hashedToken = hashToken(token);
+  const hashedToken = hash(token);
 
   const user = await userRepository.findUserByPasswordResetToken(hashedToken, {
     password: true,

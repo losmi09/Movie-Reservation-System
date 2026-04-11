@@ -21,12 +21,6 @@ const sendRefreshTokenCookie = (res, refreshToken) =>
 const clearRefreshTokenCookie = res =>
   res.clearCookie('refreshToken', cookieOptions);
 
-const invalidateRefreshToken = async (res, userId) => {
-  clearRefreshTokenCookie(res);
-
-  await redisService.revokeRefreshToken(userId);
-};
-
 const sendAuthResponse = async (res, user, statusCode) => {
   const { accessToken, refreshToken } =
     await authService.prepareAccessAndRefreshToken(user.id);
@@ -34,6 +28,12 @@ const sendAuthResponse = async (res, user, statusCode) => {
   sendRefreshTokenCookie(res, refreshToken);
 
   res.status(statusCode).json({ accessToken, data: user });
+};
+
+const terminateUserSessions = async (res, userId) => {
+  clearRefreshTokenCookie(res);
+
+  await redisService.revokeAllUserJtis(userId);
 };
 
 export const register = catchAsync(async (req, res) => {
@@ -53,7 +53,9 @@ export const login = catchAsync(async (req, res) => {
 });
 
 export const logout = catchAsync(async (req, res) => {
-  await invalidateRefreshToken(res, req.user.id);
+  clearRefreshTokenCookie(res);
+
+  await authService.logout(req.cookies.refreshToken);
 
   sendResponse(res, null, 204);
 });
@@ -107,7 +109,7 @@ export const resetPassword = catchAsync(async (req, res) => {
     req.body.passwordConfirm,
   );
 
-  await invalidateRefreshToken(res, user.id);
+  await terminateUserSessions(res, user.id);
 
   sendPasswordUpdate(res, user);
 });
@@ -115,13 +117,15 @@ export const resetPassword = catchAsync(async (req, res) => {
 export const updateUserPassword = catchAsync(async (req, res) => {
   const { passwordCurrent, password } = req.body;
 
+  const { id: userId } = req.user;
+
   const user = await authService.updatePassword(
-    req.user.id,
+    userId,
     passwordCurrent,
     password,
   );
 
-  await invalidateRefreshToken(res, req.user.id);
+  await terminateUserSessions(res, userId);
 
   sendPasswordUpdate(res, user);
 });

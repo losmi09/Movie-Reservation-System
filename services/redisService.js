@@ -17,3 +17,24 @@ export const invalidateCache = async model => {
 
   if (keys.length) await redisClient.del(keys);
 };
+
+const getUserJtiSetKey = userId => `user:${userId}:jtis`;
+
+export const revokeUserJti = (userId, jti) =>
+  redisClient.sRem(getUserJtiSetKey(userId), jti);
+
+export const revokeAllUserJtis = userId =>
+  redisClient.del(getUserJtiSetKey(userId));
+
+export const addUserJti = (userId, jti, expiration) => {
+  const userJtisKey = getUserJtiSetKey(userId);
+
+  return redisClient
+    .multi()
+    .sAdd(userJtisKey, jti)
+    .expire(userJtisKey, expiration)
+    .exec();
+};
+
+export const isJtiValid = (userId, jti) =>
+  redisClient.sIsMember(getUserJtiSetKey(userId), jti);
