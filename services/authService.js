@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { AppError } from '../utils/appError.js';
@@ -54,13 +54,10 @@ const verifyToken = async (token, tokenType) => {
 const hashPassword = async password => await argon2.hash(password);
 
 export const hashToken = token =>
-  crypto
-    .createHmac(HMAC_ALGORITHM, TOKEN_SECRET)
-    .update(token)
-    .digest(TOKEN_ENCODING);
+  createHmac(HMAC_ALGORITHM, TOKEN_SECRET).update(token).digest(TOKEN_ENCODING);
 
 export const createToken = () => {
-  const token = crypto.randomBytes(TOKEN_BYTES).toString(TOKEN_ENCODING);
+  const token = randomBytes(TOKEN_BYTES).toString(TOKEN_ENCODING);
   const hashedToken = hashToken(token);
   return { token, hashedToken };
 };
@@ -151,7 +148,7 @@ export const refreshToken = async token => {
   const storedToken = await redisService.getRefreshToken(userId);
 
   // Prevent timming attack, even though it is currently impossible due to token rotation
-  const isMatch = crypto.timingSafeEqual(
+  const isMatch = timingSafeEqual(
     Buffer.from(storedToken),
     Buffer.from(hashedRefreshToken),
   );
